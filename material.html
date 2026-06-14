@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RD Modřice – Stavební materiál</title>
-<meta name="description" content="Uvažované stavební materiály rodinného domu v Modřicích – zdivo Porotherm." />
+<meta name="description" content="Jednotlivé materiály, ze kterých bude rodinný dům v Modřicích – zdivo, okna, dveře, stropy, střecha…" />
 <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
@@ -12,44 +12,132 @@
   <a class="backlink" href="index.html">← Rozcestník</a>
 
   <h1>Stavební materiál</h1>
-  <p class="lead">Přehled uvažovaných materiálů stavby. Údaje jsou předběžné a je potřeba je ověřit.</p>
+  <p class="lead">Jednotlivé materiály, ze kterých bude dům. Klikni na dlaždici pro detail a odkazy.</p>
 
-  <div class="callout">
-    ⚠️ <b>Nutno ověřit.</b> Zdivo bychom dělali nejspíš z níže uvedených cihel –
-    konkrétní typ, tloušťku a způsob zdění je ale ještě potřeba potvrdit s projektantem
-    a statikem (podle požadavků na tepelnou techniku a statiku).
-  </div>
+  <div class="mini" id="grid"></div>
 
-  <h2>Zdivo (obvodové) – uvažovaná varianta</h2>
-  <p><b>Porotherm 44 T Profi P8</b> – broušená tepelněizolační cihla plněná minerální vatou,
-  pro jednovrstvé obvodové zdivo tloušťky 440 mm bez nutnosti dodatečného zateplení.</p>
-
-  <table>
-    <tr><th>Parametr</th><th>Hodnota</th></tr>
-    <tr><td>Rozměry (d × š × v)</td><td>248 × 440 × 249 mm</td></tr>
-    <tr><td>Tloušťka zdiva</td><td>440 mm</td></tr>
-    <tr><td>Pevnostní třída</td><td>P8</td></tr>
-    <tr><td>Součinitel tepelné vodivosti λ (bez omítek)</td><td>0,064 W/m·K</td></tr>
-    <tr><td>Součinitel prostupu tepla U (s omítkami)</td><td>0,140 W/m²·K</td></tr>
-    <tr><td>Tepelný odpor R</td><td>6,41 m²·K/W</td></tr>
-    <tr><td>Vzduchová neprůzvučnost R<sub>w</sub></td><td>50 dB</td></tr>
-    <tr><td>Požární odolnost</td><td>REI 90 DP1 · reakce na oheň A1</td></tr>
-    <tr><td>Hmotnost</td><td>18,4 kg/ks</td></tr>
-    <tr><td>Spotřeba</td><td>16 ks/m²</td></tr>
-    <tr><td>Paleta</td><td>72 ks (1 380 kg)</td></tr>
-    <tr><td>Výrobce</td><td>Wienerberger</td></tr>
-    <tr><td>Zdění</td><td>broušená cihla – tenkovrstvá malta / zdicí pěna (Profi / Dryfix)</td></tr>
-  </table>
-
-  <p style="margin-top:14px">
-    Odkaz na produkt: <a href="https://www.dek.cz/produkty/detail/4400821196-porotherm-cihla-44-t-profi-p8-24-8-44-24-9-72" target="_blank" rel="noopener">DEK – Porotherm 44 T Profi P8</a>
-    · <a href="https://www.wienerberger.cz/zdivo-porotherm/produkty/cihly/porotherm-44-t-profi.html" target="_blank" rel="noopener">technický list Wienerberger</a>
-  </p>
-
-  <p class="note">Hodnoty pocházejí z údajů výrobce/prodejce a slouží jen pro orientaci.
-  Před objednávkou je nutné ověřit aktuální parametry, dostupnost a soulad s projektovou
-  dokumentací (statika, tepelně technické posouzení). Další materiály (střecha, podlahy,
-  izolace, příčky…) sem postupně doplníme.</p>
+  <p class="note">Většina položek je zatím orientační a je potřeba je ověřit s projektantem a statikem.
+  Postupně sem doplníme konkrétní produkty a parametry.</p>
 </div>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose" title="Zavřít">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const TAGS = {
+  check: '<span class="tag check">nutno ověřit</span>',
+  todo:  '<span class="tag todo">k doplnění</span>',
+  ok:    '<span class="tag ok">zvoleno</span>'
+};
+
+const materials = [
+  {
+    id:'zdivo', ic:'🧱', title:'Obvodové zdivo', short:'Porotherm 44 T Profi P8 · tl. 440 mm',
+    status:'check',
+    detail:`
+      <h2>Obvodové zdivo</h2>
+      <div class="callout">⚠️ <b>Nutno ověřit.</b> Zdivo bychom dělali nejspíš z těchto cihel –
+        konkrétní typ, tloušťku a způsob zdění je ale ještě potřeba potvrdit s projektantem a statikem.</div>
+      <p><b>Porotherm 44 T Profi P8</b> – broušená tepelněizolační cihla plněná minerální vatou,
+      pro jednovrstvé obvodové zdivo tloušťky 440 mm bez nutnosti dodatečného zateplení.</p>
+      <table>
+        <tr><th>Parametr</th><th>Hodnota</th></tr>
+        <tr><td>Rozměry (d × š × v)</td><td>248 × 440 × 249 mm</td></tr>
+        <tr><td>Tloušťka zdiva</td><td>440 mm</td></tr>
+        <tr><td>Pevnostní třída</td><td>P8</td></tr>
+        <tr><td>Tepelná vodivost λ (bez omítek)</td><td>0,064 W/m·K</td></tr>
+        <tr><td>Prostup tepla U (s omítkami)</td><td>0,140 W/m²·K</td></tr>
+        <tr><td>Tepelný odpor R</td><td>6,41 m²·K/W</td></tr>
+        <tr><td>Neprůzvučnost R<sub>w</sub></td><td>50 dB</td></tr>
+        <tr><td>Požární odolnost</td><td>REI 90 DP1 · A1</td></tr>
+        <tr><td>Hmotnost</td><td>18,4 kg/ks</td></tr>
+        <tr><td>Spotřeba</td><td>16 ks/m²</td></tr>
+        <tr><td>Paleta</td><td>72 ks (1 380 kg)</td></tr>
+        <tr><td>Výrobce</td><td>Wienerberger</td></tr>
+        <tr><td>Zdění</td><td>tenkovrstvá malta / zdicí pěna (Profi / Dryfix)</td></tr>
+      </table>
+      <p style="margin-top:14px">Odkazy:
+        <a href="https://www.dek.cz/produkty/detail/4400821196-porotherm-cihla-44-t-profi-p8-24-8-44-24-9-72" target="_blank" rel="noopener">DEK</a> ·
+        <a href="https://www.wienerberger.cz/zdivo-porotherm/produkty/cihly/porotherm-44-t-profi.html" target="_blank" rel="noopener">technický list Wienerberger</a>
+      </p>`
+  },
+  {
+    id:'pricky', ic:'🧱', title:'Příčky', short:'Vnitřní dělicí stěny',
+    status:'todo',
+    detail:`<h2>Příčky</h2><p>Vnitřní dělicí (nenosné) stěny.</p>
+      <p class="note">Zatím neurčeno – doplníme typ (např. broušené příčkovky Porotherm,
+      sádrokarton apod.) a tloušťku.</p>`
+  },
+  {
+    id:'stropy', ic:'▦', title:'Stropy', short:'Stropní konstrukce (dle modelu železobeton)',
+    status:'check',
+    detail:`<h2>Stropy</h2><p>Dle 3D modelu je uvažována <b>železobetonová</b> stropní konstrukce.</p>
+      <p class="note">Nutno ověřit – konkrétní systém (monolit / filigrán / vložkový strop)
+      a tloušťku potvrdí statik.</p>`
+  },
+  {
+    id:'strecha', ic:'🏠', title:'Střecha', short:'Krytina v tmavě šedé (dle modelu)',
+    status:'todo',
+    detail:`<h2>Střecha</h2><p>Dle modelu střešní krytina v <b>tmavě šedé</b> barvě.</p>
+      <p class="note">Zatím neurčeno – doplníme typ krytiny (betonová / pálená taška, plech…),
+      skladbu a klempířské prvky.</p>`
+  },
+  {
+    id:'fasada', ic:'🎨', title:'Fasáda', short:'Omítka, světle šedá (dle modelu)',
+    status:'todo',
+    detail:`<h2>Fasáda</h2><p>Dle modelu fasádní <b>omítka ve světle šedé</b>.</p>
+      <p class="note">Zatím neurčeno – doplníme typ omítky a finální odstín.</p>`
+  },
+  {
+    id:'okna', ic:'🪟', title:'Okna', short:'Okenní výplně',
+    status:'todo',
+    detail:`<h2>Okna</h2><p>Okenní výplně otvorů.</p>
+      <p class="note">Zatím neurčeno – doplníme materiál rámu (plast / hliník / dřevo),
+      zasklení (dvojsklo / trojsklo) a U-hodnotu.</p>`
+  },
+  {
+    id:'dvere', ic:'🚪', title:'Dveře', short:'Vstupní a vnitřní dveře',
+    status:'todo',
+    detail:`<h2>Dveře</h2><p>Vstupní dveře a vnitřní dveře.</p>
+      <p class="note">Zatím neurčeno – doplníme typ vstupních dveří (bezpečnostní, U-hodnota)
+      i provedení vnitřních dveří.</p>`
+  },
+  {
+    id:'podlahy', ic:'▭', title:'Podlahy', short:'Vinyl + dlažba (dle modelu)',
+    status:'todo',
+    detail:`<h2>Podlahy</h2><p>Dle modelu kombinace <b>vinylu</b> a <b>dlažby</b>.</p>
+      <p class="note">Zatím neurčeno – doplníme konkrétní produkty, skladbu podlahy
+      a rozdělení po místnostech.</p>`
+  },
+  {
+    id:'izolace', ic:'🧊', title:'Izolace', short:'Tepelné a hydroizolace',
+    status:'todo',
+    detail:`<h2>Izolace</h2><p>Tepelné izolace (základy, střecha) a hydroizolace spodní stavby.</p>
+      <p class="note">U jednovrstvého zdiva Porotherm 44 T se obvodová stěna dodatečně nezatepluje.
+      Doplníme izolaci základové desky/soklu, střechy a hydroizolaci.</p>`
+  }
+];
+
+const grid = document.getElementById('grid');
+materials.forEach(m => {
+  const b = document.createElement('button');
+  b.className = 'mtile';
+  b.innerHTML = `<span class="ic">${m.ic}</span><h3>${m.title}</h3><p>${m.short}</p>${TAGS[m.status]||''}`;
+  b.addEventListener('click', ()=> openModal(m));
+  grid.appendChild(b);
+});
+
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modalBody');
+function openModal(m){ modalBody.innerHTML = m.detail; modal.classList.add('open'); }
+function closeModal(){ modal.classList.remove('open'); }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+document.addEventListener('keydown', (e)=>{ if(e.code === 'Escape') closeModal(); });
+</script>
 </body>
 </html>
