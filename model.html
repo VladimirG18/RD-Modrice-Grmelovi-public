@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – 3D model</title>
+<meta name="description" content="Interaktivní 3D model rodinného domu v Modřicích – procházka interiérem, vypínání vrstev." />
+<style>
+  :root{ --accent:#4f9eff; --panel:rgba(22,27,34,.92); --text:#e6edf3; --muted:#9aa4af; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:#0e1116; color:var(--text); }
+  #app{ position:fixed; inset:0; }
+  canvas{ display:block; }
+
+  /* horní lišta */
+  #titlebar{ position:fixed; top:0; left:0; right:0; padding:.6rem 1rem; text-align:center;
+    background:linear-gradient(180deg, rgba(14,17,22,.85), rgba(14,17,22,0)); pointer-events:none; z-index:5; }
+  #titlebar h1{ margin:0; font-size:1.05rem; font-weight:600; }
+  #titlebar span{ color:var(--muted); font-size:.8rem; }
+
+  /* horní tlačítka (zpět / info) */
+  .navbtn{ position:fixed; top:12px; z-index:7; padding:9px 14px; border:1px solid #2b333d;
+    border-radius:10px; background:var(--panel); color:var(--text); font-size:.85rem; cursor:pointer;
+    text-decoration:none; backdrop-filter:blur(6px); box-shadow:0 6px 20px rgba(0,0,0,.4); }
+  .navbtn:hover{ border-color:var(--accent); text-decoration:none; }
+  #backBtn{ left:12px; }
+  #infoBtn{ right:12px; }
+
+  /* ovládací panel */
+  #panel{ position:fixed; top:60px; left:12px; z-index:6; width:230px;
+    background:var(--panel); border:1px solid #2b333d; border-radius:12px; padding:12px 14px;
+    backdrop-filter:blur(6px); box-shadow:0 8px 30px rgba(0,0,0,.45); font-size:.85rem; }
+  #panel h2{ margin:0 0 8px; font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+  #panel label{ display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer; }
+  #panel input[type=checkbox]{ accent-color:var(--accent); width:16px; height:16px; }
+  #panel .sep{ height:1px; background:#2b333d; margin:10px 0; }
+  .btn{ display:block; width:100%; text-align:center; padding:8px 10px; margin-top:6px; border:1px solid #2b333d;
+    border-radius:8px; background:#1f2630; color:var(--text); font-size:.82rem; cursor:pointer; }
+  .btn:hover{ border-color:var(--accent); }
+  .btn.primary{ background:var(--accent); border-color:var(--accent); color:#04121f; font-weight:600; }
+
+  /* nápověda k ovládání */
+  #help{ position:fixed; bottom:12px; left:12px; right:12px; z-index:6; text-align:center;
+    color:var(--muted); font-size:.78rem; pointer-events:none; }
+  #help b{ color:var(--text); }
+
+  /* loader */
+  #loader{ position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:10; background:#0e1116; gap:14px; }
+  #loader .bar{ width:220px; height:4px; background:#21262d; border-radius:2px; overflow:hidden; }
+  #loader .bar i{ display:block; height:100%; width:0%; background:var(--accent); transition:width .2s; }
+  #loader.hide{ opacity:0; pointer-events:none; transition:opacity .5s; }
+
+  /* overlay pro procházku */
+  #walkOverlay{ position:fixed; inset:0; z-index:8; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.55); cursor:pointer; text-align:center; }
+  #walkOverlay div{ background:var(--panel); border:1px solid #2b333d; border-radius:12px; padding:22px 26px; max-width:340px; }
+  #walkOverlay h3{ margin:.2rem 0 .6rem; }
+  #walkOverlay p{ margin:.3rem 0; color:var(--muted); font-size:.85rem; line-height:1.5; }
+  kbd{ background:#0e1116; border:1px solid #2b333d; border-bottom-width:2px; border-radius:5px; padding:1px 6px; font-size:.8rem; }
+
+  @media (max-width:640px){ #panel{ width:188px; top:56px; } #titlebar{ display:none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<a id="backBtn" class="navbtn" href="index.html">← Rozcestník</a>
+<a id="infoBtn" class="navbtn" href="informace.html">ℹ️ Informace o domě</a>
+
+<div id="titlebar">
+  <h1>Rodinný dům Modřice – Grmelovi</h1>
+  <span>interaktivní 3D model · procházka interiérem</span>
+</div>
+
+<div id="panel">
+  <h2>Vrstvy</h2>
+  <label><input type="checkbox" id="t-roof" checked> Střecha</label>
+  <label><input type="checkbox" id="t-walls" checked> Obvodové stěny</label>
+  <label><input type="checkbox" id="t-2np" checked> 2. patro (2NP)</label>
+  <label><input type="checkbox" id="t-1np" checked> 1. patro (1NP)</label>
+  <label><input type="checkbox" id="t-glass" checked> Výplně oken</label>
+  <label><input type="checkbox" id="t-terrain" checked> Terén</label>
+  <label><input type="checkbox" id="t-labels" checked> Popisky místností</label>
+  <div class="sep"></div>
+  <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
+  <button class="btn" id="dollhouse">🏠 Pohled do místností</button>
+  <button class="btn" id="resetBtn">↺ Resetovat pohled</button>
+</div>
+
+<div id="help">
+  <b>Otáčení:</b> tažení myší · <b>Přiblížení:</b> kolečko · <b>Posun:</b> pravé tlačítko / dva prsty
+</div>
+
+<div id="walkOverlay">
+  <div>
+    <h3>🚶 Režim procházky</h3>
+    <p>Klikni pro vstup. Pak se rozhlížíš <b>myší</b> a chodíš:</p>
+    <p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> pohyb · <kbd>Space</kbd> nahoru · <kbd>Shift</kbd> dolů</p>
+    <p><kbd>Esc</kbd> ukončí procházku</p>
+  </div>
+</div>
+
+<div id="loader">
+  <div>Načítám 3D model domu…</div>
+  <div class="bar"><i id="loadfill"></i></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+const app = document.getElementById('app');
+
+// --- Renderer ---
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+app.appendChild(renderer.domElement);
+
+// --- Scene & camera ---
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x11151c);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.05, 5000);
+
+// --- Lights ---
+scene.add(new THREE.HemisphereLight(0xffffff, 0x35404d, 1.1));
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+const sun = new THREE.DirectionalLight(0xffffff, 2.0);
+sun.position.set(1, 2, 1);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.6);
+fill.position.set(-1, 1, -1);
+scene.add(fill);
+
+// --- Controls (orbit) ---
+const orbit = new OrbitControls(camera, renderer.domElement);
+orbit.enableDamping = true;
+orbit.dampingFactor = 0.08;
+orbit.screenSpacePanning = true;   // posun ve směru pohledu -> umožní dostat se dovnitř
+
+// --- Vrstvy (skupiny objektů podle názvu) ---
+const groups = { roof:[], walls:[], np2:[], np1:[], glass:[], terrain:[], labels:[], other:[] };
+
+function classify(name){
+  const n = name || '';
+  if(/^RD_strecha/i.test(n)) return 'roof';
+  if(/^txt_/i.test(n)) return 'labels';
+  if(/^vypln/i.test(n)) return 'glass';
+  if(/^RD_teren/i.test(n) || n === 'Cube') return 'terrain';
+  if(n === 'RD_Obvod' || /^RD_Obvod/i.test(n)) return 'walls';
+  if(/2NP/i.test(n) || /(^|_)2\d\d(_|$)/.test(n)) return 'np2';
+  if(/1NP/i.test(n) || /(^|_)1\d\d(_|$)/.test(n)) return 'np1';
+  return 'other';
+}
+
+let modelSize = 10, modelCenter = new THREE.Vector3();
+
+// --- Načtení modelu ---
+const loader = new GLTFLoader();
+const loadfill = document.getElementById('loadfill');
+loader.load('RDModrice.glb', (gltf) => {
+  const model = gltf.scene;
+  model.traverse(o => {
+    if(o.isMesh){
+      o.castShadow = true; o.receiveShadow = true;
+      if(o.material){ o.material.side = THREE.DoubleSide; } // ať jsou stěny vidět i zevnitř
+      groups[classify(o.name)].push(o);
+    }
+  });
+  scene.add(model);
+
+  // vycentrování a nastavení kamery
+  const box = new THREE.Box3().setFromObject(model);
+  box.getCenter(modelCenter);
+  const size = box.getSize(new THREE.Vector3());
+  modelSize = Math.max(size.x, size.y, size.z);
+
+  orbit.target.copy(modelCenter);
+  orbit.minDistance = modelSize * 0.02;
+  orbit.maxDistance = modelSize * 6;
+  resetView();
+
+  document.getElementById('loader').classList.add('hide');
+  animate();
+}, (e)=>{
+  if(e.total){ loadfill.style.width = (e.loaded/e.total*100).toFixed(0)+'%'; }
+}, (err)=>{
+  document.getElementById('loader').innerHTML = '<div style="color:#ff6b6b">Nepodařilo se načíst model.<br>'+err+'</div>';
+});
+
+function resetView(){
+  const d = modelSize * 1.6;
+  camera.position.set(modelCenter.x + d*0.7, modelCenter.y + d*0.5, modelCenter.z + d*0.7);
+  orbit.target.copy(modelCenter);
+  orbit.update();
+}
+
+// --- Přepínače vrstev ---
+function bind(id, key){
+  document.getElementById(id).addEventListener('change', (e)=>{
+    groups[key].forEach(o => o.visible = e.target.checked);
+  });
+}
+bind('t-roof','roof'); bind('t-walls','walls'); bind('t-2np','np2');
+bind('t-1np','np1'); bind('t-glass','glass'); bind('t-terrain','terrain'); bind('t-labels','labels');
+
+// rychlý "domečkový" pohled: schová střechu + obvodové stěny a nadhled shora
+document.getElementById('dollhouse').addEventListener('click', ()=>{
+  document.getElementById('t-roof').checked = false; groups.roof.forEach(o=>o.visible=false);
+  document.getElementById('t-walls').checked = false; groups.walls.forEach(o=>o.visible=false);
+  const d = modelSize * 1.4;
+  camera.position.set(modelCenter.x + d*0.25, modelCenter.y + d*1.1, modelCenter.z + d*0.25);
+  orbit.target.copy(modelCenter); orbit.update();
+});
+
+document.getElementById('resetBtn').addEventListener('click', resetView);
+
+// --- Procházka v první osobě ---
+const walk = new PointerLockControls(camera, renderer.domElement);
+const walkOverlay = document.getElementById('walkOverlay');
+let walking = false;
+const move = { f:false, b:false, l:false, r:false, up:false, down:false };
+const velocity = new THREE.Vector3();
+const dir = new THREE.Vector3();
+const clock = new THREE.Clock();
+
+document.getElementById('walkBtn').addEventListener('click', ()=>{
+  walkOverlay.style.display = 'flex';
+});
+walkOverlay.addEventListener('click', ()=> walk.lock());
+walk.addEventListener('lock', ()=>{ walking = true; walkOverlay.style.display='none'; orbit.enabled=false; });
+walk.addEventListener('unlock', ()=>{ walking = false; orbit.enabled=true; });
+
+document.addEventListener('keydown', (e)=>{
+  switch(e.code){
+    case 'KeyW': case 'ArrowUp': move.f=true; break;
+    case 'KeyS': case 'ArrowDown': move.b=true; break;
+    case 'KeyA': case 'ArrowLeft': move.l=true; break;
+    case 'KeyD': case 'ArrowRight': move.r=true; break;
+    case 'Space': move.up=true; break;
+    case 'ShiftLeft': case 'ShiftRight': move.down=true; break;
+  }
+});
+document.addEventListener('keyup', (e)=>{
+  switch(e.code){
+    case 'KeyW': case 'ArrowUp': move.f=false; break;
+    case 'KeyS': case 'ArrowDown': move.b=false; break;
+    case 'KeyA': case 'ArrowLeft': move.l=false; break;
+    case 'KeyD': case 'ArrowRight': move.r=false; break;
+    case 'Space': move.up=false; break;
+    case 'ShiftLeft': case 'ShiftRight': move.down=false; break;
+  }
+});
+
+function updateWalk(dt){
+  const speed = modelSize * 0.35;          // jednotky za sekundu
+  const damp = 8;
+  velocity.x -= velocity.x * damp * dt;
+  velocity.z -= velocity.z * damp * dt;
+  velocity.y -= velocity.y * damp * dt;
+
+  dir.z = Number(move.f) - Number(move.b);
+  dir.x = Number(move.r) - Number(move.l);
+  dir.normalize();
+
+  if(move.f || move.b) velocity.z -= dir.z * speed * damp * dt;
+  if(move.l || move.r) velocity.x -= dir.x * speed * damp * dt;
+  if(move.up)   velocity.y += speed * damp * dt;
+  if(move.down) velocity.y -= speed * damp * dt;
+
+  walk.moveRight(-velocity.x * dt);
+  walk.moveForward(-velocity.z * dt);
+  camera.position.y += velocity.y * dt;
+}
+
+// --- Render loop ---
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.1);
+  if(walking) updateWalk(dt);
+  else orbit.update();
+  renderer.render(scene, camera);
+}
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
