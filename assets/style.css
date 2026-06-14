@@ -87,4 +87,30 @@ ul.tidy li{ margin:4px 0; }
 .statetag.done{ color:#2ec27e; border-color:#2ec27e55; }
 .statetag.active{ color:var(--accent); border-color:var(--accent); }
 
+/* ---------- Mini-dlaždice materiálů ---------- */
+.mini{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; margin-top:10px; }
+.mtile{ text-align:left; background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  padding:16px 16px 14px; color:var(--text); cursor:pointer; font:inherit;
+  transition:transform .12s, border-color .12s, box-shadow .12s; }
+.mtile:hover{ transform:translateY(-2px); border-color:var(--accent); box-shadow:0 10px 24px rgba(0,0,0,.4); }
+.mtile .ic{ font-size:1.5rem; display:block; margin-bottom:8px; }
+.mtile h3{ margin:0 0 4px; font-size:1.02rem; }
+.mtile p{ margin:0; color:var(--muted); font-size:.82rem; line-height:1.4; }
+.mtile .tag{ display:inline-block; margin-top:10px; font-size:.68rem; padding:2px 9px; border-radius:20px;
+  border:1px solid var(--border); color:var(--muted); }
+.mtile .tag.ok{ color:#2ec27e; border-color:#2ec27e55; }
+.mtile .tag.check{ color:#e3b341; border-color:#e3b34155; }
+.mtile .tag.todo{ color:var(--muted); }
+
+/* ---------- Modal (detail) ---------- */
+.modal{ position:fixed; inset:0; z-index:30; display:none; align-items:flex-start; justify-content:center;
+  background:rgba(0,0,0,.6); padding:4vh 16px; overflow:auto; }
+.modal.open{ display:flex; }
+.modal-card{ position:relative; background:#161b22; border:1px solid var(--border); border-radius:14px;
+  max-width:640px; width:100%; padding:24px 26px 28px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+.modal-card h2{ margin:0 26px 4px 0; }
+.modal-close{ position:absolute; top:12px; right:14px; background:none; border:none; color:var(--muted);
+  font-size:1.7rem; line-height:1; cursor:pointer; }
+.modal-close:hover{ color:var(--text); }
+
 @media (max-width:560px){ .grid2{ grid-template-columns:1fr; } }
