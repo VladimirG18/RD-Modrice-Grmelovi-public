@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RD Modřice – Grmelovi | Interaktivní 3D model</title>
+  <meta name="description" content="Interaktivní 3D model rodinného domu v Modřicích – projekt rodiny Grmelových." />
+
+  <!-- model-viewer (Google) -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0e1116;
+      --panel: #161b22;
+      --accent: #4f9eff;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 1.4rem 1.6rem 1rem;
+      text-align: center;
+      border-bottom: 1px solid #21262d;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.2px;
+    }
+
+    header p {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.2rem;
+      gap: 1rem;
+    }
+
+    .viewer-wrap {
+      width: 100%;
+      max-width: 1100px;
+      background: linear-gradient(180deg, #1a2230 0%, #11151c 100%);
+      border: 1px solid #21262d;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 70vh;
+      min-height: 420px;
+      background-color: transparent;
+      --poster-color: transparent;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+      max-width: 1100px;
+    }
+
+    .hint b { color: var(--text); font-weight: 600; }
+
+    footer {
+      text-align: center;
+      padding: 1.2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid #21262d;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: #21262d;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Rodinný dům Modřice – Grmelovi</h1>
+    <p>Interaktivní 3D model domu</p>
+  </header>
+
+  <main>
+    <div class="viewer-wrap" style="position: relative;">
+      <model-viewer
+        id="house"
+        src="RDModrice.glb"
+        alt="3D model rodinného domu v Modřicích"
+        camera-controls
+        touch-action="pan-y"
+        auto-rotate
+        auto-rotate-delay="2000"
+        rotation-per-second="12deg"
+        shadow-intensity="1"
+        exposure="1.0"
+        environment-image="neutral"
+        camera-orbit="45deg 70deg auto"
+        min-camera-orbit="auto auto auto"
+        max-camera-orbit="auto 90deg auto"
+        interaction-prompt="auto">
+        <div class="loading" slot="poster">Načítám 3D model…</div>
+        <div class="progress-bar" slot="progress-bar">
+          <div class="fill"></div>
+        </div>
+      </model-viewer>
+    </div>
+
+    <p class="hint">
+      Ovládání: <b>táhnutím</b> otáčíte modelem, <b>kolečkem / sevřením prstů</b> přibližujete,
+      <b>pravým tlačítkem / dvěma prsty</b> posouváte pohled.
+    </p>
+  </main>
+
+  <footer>
+    © <span id="year"></span> Grmelovi · Modřice · Model ve formátu glTF (.glb)
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const mv = document.getElementById('house');
+    const fill = document.querySelector('.progress-bar .fill');
+    mv.addEventListener('progress', (e) => {
+      const p = e.detail.totalProgress * 100;
+      fill.style.width = p + '%';
+      if (p >= 100) {
+        setTimeout(() => { fill.style.opacity = '0'; }, 400);
+      }
+    });
+  </script>
+</body>
+</html>
