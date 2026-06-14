@@ -51,7 +51,36 @@
   #walkOverlay p{ margin:.3rem 0; color:var(--muted); font-size:.85rem; line-height:1.5; }
   kbd{ background:#0e1116; border:1px solid #2b333d; border-bottom-width:2px; border-radius:5px; padding:1px 6px; font-size:.8rem; }
 
-  @media (max-width:640px){ #panel{ width:190px; top:58px; } }
+  /* tlačítko info */
+  #infoBtn{ position:fixed; top:12px; right:12px; z-index:7; padding:9px 14px; border:1px solid #2b333d;
+    border-radius:10px; background:var(--panel); color:var(--text); font-size:.85rem; cursor:pointer;
+    backdrop-filter:blur(6px); box-shadow:0 6px 20px rgba(0,0,0,.4); }
+  #infoBtn:hover{ border-color:var(--accent); }
+
+  /* modální okno s informacemi */
+  #infoModal{ position:fixed; inset:0; z-index:20; display:none; align-items:flex-start; justify-content:center;
+    background:rgba(0,0,0,.6); padding:4vh 16px; overflow:auto; }
+  #infoModal.open{ display:flex; }
+  #infoCard{ background:#161b22; border:1px solid #2b333d; border-radius:14px; max-width:680px; width:100%;
+    padding:24px 26px 30px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+  #infoCard h2{ margin:0 0 4px; font-size:1.35rem; }
+  #infoCard .lead{ color:var(--muted); font-size:.9rem; margin:0 0 18px; }
+  #infoCard h3{ margin:22px 0 8px; font-size:1rem; color:var(--accent); border-bottom:1px solid #2b333d; padding-bottom:6px; }
+  #infoCard table{ width:100%; border-collapse:collapse; font-size:.88rem; }
+  #infoCard td,#infoCard th{ text-align:left; padding:5px 8px; border-bottom:1px solid #20262e; }
+  #infoCard th{ color:var(--muted); font-weight:600; }
+  #infoCard td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  #infoCard tr.sum td{ font-weight:700; border-top:1px solid #2b333d; }
+  #infoCard ul{ margin:6px 0; padding-left:18px; }
+  #infoCard li{ margin:3px 0; font-size:.88rem; }
+  #infoCard .grid{ display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; font-size:.9rem; }
+  #infoCard .grid div{ display:flex; justify-content:space-between; gap:10px; padding:4px 0; border-bottom:1px solid #20262e; }
+  #infoCard .grid b{ font-weight:600; }
+  #infoCard .note{ margin-top:18px; font-size:.78rem; color:var(--muted); font-style:italic; }
+  #infoClose{ float:right; margin:-6px -6px 0 0; background:none; border:none; color:var(--muted); font-size:1.6rem; cursor:pointer; line-height:1; }
+  #infoClose:hover{ color:var(--text); }
+
+  @media (max-width:640px){ #panel{ width:190px; top:58px; } #infoCard .grid{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -75,6 +104,72 @@
   <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
   <button class="btn" id="dollhouse">🏠 Pohled do místností</button>
   <button class="btn" id="resetBtn">↺ Resetovat pohled</button>
+</div>
+
+<button id="infoBtn">ℹ️ Informace o domě</button>
+
+<div id="infoModal">
+  <div id="infoCard">
+    <button id="infoClose" title="Zavřít">×</button>
+    <h2>Rodinný dům Modřice</h2>
+    <p class="lead">Dvoupodlažní rodinný dům · projekt rodiny Grmelových</p>
+
+    <h3>Základní rozměry</h3>
+    <div class="grid">
+      <div><span>Půdorysné rozměry</span><b>cca 11,2 × 11,0 m</b></div>
+      <div><span>Výška k hřebeni</span><b>cca 8,85 m</b></div>
+      <div><span>Světlá výška 1.&nbsp;NP</span><b>cca 2,95 m</b></div>
+      <div><span>Počet podlaží</span><b>2 nadzemní (1NP + 2NP)</b></div>
+      <div><span>Schodišťové stupně</span><b>16</b></div>
+      <div><span>Počet místností</span><b>15</b></div>
+    </div>
+
+    <h3>Plochy místností – 1.&nbsp;NP</h3>
+    <table>
+      <tr><th>Č.</th><th>Místnost</th><th class="num">Plocha</th></tr>
+      <tr><td>101</td><td>Zádveří / hala</td><td class="num">6,4 m²</td></tr>
+      <tr><td>102</td><td>WC + sprcha</td><td class="num">2,4 m²</td></tr>
+      <tr><td>103</td><td>Pracovna</td><td class="num">11,4 m²</td></tr>
+      <tr><td>104</td><td>Obývací pokoj + KK</td><td class="num">35,7 m²</td></tr>
+      <tr><td>105</td><td>Spíž</td><td class="num">1,8 m²</td></tr>
+      <tr><td>106</td><td>Schodiště</td><td class="num">3,7 m²</td></tr>
+      <tr><td>107</td><td>Garáž</td><td class="num">19,9 m²</td></tr>
+      <tr class="sum"><td></td><td>Celkem 1.&nbsp;NP</td><td class="num">81,3 m²</td></tr>
+    </table>
+
+    <h3>Plochy místností – 2.&nbsp;NP</h3>
+    <table>
+      <tr><th>Č.</th><th>Místnost</th><th class="num">Plocha</th></tr>
+      <tr><td>201</td><td>Chodba</td><td class="num">7,3 m²</td></tr>
+      <tr><td>202</td><td>Technická místnost</td><td class="num">6,7 m²</td></tr>
+      <tr><td>203</td><td>Koupelna</td><td class="num">8,7 m²</td></tr>
+      <tr><td>204</td><td>Dětský pokoj</td><td class="num">12,3 m²</td></tr>
+      <tr><td>205</td><td>Dětský pokoj</td><td class="num">13,3 m²</td></tr>
+      <tr><td>206</td><td>WC</td><td class="num">1,4 m²</td></tr>
+      <tr><td>207</td><td>Ložnice</td><td class="num">16,5 m²</td></tr>
+      <tr><td>208</td><td>Šatna</td><td class="num">4,8 m²</td></tr>
+      <tr class="sum"><td></td><td>Celkem 2.&nbsp;NP</td><td class="num">71,0 m²</td></tr>
+    </table>
+
+    <h3>Užitná plocha celkem</h3>
+    <div class="grid">
+      <div><span>Součet ploch místností</span><b>cca 152,3 m²</b></div>
+    </div>
+
+    <h3>Konstrukce a materiály</h3>
+    <ul>
+      <li>Nosné konstrukce: <b>železobeton</b></li>
+      <li>Vnitřní příčky: zděné</li>
+      <li>Fasáda: <b>omítka</b> (světle šedá)</li>
+      <li>Střecha: krytina v <b>tmavě šedé</b></li>
+      <li>Podlahy: <b>vinyl</b> + <b>dlažba</b></li>
+      <li>Výplně otvorů: prosklené (okna), dřevěné prvky</li>
+      <li>Venkovní: terasa + terénní úpravy</li>
+    </ul>
+
+    <p class="note">Hodnoty jsou orientační a byly odměřeny přímo z 3D modelu (jednotky v metrech).
+    Plochy místností odpovídají vnitřním podlahovým plochám. Pro přesné údaje slouží projektová dokumentace.</p>
+  </div>
 </div>
 
 <div id="help">
@@ -296,6 +391,13 @@ window.addEventListener('resize', ()=>{
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// --- Informační panel ---
+const infoModal = document.getElementById('infoModal');
+document.getElementById('infoBtn').addEventListener('click', ()=> infoModal.classList.add('open'));
+document.getElementById('infoClose').addEventListener('click', ()=> infoModal.classList.remove('open'));
+infoModal.addEventListener('click', (e)=>{ if(e.target === infoModal) infoModal.classList.remove('open'); });
+document.addEventListener('keydown', (e)=>{ if(e.code === 'Escape') infoModal.classList.remove('open'); });
 </script>
 </body>
 </html>
