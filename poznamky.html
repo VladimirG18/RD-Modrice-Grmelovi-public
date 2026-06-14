@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Poznámky</title>
+<meta name="description" content="Společné poznámky k projektu rodinného domu v Modřicích." />
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<div class="content">
+  <a class="backlink" href="index.html">← Rozcestník</a>
+
+  <h1>Poznámky</h1>
+  <p class="lead">Zapiš poznámku a vyber, kdo ji píše. Poznámky se řadí od nejnovější.</p>
+
+  <div class="noteform">
+    <div class="frow">
+      <label for="author">Autor:</label>
+      <select id="author">
+        <option value="Lucka">Lucka</option>
+        <option value="Vladimír">Vladimír</option>
+        <option value="Jirka">Jirka</option>
+        <option value="Jarka">Jarka</option>
+      </select>
+    </div>
+    <textarea id="text" placeholder="Sem napiš poznámku…"></textarea>
+    <div class="frow" style="margin-top:10px; justify-content:flex-end">
+      <button class="send" id="add">Přidat poznámku</button>
+    </div>
+  </div>
+
+  <div class="notelist" id="list"></div>
+
+  <p class="note">Poznámky se ukládají ve tvém prohlížeči (localStorage) na tomto zařízení –
+  zatím se mezi vámi automaticky nesdílejí. Pokud chcete sdílené poznámky napříč zařízeními,
+  lze doplnit malý online backend.</p>
+</div>
+
+<script>
+const KEY = 'rdmodrice-poznamky-v1';
+const slug = s => s.toLowerCase().replace('á','a').replace('í','i').replace('ř','r');
+const authorEl = document.getElementById('author');
+const textEl = document.getElementById('text');
+const listEl = document.getElementById('list');
+
+let notes = [];
+try { notes = JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ notes = []; }
+
+// zapamatuj si naposledy zvoleného autora
+const lastAuthor = localStorage.getItem(KEY + '-author');
+if(lastAuthor) authorEl.value = lastAuthor;
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(notes)); }
+
+function fmt(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('cs-CZ') + ' ' + d.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit'});
+}
+
+function render(){
+  listEl.innerHTML = '';
+  if(notes.length === 0){
+    listEl.innerHTML = '<div class="empty">Zatím tu nejsou žádné poznámky.</div>';
+    return;
+  }
+  notes.slice().sort((a,b)=> b.ts - a.ts).forEach(n => {
+    const s = slug(n.author);
+    const div = document.createElement('div');
+    div.className = 'noteitem border-' + s;
+    const head = document.createElement('div');
+    head.className = 'head';
+    head.innerHTML = `<span class="who who-${s}">${n.author}</span>
+      <span style="display:flex;align-items:center;gap:8px">
+        <span class="when">${fmt(n.ts)}</span>
+        <button class="del" title="Smazat">🗑</button></span>`;
+    const text = document.createElement('div');
+    text.className = 'text';
+    text.textContent = n.text;
+    head.querySelector('.del').addEventListener('click', ()=>{
+      if(!confirm('Smazat tuto poznámku?')) return;
+      notes = notes.filter(x => x.id !== n.id);
+      save(); render();
+    });
+    div.appendChild(head); div.appendChild(text);
+    listEl.appendChild(div);
+  });
+}
+
+document.getElementById('add').addEventListener('click', ()=>{
+  const text = textEl.value.trim();
+  if(!text){ textEl.focus(); return; }
+  notes.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+               author: authorEl.value, text, ts: Date.now() });
+  localStorage.setItem(KEY + '-author', authorEl.value);
+  save();
+  textEl.value = '';
+  render();
+});
+
+// Ctrl/Cmd + Enter pro rychlé přidání
+textEl.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') document.getElementById('add').click();
+});
+
+render();
+</script>
+</body>
+</html>
