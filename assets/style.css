@@ -52,6 +52,8 @@ tr.sum td{ font-weight:700; border-top:1px solid var(--border); }
 .grid2 .row{ display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid #20262e; }
 .grid2 .row b{ font-weight:600; text-align:right; }
 .note{ margin-top:22px; font-size:.8rem; color:var(--muted); font-style:italic; }
+.callout{ margin:14px 0 4px; padding:13px 16px; border:1px solid #6b5a1f; background:#241f0e;
+  border-radius:10px; font-size:.9rem; line-height:1.5; color:#f0e6c8; }
 ul.tidy{ margin:8px 0; padding-left:20px; }
 ul.tidy li{ margin:4px 0; }
 
