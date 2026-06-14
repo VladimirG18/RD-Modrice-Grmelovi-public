@@ -102,6 +102,34 @@ ul.tidy li{ margin:4px 0; }
 .mtile .tag.check{ color:#e3b341; border-color:#e3b34155; }
 .mtile .tag.todo{ color:var(--muted); }
 
+/* ---------- Poznámky ---------- */
+.noteform{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; margin:6px 0 24px; }
+.noteform .frow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+.noteform label{ font-size:.85rem; color:var(--muted); }
+.noteform select, .noteform textarea{ background:#0e1116; color:var(--text); border:1px solid var(--border);
+  border-radius:8px; padding:9px 11px; font:inherit; }
+.noteform select{ min-width:140px; }
+.noteform textarea{ width:100%; min-height:80px; resize:vertical; }
+.noteform .send{ background:var(--accent); border:1px solid var(--accent); color:#04121f; font-weight:600;
+  border-radius:8px; padding:9px 16px; cursor:pointer; font:inherit; }
+.noteform .send:hover{ filter:brightness(1.07); }
+
+.notelist{ display:flex; flex-direction:column; gap:12px; }
+.noteitem{ background:var(--panel); border:1px solid var(--border); border-left-width:4px; border-radius:10px; padding:12px 14px; }
+.noteitem .head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px; }
+.noteitem .who{ font-weight:700; }
+.noteitem .when{ color:var(--muted); font-size:.78rem; }
+.noteitem .text{ white-space:pre-wrap; line-height:1.5; font-size:.94rem; }
+.noteitem .del{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:.95rem; padding:2px 6px; border-radius:6px; }
+.noteitem .del:hover{ color:#ff6b6b; }
+.empty{ color:var(--muted); font-style:italic; padding:14px 0; }
+
+/* barvy autorů */
+.who-lucka{ color:#e879c9; } .border-lucka{ border-left-color:#e879c9; }
+.who-vladimir{ color:#4f9eff; } .border-vladimir{ border-left-color:#4f9eff; }
+.who-jirka{ color:#2ec27e; } .border-jirka{ border-left-color:#2ec27e; }
+.who-jarka{ color:#e3b341; } .border-jarka{ border-left-color:#e3b341; }
+
 /* ---------- Modal (detail) ---------- */
 .modal{ position:fixed; inset:0; z-index:30; display:none; align-items:flex-start; justify-content:center;
   background:rgba(0,0,0,.6); padding:4vh 16px; overflow:auto; }
