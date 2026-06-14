@@ -109,7 +109,7 @@ ul.tidy li{ margin:4px 0; }
 .noteform select, .noteform textarea{ background:#0e1116; color:var(--text); border:1px solid var(--border);
   border-radius:8px; padding:9px 11px; font:inherit; }
 .noteform select{ min-width:140px; }
-.noteform textarea{ width:100%; min-height:80px; resize:vertical; }
+.noteform textarea{ width:100%; min-height:180px; resize:vertical; line-height:1.5; }
 .noteform .send{ background:var(--accent); border:1px solid var(--accent); color:#04121f; font-weight:600;
   border-radius:8px; padding:9px 16px; cursor:pointer; font:inherit; }
 .noteform .send:hover{ filter:brightness(1.07); }
