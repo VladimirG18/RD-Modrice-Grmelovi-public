@@ -39,6 +39,16 @@
   .btn:hover{ border-color:var(--accent); }
   .btn.primary{ background:var(--accent); border-color:var(--accent); color:#04121f; font-weight:600; }
 
+  /* sbalování panelu */
+  #panelToggle{ display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%;
+    background:none; border:none; color:var(--text); font:inherit; font-size:.85rem; font-weight:600;
+    cursor:pointer; padding:2px; }
+  #panelToggle:hover{ color:var(--accent); }
+  #panelChevron{ color:var(--muted); transition:transform .15s; }
+  #panel.collapsed{ width:auto; }
+  #panel.collapsed #panelBody{ display:none; }
+  #panelBody h2:first-child{ margin-top:12px; }
+
   /* nápověda k ovládání */
   #help{ position:fixed; bottom:12px; left:12px; right:12px; z-index:6; text-align:center;
     color:var(--muted); font-size:.78rem; pointer-events:none; }
@@ -74,18 +84,23 @@
 </div>
 
 <div id="panel">
-  <h2>Vrstvy</h2>
-  <label><input type="checkbox" id="t-roof" checked> Střecha</label>
-  <label><input type="checkbox" id="t-walls" checked> Obvodové stěny</label>
-  <label><input type="checkbox" id="t-2np" checked> 2. patro (2NP)</label>
-  <label><input type="checkbox" id="t-1np" checked> 1. patro (1NP)</label>
-  <label><input type="checkbox" id="t-glass" checked> Výplně oken</label>
-  <label><input type="checkbox" id="t-terrain" checked> Terén</label>
-  <label><input type="checkbox" id="t-labels" checked> Popisky místností</label>
-  <div class="sep"></div>
-  <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
-  <button class="btn" id="dollhouse">🏠 Pohled do místností</button>
-  <button class="btn" id="resetBtn">↺ Resetovat pohled</button>
+  <button id="panelToggle" aria-expanded="true" title="Skrýt / zobrazit nabídku">
+    <span>☰ Vrstvy a ovládání</span><span id="panelChevron">▾</span>
+  </button>
+  <div id="panelBody">
+    <h2>Vrstvy</h2>
+    <label><input type="checkbox" id="t-roof" checked> Střecha</label>
+    <label><input type="checkbox" id="t-walls" checked> Obvodové stěny</label>
+    <label><input type="checkbox" id="t-2np" checked> 2. patro (2NP)</label>
+    <label><input type="checkbox" id="t-1np" checked> 1. patro (1NP)</label>
+    <label><input type="checkbox" id="t-glass" checked> Výplně oken</label>
+    <label><input type="checkbox" id="t-terrain" checked> Terén</label>
+    <label><input type="checkbox" id="t-labels" checked> Popisky místností</label>
+    <div class="sep"></div>
+    <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
+    <button class="btn" id="dollhouse">🏠 Pohled do místností</button>
+    <button class="btn" id="resetBtn">↺ Resetovat pohled</button>
+  </div>
 </div>
 
 <div id="help">
@@ -234,6 +249,19 @@ document.getElementById('dollhouse').addEventListener('click', ()=>{
 });
 
 document.getElementById('resetBtn').addEventListener('click', resetView);
+
+// --- Sbalování ovládacího panelu ---
+const panel = document.getElementById('panel');
+const panelToggle = document.getElementById('panelToggle');
+const panelChevron = document.getElementById('panelChevron');
+function setCollapsed(c){
+  panel.classList.toggle('collapsed', c);
+  panelToggle.setAttribute('aria-expanded', String(!c));
+  panelChevron.textContent = c ? '▸' : '▾';
+}
+panelToggle.addEventListener('click', ()=> setCollapsed(!panel.classList.contains('collapsed')));
+// na malých obrazovkách začni sbalené, ať panel nezakrývá model
+if(window.matchMedia('(max-width: 640px)').matches) setCollapsed(true);
 
 // --- Procházka v první osobě ---
 const walk = new PointerLockControls(camera, renderer.domElement);
