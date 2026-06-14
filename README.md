@@ -1,10 +1,15 @@
 # RD Modřice – Grmelovi
 
-Hlavní stránka s **interaktivním 3D modelem** rodinného domu v Modřicích.
+Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalšími podklady.
 
 ## Co je tu
 
-- `index.html` – webová stránka, která zobrazí 3D model (otáčení, zoom, posun).
+- `index.html` – **rozcestník** s odkazy na jednotlivé sekce.
+- `model.html` – interaktivní **3D model** domu (otáčení, zoom, procházka, vrstvy).
+- `informace.html` – **informace o domě** (rozměry, plochy místností, materiály).
+- `checklist.html` – **checklist** úkolů a rozhodnutí (ukládá se v prohlížeči).
+- `harmonogram.html` – **harmonogram stavby** (fáze a termíny).
+- `assets/style.css` – sdílený vzhled stránek.
 - `RDModrice.glb` – samotný 3D model domu ve formátu glTF (binární `.glb`).
 
 ## Spuštění

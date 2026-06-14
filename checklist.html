@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Checklist</title>
+<meta name="description" content="Checklist úkolů a rozhodnutí pro stavbu rodinného domu v Modřicích." />
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<div class="content">
+  <a class="backlink" href="index.html">← Rozcestník</a>
+
+  <h1>Checklist</h1>
+  <p class="lead">Úkoly a rozhodnutí napříč stavbou. Odškrtnutí se ukládá ve tvém prohlížeči (localStorage).</p>
+
+  <div class="progresswrap">
+    <div class="progressbar"><i id="pfill"></i></div>
+    <small id="pcount">0 / 0 hotovo</small>
+    <button class="toolbtn" id="resetCl" style="float:right">Vynulovat</button>
+  </div>
+
+  <div id="list">
+    <div class="clgroup" data-group="Příprava a povolení">
+      <h2>Příprava a povolení</h2>
+      <div data-item>Koupě / vyřešení pozemku</div>
+      <div data-item>Geodetické zaměření pozemku</div>
+      <div data-item>Geologický / radonový průzkum</div>
+      <div data-item>Studie a projektová dokumentace (DSP)</div>
+      <div data-item>Vyjádření správců sítí (elektřina, voda, plyn, kanalizace)</div>
+      <div data-item>Stavební povolení / ohlášení</div>
+      <div data-item>Výběr stavební firmy / dodavatele</div>
+    </div>
+
+    <div class="clgroup" data-group="Financování">
+      <h2>Financování</h2>
+      <div data-item>Rozpočet stavby</div>
+      <div data-item>Hypotéka / úvěr schválen</div>
+      <div data-item>Rezerva na vícepráce (10–15 %)</div>
+      <div data-item>Pojištění stavby</div>
+    </div>
+
+    <div class="clgroup" data-group="Přípojky">
+      <h2>Přípojky</h2>
+      <div data-item>Přípojka elektřiny</div>
+      <div data-item>Přípojka vody</div>
+      <div data-item>Přípojka kanalizace / ČOV</div>
+      <div data-item>Přípojka plynu (pokud bude)</div>
+      <div data-item>Datová / internetová přípojka</div>
+    </div>
+
+    <div class="clgroup" data-group="Hrubá stavba">
+      <h2>Hrubá stavba</h2>
+      <div data-item>Skrývka ornice a vytyčení stavby</div>
+      <div data-item>Základová deska</div>
+      <div data-item>Svislé konstrukce 1.&nbsp;NP</div>
+      <div data-item>Strop nad 1.&nbsp;NP</div>
+      <div data-item>Svislé konstrukce 2.&nbsp;NP</div>
+      <div data-item>Krov a střešní krytina</div>
+      <div data-item>Okna a vstupní dveře</div>
+    </div>
+
+    <div class="clgroup" data-group="Rozhodnutí – interiér">
+      <h2>Rozhodnutí – interiér</h2>
+      <div data-item>Vytápění (tepelné čerpadlo / kotel / podlahové)</div>
+      <div data-item>Rekuperace / větrání</div>
+      <div data-item>Elektroinstalace – rozmístění zásuvek a světel</div>
+      <div data-item>Rozvody vody a odpadů</div>
+      <div data-item>Kuchyňská linka – návrh a dodavatel</div>
+      <div data-item>Koupelny – obklady a zařizovací předměty</div>
+      <div data-item>Podlahy – vinyl / dlažba</div>
+      <div data-item>Vnitřní dveře</div>
+      <div data-item>Schodiště – provedení a zábradlí</div>
+    </div>
+
+    <div class="clgroup" data-group="Dokončení a okolí">
+      <h2>Dokončení a okolí</h2>
+      <div data-item>Fasáda a zateplení</div>
+      <div data-item>Terasa</div>
+      <div data-item>Oplocení a vjezd</div>
+      <div data-item>Zpevněné plochy a chodníky</div>
+      <div data-item>Zahrada a terénní úpravy</div>
+      <div data-item>Kolaudace</div>
+    </div>
+  </div>
+
+  <p class="note">Toto je výchozí šablona – položky lze libovolně upravit, doplnit nebo smazat.
+  Napiš, co chceš přidat či změnit.</p>
+</div>
+
+<script>
+const KEY = 'rdmodrice-checklist-v1';
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ state = {}; }
+
+const list = document.getElementById('list');
+const items = [];
+
+list.querySelectorAll('.clgroup').forEach(g => {
+  const group = g.getAttribute('data-group');
+  g.querySelectorAll('[data-item]').forEach(div => {
+    const text = div.textContent.trim();
+    const id = group + '::' + text;
+    div.classList.add('clitem');
+    div.removeAttribute('data-item');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!state[id];
+    const span = document.createElement('span');
+    span.innerHTML = div.innerHTML;
+    div.innerHTML = '';
+    div.appendChild(cb);
+    div.appendChild(span);
+    if(cb.checked) div.classList.add('done');
+    const toggle = (fromLabel) => {
+      if(fromLabel) cb.checked = !cb.checked;
+      state[id] = cb.checked;
+      div.classList.toggle('done', cb.checked);
+      localStorage.setItem(KEY, JSON.stringify(state));
+      updateProgress();
+    };
+    cb.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(false); });
+    div.addEventListener('click', ()=> toggle(true));
+    items.push(cb);
+  });
+});
+
+const pfill = document.getElementById('pfill');
+const pcount = document.getElementById('pcount');
+function updateProgress(){
+  const total = items.length;
+  const done = items.filter(c => c.checked).length;
+  pfill.style.width = total ? (done/total*100)+'%' : '0%';
+  pcount.textContent = done + ' / ' + total + ' hotovo';
+}
+updateProgress();
+
+document.getElementById('resetCl').addEventListener('click', ()=>{
+  if(!confirm('Opravdu odškrtnout všechny položky?')) return;
+  state = {};
+  localStorage.removeItem(KEY);
+  items.forEach(c => { c.checked = false; c.closest('.clitem').classList.remove('done'); });
+  updateProgress();
+});
+</script>
+</body>
+</html>
