@@ -14,6 +14,8 @@
   <h1>Poznámky</h1>
   <p class="lead">Zapiš poznámku a vyber, kdo ji píše. Poznámky se řadí od nejnovější.</p>
 
+  <div id="status" class="statusbar"></div>
+
   <div class="noteform">
     <div class="frow">
       <label for="author">Autor:</label>
@@ -32,45 +34,45 @@
 
   <div class="notelist" id="list"></div>
 
-  <p class="note">Poznámky se ukládají ve tvém prohlížeči (localStorage) na tomto zařízení –
-  zatím se mezi vámi automaticky nesdílejí. Pokud chcete sdílené poznámky napříč zařízeními,
-  lze doplnit malý online backend.</p>
+  <p class="note" id="footnote"></p>
 </div>
 
-<script>
-const KEY = 'rdmodrice-poznamky-v1';
-const slug = s => s.toLowerCase().replace('á','a').replace('í','i').replace('ř','r');
+<script type="module">
+import { firebaseConfig } from './assets/firebase-config.js';
+
 const authorEl = document.getElementById('author');
 const textEl = document.getElementById('text');
 const listEl = document.getElementById('list');
+const statusEl = document.getElementById('status');
+const footEl = document.getElementById('footnote');
+const addBtn = document.getElementById('add');
 
-let notes = [];
-try { notes = JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ notes = []; }
+const slug = s => s.toLowerCase().replace('á','a').replace('í','i').replace('ř','r');
+const KEY = 'rdmodrice-poznamky-v1';
 
 // zapamatuj si naposledy zvoleného autora
 const lastAuthor = localStorage.getItem(KEY + '-author');
 if(lastAuthor) authorEl.value = lastAuthor;
 
-function save(){ localStorage.setItem(KEY, JSON.stringify(notes)); }
-
 function fmt(ts){
+  if(!ts) return '';
   const d = new Date(ts);
   return d.toLocaleDateString('cs-CZ') + ' ' + d.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit'});
 }
 
-function render(){
+function render(notes){
   listEl.innerHTML = '';
-  if(notes.length === 0){
+  if(!notes || notes.length === 0){
     listEl.innerHTML = '<div class="empty">Zatím tu nejsou žádné poznámky.</div>';
     return;
   }
-  notes.slice().sort((a,b)=> b.ts - a.ts).forEach(n => {
-    const s = slug(n.author);
+  notes.slice().sort((a,b)=> (b.ts||0) - (a.ts||0)).forEach(n => {
+    const s = slug(n.author || '');
     const div = document.createElement('div');
     div.className = 'noteitem border-' + s;
     const head = document.createElement('div');
     head.className = 'head';
-    head.innerHTML = `<span class="who who-${s}">${n.author}</span>
+    head.innerHTML = `<span class="who who-${s}">${n.author||''}</span>
       <span style="display:flex;align-items:center;gap:8px">
         <span class="when">${fmt(n.ts)}</span>
         <button class="del" title="Smazat">🗑</button></span>`;
@@ -79,31 +81,93 @@ function render(){
     text.textContent = n.text;
     head.querySelector('.del').addEventListener('click', ()=>{
       if(!confirm('Smazat tuto poznámku?')) return;
-      notes = notes.filter(x => x.id !== n.id);
-      save(); render();
+      backend.remove(n.id);
     });
     div.appendChild(head); div.appendChild(text);
     listEl.appendChild(div);
   });
 }
 
-document.getElementById('add').addEventListener('click', ()=>{
+/* ---------- Lokální backend (localStorage) ---------- */
+function localBackend(){
+  let notes = [];
+  try { notes = JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ notes = []; }
+  const save = ()=> localStorage.setItem(KEY, JSON.stringify(notes));
+  return {
+    subscribe(cb){ cb(notes); this._cb = cb; },
+    add(author, text){
+      notes.push({ id: Date.now()+'-'+Math.random().toString(36).slice(2,7), author, text, ts: Date.now() });
+      save(); this._cb(notes);
+    },
+    remove(id){ notes = notes.filter(n => n.id !== id); save(); this._cb(notes); }
+  };
+}
+
+/* ---------- Firebase backend (Firestore, realtime) ---------- */
+async function firebaseBackend(){
+  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+  const { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy }
+    = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const col = collection(db, 'poznamky');
+
+  return {
+    subscribe(cb){
+      onSnapshot(query(col, orderBy('ts','desc')), (snap)=>{
+        const notes = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+        cb(notes);
+      }, (err)=>{
+        console.error(err);
+        statusEl.innerHTML = '⚠️ Chyba připojení k databázi – zkontroluj konfiguraci a pravidla Firestore.';
+        statusEl.className = 'statusbar warn';
+      });
+    },
+    add(author, text){ return addDoc(col, { author, text, ts: Date.now() }); },
+    remove(id){ return deleteDoc(doc(db, 'poznamky', id)); }
+  };
+}
+
+/* ---------- Inicializace ---------- */
+let backend;
+const useFirebase = firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey.length > 10;
+
+if(useFirebase){
+  try {
+    backend = await firebaseBackend();
+    statusEl.innerHTML = '🟢 Sdílené online – poznámky vidí všichni v reálném čase.';
+    statusEl.className = 'statusbar ok';
+    footEl.textContent = 'Poznámky se ukládají do sdílené online databáze (Firebase) a aktualizují se všem zařízením v reálném čase.';
+  } catch(e){
+    console.error(e);
+    backend = localBackend();
+    statusEl.innerHTML = '⚠️ Online databázi se nepodařilo načíst – používá se lokální ukládání.';
+    statusEl.className = 'statusbar warn';
+  }
+} else {
+  backend = localBackend();
+  statusEl.innerHTML = '🔒 Jen na tomto zařízení – pro sdílení doplň konfiguraci Firebase (assets/firebase-config.js).';
+  statusEl.className = 'statusbar';
+  footEl.textContent = 'Poznámky se zatím ukládají jen v tomto prohlížeči. Po vložení konfigurace Firebase se začnou sdílet online.';
+}
+
+backend.subscribe(render);
+
+addBtn.addEventListener('click', async ()=>{
   const text = textEl.value.trim();
   if(!text){ textEl.focus(); return; }
-  notes.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
-               author: authorEl.value, text, ts: Date.now() });
   localStorage.setItem(KEY + '-author', authorEl.value);
-  save();
-  textEl.value = '';
-  render();
+  addBtn.disabled = true;
+  try { await backend.add(authorEl.value, text); textEl.value = ''; }
+  catch(e){ console.error(e); alert('Poznámku se nepodařilo uložit.'); }
+  finally { addBtn.disabled = false; textEl.focus(); }
 });
 
 // Ctrl/Cmd + Enter pro rychlé přidání
 textEl.addEventListener('keydown', (e)=>{
-  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') document.getElementById('add').click();
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') addBtn.click();
 });
-
-render();
 </script>
 </body>
 </html>
