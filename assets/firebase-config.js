@@ -11,10 +11,10 @@
 // bezpečnost se řeší pravidly Firestore, ne skrýváním configu.
 
 export const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyCLU7cH1tXPqnaxVV_-BsSNssl-NU9Pz1I",
+  authDomain: "rd-modrice-e9477.firebaseapp.com",
+  projectId: "rd-modrice-e9477",
+  storageBucket: "rd-modrice-e9477.firebasestorage.app",
+  messagingSenderId: "941681195558",
+  appId: "1:941681195558:web:3aac10f182e784cdb3c4e7"
 };
