@@ -103,6 +103,10 @@ ul.tidy li{ margin:4px 0; }
 .mtile .tag.todo{ color:var(--muted); }
 
 /* ---------- Poznámky ---------- */
+.statusbar{ font-size:.82rem; color:var(--muted); padding:9px 12px; border:1px solid var(--border);
+  border-radius:9px; margin:4px 0 16px; background:var(--panel); }
+.statusbar.ok{ color:#2ec27e; border-color:#2ec27e55; }
+.statusbar.warn{ color:#e3b341; border-color:#e3b34155; }
 .noteform{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; margin:6px 0 24px; }
 .noteform .frow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
 .noteform label{ font-size:.85rem; color:var(--muted); }
