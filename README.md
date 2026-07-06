@@ -4,13 +4,20 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
 
 ## Co je tu
 
-- `index.html` – **rozcestník** s odkazy na jednotlivé sekce.
-- `model.html` – interaktivní **3D model** domu (otáčení, zoom, procházka, vrstvy).
-- `informace.html` – **informace o domě** (rozměry, plochy místností, materiály).
+- `index.html` – **rozcestník** s hero vizualizací a přehledem projektu.
+- `model.html` – interaktivní **3D model** domu (otáčení, zoom, procházka, vrstvy,
+  popisky místností, vnitřní dispozice).
+- `informace.html` – **informace o domě** z projektové dokumentace (plochy místností,
+  konstrukce, povrchy, technika, pozemek, vizualizace).
+- `material.html` – **stavební materiály** a skladby dle projektu.
 - `checklist.html` – **checklist** úkolů a rozhodnutí (ukládá se v prohlížeči).
 - `harmonogram.html` – **harmonogram stavby** (fáze a termíny).
-- `assets/style.css` – sdílený vzhled stránek.
-- `RDModrice.glb` – samotný 3D model domu ve formátu glTF (binární `.glb`).
+- `poznamky.html` – **sdílené poznámky** (Firebase Firestore, realtime).
+- `assets/style.css` – sdílený design systém (světlý + tmavý režim).
+- `assets/site.js` – přepínání vzhledu a zvýraznění navigace.
+- `assets/img/` – vizualizace generované z projektové dokumentace.
+- `RDModrice.glb` – samotný 3D model domu ve formátu glTF (binární `.glb`);
+  generuje se parametrickým skriptem z privátního repozitáře projektu.
 
 ## Spuštění
 

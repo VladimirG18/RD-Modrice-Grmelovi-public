@@ -4,21 +4,48 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RD Modřice – Stavební materiál</title>
-<meta name="description" content="Jednotlivé materiály, ze kterých bude rodinný dům v Modřicích – zdivo, okna, dveře, stropy, střecha…" />
+<meta name="description" content="Materiály a skladby rodinného domu v Modřicích podle projektové dokumentace – zdivo, stropy, střecha, izolace, vytápění." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
 </head>
 <body>
-<div class="content">
-  <a class="backlink" href="index.html">← Rozcestník</a>
 
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content">
+  <span class="eyebrow">Konstrukce a výrobky</span>
   <h1>Stavební materiál</h1>
-  <p class="lead">Jednotlivé materiály, ze kterých bude dům. Klikni na dlaždici pro detail a odkazy.</p>
+  <p class="lead">Materiály a skladby podle projektové dokumentace + položky, které jsou
+  ještě k výběru. Klikni na dlaždici pro detail.</p>
 
   <div class="mini" id="grid"></div>
 
-  <p class="note">Většina položek je zatím orientační a je potřeba je ověřit s projektantem a statikem.
-  Postupně sem doplníme konkrétní produkty a parametry.</p>
+  <p class="note">Položky se štítkem „dle projektu“ vycházejí přímo z dokumentace (07/2023).
+  U položek „nutno ověřit“ a „k výběru“ doplníme konkrétní produkty po dohodě
+  s projektantem, statikem a dodavatelem.</p>
 </div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
+</footer>
 
 <div class="modal" id="modal">
   <div class="modal-card">
@@ -29,96 +56,200 @@
 
 <script>
 const TAGS = {
+  ok:    '<span class="tag ok">dle projektu</span>',
   check: '<span class="tag check">nutno ověřit</span>',
-  todo:  '<span class="tag todo">k doplnění</span>',
-  ok:    '<span class="tag ok">zvoleno</span>'
+  todo:  '<span class="tag todo">k výběru</span>'
 };
 
 const materials = [
   {
-    id:'zdivo', ic:'🧱', title:'Obvodové zdivo', short:'Porotherm 44 T Profi P8 · tl. 440 mm',
+    id:'zdivo', ic:'🧱', title:'Obvodové zdivo', short:'Cihelné bloky tl. 450 mm, jednovrstvé bez zateplení',
     status:'check',
     detail:`
       <h2>Obvodové zdivo</h2>
-      <div class="callout">⚠️ <b>Nutno ověřit.</b> Zdivo bychom dělali nejspíš z těchto cihel –
-        konkrétní typ, tloušťku a způsob zdění je ale ještě potřeba potvrdit s projektantem a statikem.</div>
-      <p><b>Porotherm 44 T Profi P8</b> – broušená tepelněizolační cihla plněná minerální vatou,
-      pro jednovrstvé obvodové zdivo tloušťky 440 mm bez nutnosti dodatečného zateplení.</p>
+      <p>Projekt předepisuje <b>cihelné bloky tloušťky 450 mm</b> – jednovrstvé tepelněizolační
+      zdivo bez dodatečného zateplení. Vnitřní nosné stěny z bloků tl. 250 mm.</p>
+      <div class="callout">⚠️ <b>Konkrétní výrobek ověřit.</b> Uvažujeme broušené cihly plněné
+      minerální vatou – např. <b>Porotherm 44 T Profi P8</b> (tl. 440 mm); typ a pevnost
+      potvrdí projektant se statikem.</div>
       <table>
-        <tr><th>Parametr</th><th>Hodnota</th></tr>
+        <tr><th>Parametr</th><th>Porotherm 44 T Profi P8</th></tr>
         <tr><td>Rozměry (d × š × v)</td><td>248 × 440 × 249 mm</td></tr>
-        <tr><td>Tloušťka zdiva</td><td>440 mm</td></tr>
-        <tr><td>Pevnostní třída</td><td>P8</td></tr>
-        <tr><td>Tepelná vodivost λ (bez omítek)</td><td>0,064 W/m·K</td></tr>
+        <tr><td>Tepelná vodivost λ</td><td>0,064 W/m·K</td></tr>
         <tr><td>Prostup tepla U (s omítkami)</td><td>0,140 W/m²·K</td></tr>
-        <tr><td>Tepelný odpor R</td><td>6,41 m²·K/W</td></tr>
         <tr><td>Neprůzvučnost R<sub>w</sub></td><td>50 dB</td></tr>
         <tr><td>Požární odolnost</td><td>REI 90 DP1 · A1</td></tr>
-        <tr><td>Hmotnost</td><td>18,4 kg/ks</td></tr>
-        <tr><td>Spotřeba</td><td>16 ks/m²</td></tr>
-        <tr><td>Paleta</td><td>72 ks (1 380 kg)</td></tr>
-        <tr><td>Výrobce</td><td>Wienerberger</td></tr>
-        <tr><td>Zdění</td><td>tenkovrstvá malta / zdicí pěna (Profi / Dryfix)</td></tr>
+        <tr><td>Zdění</td><td>tenkovrstvá malta / pěna (Profi / Dryfix)</td></tr>
       </table>
       <p style="margin-top:14px">Odkazy:
-        <a href="https://www.dek.cz/produkty/detail/4400821196-porotherm-cihla-44-t-profi-p8-24-8-44-24-9-72" target="_blank" rel="noopener">DEK</a> ·
-        <a href="https://www.wienerberger.cz/zdivo-porotherm/produkty/cihly/porotherm-44-t-profi.html" target="_blank" rel="noopener">technický list Wienerberger</a>
+        <a href="https://www.wienerberger.cz/zdivo-porotherm/produkty/cihly/porotherm-44-t-profi.html" target="_blank" rel="noopener">technický list Wienerberger</a> ·
+        <a href="https://www.dek.cz/produkty/detail/4400821196-porotherm-cihla-44-t-profi-p8-24-8-44-24-9-72" target="_blank" rel="noopener">DEK</a>
       </p>`
   },
   {
-    id:'pricky', ic:'🧱', title:'Příčky', short:'Vnitřní dělicí stěny',
-    status:'todo',
-    detail:`<h2>Příčky</h2><p>Vnitřní dělicí (nenosné) stěny.</p>
-      <p class="note">Zatím neurčeno – doplníme typ (např. broušené příčkovky Porotherm,
-      sádrokarton apod.) a tloušťku.</p>`
+    id:'pricky', ic:'🧩', title:'Příčky', short:'Pórobeton nebo SDK · tl. 100 a 150 mm',
+    status:'ok',
+    detail:`<h2>Příčky</h2>
+      <p>Dle projektu vnitřní příčky z <b>pórobetonu nebo sádrokartonu</b>, tloušťky
+      <b>100 a 150 mm</b>. V koupelnách omyvatelný povrch stěn do výšky 2 150 mm
+      (keramický obklad).</p>
+      <p class="note">Zbývá zvolit konkrétní systém (např. Ytong / SDK s izolací) podle
+      akustických požadavků jednotlivých místností.</p>`
   },
   {
-    id:'stropy', ic:'▦', title:'Stropy', short:'Stropní konstrukce (dle modelu železobeton)',
-    status:'check',
-    detail:`<h2>Stropy</h2><p>Dle 3D modelu je uvažována <b>železobetonová</b> stropní konstrukce.</p>
-      <p class="note">Nutno ověřit – konkrétní systém (monolit / filigrán / vložkový strop)
-      a tloušťku potvrdí statik.</p>`
+    id:'stropy', ic:'▦', title:'Strop nad 1. NP', short:'Železobetonový monolit 200 mm + věnec 250 mm',
+    status:'ok',
+    detail:`<h2>Strop nad 1. NP</h2>
+      <p>Dle projektu <b>železobetonový monolitický strop tl. 200 mm</b>, po obvodu
+      ztužující věnec výšky 250 mm vyztužený v rozích. Podhled vápennou štukovou omítkou.</p>
+      <p>Nad obytným podkrovím strop není – prostor je otevřený po SDK podhled na kleštinách
+      (světlá výška podkroví 2,60 m).</p>`
   },
   {
-    id:'strecha', ic:'🏠', title:'Střecha', short:'Krytina v tmavě šedé (dle modelu)',
-    status:'todo',
-    detail:`<h2>Střecha</h2><p>Dle modelu střešní krytina v <b>tmavě šedé</b> barvě.</p>
-      <p class="note">Zatím neurčeno – doplníme typ krytiny (betonová / pálená taška, plech…),
-      skladbu a klempířské prvky.</p>`
+    id:'strecha', ic:'🏠', title:'Střecha', short:'Sedlová 33° · krytina Bramac Turmalin, tmavě šedá',
+    status:'ok',
+    detail:`<h2>Střecha</h2>
+      <p>Sedlová střecha se sklonem <b>33°</b>, hřeben rovnoběžný s ulicí. Hambálkový krov
+      s krokvemi <b>100/180 mm</b>, ocelová a dřevěné vaznice.</p>
+      <table>
+        <tr><th>Vrstva</th><th>Provedení</th></tr>
+        <tr><td>Krytina</td><td><b>Bramac Turmalin</b>, tmavě šedá (břidlicově černá)</td></tr>
+        <tr><td>Latě + kontralatě</td><td>dřevěné</td></tr>
+        <tr><td>Pojistná hydroizolace</td><td>difuzní fólie</td></tr>
+        <tr><td>Tepelná izolace</td><td>minerální vlna 350 mm (mezi + pod krokvemi)</td></tr>
+        <tr><td>Parozábrana + podhled</td><td>fólie + SDK</td></tr>
+        <tr><td>Klempířské prvky</td><td>poplastovaný / lakovaný plech, tmavě šedý</td></tr>
+      </table>
+      <p style="margin-top:12px">Ve střeše je <b>8 střešních oken</b> (5 do ulice, 3 do zahrady)
+      a výřez zapuštěné terasy šířky 5,2 m v jižní rovině.</p>`
   },
   {
-    id:'fasada', ic:'🎨', title:'Fasáda', short:'Omítka, světle šedá (dle modelu)',
-    status:'todo',
-    detail:`<h2>Fasáda</h2><p>Dle modelu fasádní <b>omítka ve světle šedé</b>.</p>
-      <p class="note">Zatím neurčeno – doplníme typ omítky a finální odstín.</p>`
+    id:'fasada', ic:'🎨', title:'Fasáda a povrchy', short:'Silikátová omítka, velmi světlá šedá / bílá',
+    status:'ok',
+    detail:`<h2>Fasáda a vnější povrchy</h2>
+      <p>Dle legendy povrchů (výkres Pohledy):</p>
+      <table>
+        <tr><td>A</td><td>silikátová omítka strukturovaná, <b>velmi světlá šedá / bílá</b></td></tr>
+        <tr><td>E</td><td>sokl – omyvatelná omítka, tmavá šedá</td></tr>
+        <tr><td>F</td><td>tmavě šedý keramický obklad (závětří, ostění terasy)</td></tr>
+        <tr><td>C</td><td>okrajové lišty střechy a klempířina – tmavá šedá</td></tr>
+      </table>
+      <p class="note">Přesný odstín fasády určí investor v průběhu stavby – v modelu je
+      zatím „velmi světlá šedá“.</p>`
   },
   {
-    id:'okna', ic:'🪟', title:'Okna', short:'Okenní výplně',
-    status:'todo',
-    detail:`<h2>Okna</h2><p>Okenní výplně otvorů.</p>
-      <p class="note">Zatím neurčeno – doplníme materiál rámu (plast / hliník / dřevo),
-      zasklení (dvojsklo / trojsklo) a U-hodnotu.</p>`
+    id:'okna', ic:'🪟', title:'Okna', short:'Hliníková, tmavě šedá (antracit), izolační zasklení',
+    status:'ok',
+    detail:`<h2>Okna</h2>
+      <p>Dle výkresu pohledů <b>hliníková okna v tmavě šedé</b> (antracit ~RAL 7016),
+      zasklená izolačním sklem. Parapety z tmavého plechu.</p>
+      <ul class="tidy">
+        <li>Obývací pokoj: <b>HS portál 3 250 × 2 250 mm</b> do zahrady</li>
+        <li>Pásová okna nadezdívky podkroví (600 mm vysoká) s <b>nerezovými síťkami</b>
+          v ocelovém rámu místo zábradlí</li>
+        <li>Terasa: prosklená stěna s dveřmi na celou výšku</li>
+        <li>8× střešní okno (~600 mm mezi krokvemi)</li>
+      </ul>
+      <p class="note">Starší text technické zprávy uvádí „plastová bílá“ – závazná je novější
+      legenda povrchů s hliníkem v antracitu. Zbývá vybrat výrobce a zasklení
+      (dvojsklo/trojsklo, U<sub>w</sub>).</p>`
   },
   {
-    id:'dvere', ic:'🚪', title:'Dveře', short:'Vstupní a vnitřní dveře',
-    status:'todo',
-    detail:`<h2>Dveře</h2><p>Vstupní dveře a vnitřní dveře.</p>
-      <p class="note">Zatím neurčeno – doplníme typ vstupních dveří (bezpečnostní, U-hodnota)
-      i provedení vnitřních dveří.</p>`
+    id:'dvere', ic:'🚪', title:'Dveře a vrata', short:'Vstupní hliníkové · sekční vrata 2× · vnitřní dřevěné',
+    status:'ok',
+    detail:`<h2>Dveře a vrata</h2>
+      <ul class="tidy">
+        <li><b>Vstupní dveře</b>: hliníkové, tmavě šedé, v krytém závětří</li>
+        <li><b>Garážová vrata</b>: sekční, tmavě šedá – <b>dvoje</b>: od ulice (v závětří)
+          a do zahrady (garáž je průjezdná), s větracími mřížkami</li>
+        <li><b>Vnitřní dveře</b>: dřevěné do ocelových zárubní, výška 2 100 mm
+          (stavební otvor 2 150 mm)</li>
+      </ul>
+      <p class="note">K výběru zůstává design vnitřních dveří a bezpečnostní třída vstupních.</p>`
   },
   {
-    id:'podlahy', ic:'▭', title:'Podlahy', short:'Vinyl + dlažba (dle modelu)',
-    status:'todo',
-    detail:`<h2>Podlahy</h2><p>Dle modelu kombinace <b>vinylu</b> a <b>dlažby</b>.</p>
-      <p class="note">Zatím neurčeno – doplníme konkrétní produkty, skladbu podlahy
-      a rozdělení po místnostech.</p>`
+    id:'podlahy', ic:'▭', title:'Podlahy', short:'Dlažba (zádveří, koupelny, garáž) + dřevo/vinyl (pokoje)',
+    status:'ok',
+    detail:`<h2>Podlahy</h2>
+      <p>Rozdělení dle legendy místností:</p>
+      <table>
+        <tr><th>Místnosti</th><th>Nášlapná vrstva</th></tr>
+        <tr><td>zádveří, WC, koupelna, schodiště, technická m., garáž</td><td>keramická dlažba</td></tr>
+        <tr><td>pracovna, obývací pokoj + KK, pokoje, ložnice, šatna, chodba</td><td>dřevo / vinyl</td></tr>
+        <tr><td>spíž</td><td>vinyl</td></tr>
+        <tr><td>terasa</td><td>betonová dlažba na terčích</td></tr>
+      </table>
+      <p style="margin-top:12px">Skladba na terénu: EPS-S 180 mm + mazanina 50 mm + nášlap;
+      v podkroví kročejová izolace EPS-T 30 mm. V podlahách poběží
+      <b>teplovodní podlahové vytápění</b>.</p>
+      <p class="note">Konkrétní dekory a formáty vybereme s dodavatelem.</p>`
   },
   {
-    id:'izolace', ic:'🧊', title:'Izolace', short:'Tepelné a hydroizolace',
-    status:'todo',
-    detail:`<h2>Izolace</h2><p>Tepelné izolace (základy, střecha) a hydroizolace spodní stavby.</p>
-      <p class="note">U jednovrstvého zdiva Porotherm 44 T se obvodová stěna dodatečně nezatepluje.
-      Doplníme izolaci základové desky/soklu, střechy a hydroizolaci.</p>`
+    id:'izolace', ic:'🧊', title:'Izolace', short:'Vlna 350 mm · EPS-S 180 mm · 2× SBS s protiradonovou funkcí',
+    status:'ok',
+    detail:`<h2>Izolace</h2>
+      <table>
+        <tr><th>Kde</th><th>Izolace</th></tr>
+        <tr><td>Střecha</td><td>minerální vlna 350 mm mezi a pod krokvemi</td></tr>
+        <tr><td>Podlaha na terénu</td><td>polystyren EPS-S 180 mm</td></tr>
+        <tr><td>Podlaha podkroví</td><td>EPS-T 30 mm (kročejová)</td></tr>
+        <tr><td>Terasa</td><td>spádový polystyren 250–350 mm + mPVC fólie</td></tr>
+        <tr><td>Spodní stavba</td><td>2× asfaltový pás SBS se skelnou rohoží, vytaženo 300 mm nad terén</td></tr>
+      </table>
+      <p style="margin-top:12px">Hydroizolace zároveň plní funkci <b>protiradonové bariéry</b>
+      (pozemek má střední radonový index). Obvodové zdivo tl. 450 mm se dodatečně nezatepluje;
+      mezera 300 mm k sousednímu domu se vyplní tepelnou izolací.</p>`
+  },
+  {
+    id:'vytapeni', ic:'🔥', title:'Vytápění a teplá voda', short:'Kondenzační kotel 18 kW · podlahovka · krb 6 kW',
+    status:'ok',
+    detail:`<h2>Vytápění a teplá voda</h2>
+      <ul class="tidy">
+        <li>Zdroj: <b>plynový kondenzační kotel 18 kW</b> v technické místnosti v podkroví,
+          souosé odkouření nad střechu</li>
+        <li>Rozvod: <b>teplovodní podlahové vytápění</b> v celém domě,
+          v koupelně doplněné žebříkovým tělesem</li>
+        <li>Teplá voda: <b>zásobník TUV</b> u kotle</li>
+        <li>Doplňkový zdroj: <b>krbová vložka 6 kW</b> v obývacím pokoji s vlastním
+          přívodem vzduchu (systémový komín Schiedel)</li>
+      </ul>
+      <p class="note">K výběru konkrétní kotel, zásobník a krbová vložka.</p>`
+  },
+  {
+    id:'vetrani', ic:'💨', title:'Větrání', short:'Centrální rekuperace (min. 150 m³/h)',
+    status:'ok',
+    detail:`<h2>Větrání</h2>
+      <p>Obytné místnosti větrané nuceně <b>centrální rekuperační jednotkou</b>
+      (minimální větraný objem 150 m³/h). WC a koupelny odvětrané ventilátory do svislých
+      VZT stoupaček vyústěných nad střechu; přirozené větrání okny zůstává zachované.</p>
+      <p class="note">K výběru konkrétní jednotka a trasování rozvodů.</p>`
+  },
+  {
+    id:'kanalizace', ic:'🚿', title:'Voda a kanalizace', short:'Jímka 6,4 m³ · vsak AS-KRECHT · nové přípojky',
+    status:'ok',
+    detail:`<h2>Voda a kanalizace</h2>
+      <ul class="tidy">
+        <li><b>Vodovod</b>: přípojka PE 100 RC 32×3,0 mm, dl. 4,1 m, vodoměrná šachta</li>
+        <li><b>Plyn</b>: přípojka PE 100 RC 40×3,7 mm, dl. 4,1 m, HUP na hranici</li>
+        <li><b>Splašky</b>: podzemní <b>jímka na vyvážení 6,4 m³</b></li>
+        <li><b>Dešťová voda</b>: retenční nádrž a vsakovací systém <b>4× AS-KRECHT</b>
+          v zahradě, 2,2 m od domu (koeficient vsaku 2,9×10⁻⁶ m/s dle HG posudku)</li>
+        <li>Svody dešťové vody plechové po fasádě, tmavě šedé</li>
+      </ul>`
+  },
+  {
+    id:'schodiste', ic:'🪜', title:'Schodiště a zábradlí', short:'16× 184/260 mm · zábradlí 900 mm · terasa sklo',
+    status:'ok',
+    detail:`<h2>Schodiště a zábradlí</h2>
+      <ul class="tidy">
+        <li>Vnitřní schodiště: <b>16 stupňů 184/260 mm</b> do tvaru U s podestou,
+          zábradlí výšky <b>900 mm</b></li>
+        <li>Terasa: <b>skleněné zábradlí výšky 1 m</b> (případně nerezová síťka
+          v ocelovém rámu)</li>
+        <li>Okna nadezdívky podkroví: nerezové síťky v tenkém ocelovém rámu
+          jako náhrada zábradlí</li>
+      </ul>
+      <p class="note">K výběru materiál stupnic (dřevo na beton) a detail kotvení skla.</p>`
   }
 ];
 

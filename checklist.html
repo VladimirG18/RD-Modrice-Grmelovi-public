@@ -5,12 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RD Modřice – Checklist</title>
 <meta name="description" content="Checklist úkolů a rozhodnutí pro stavbu rodinného domu v Modřicích." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
 </head>
 <body>
-<div class="content">
-  <a class="backlink" href="index.html">← Rozcestník</a>
 
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content">
+  <span class="eyebrow">Úkoly a rozhodnutí</span>
   <h1>Checklist</h1>
   <p class="lead">Úkoly a rozhodnutí napříč stavbou. Odškrtnutí se ukládá ve tvém prohlížeči (localStorage).</p>
 
@@ -30,6 +51,7 @@
       <div data-item>Vyjádření správců sítí (elektřina, voda, plyn, kanalizace)</div>
       <div data-item>Stavební povolení / ohlášení</div>
       <div data-item>Výběr stavební firmy / dodavatele</div>
+      <div data-item>Demolice stávající garáže na pozemku</div>
     </div>
 
     <div class="clgroup" data-group="Financování">
@@ -46,6 +68,7 @@
       <div data-item>Přípojka vody</div>
       <div data-item>Přípojka kanalizace / ČOV</div>
       <div data-item>Přípojka plynu (pokud bude)</div>
+      <div data-item>Jímka na vyvážení 6,4 m³ + vsak dešťových vod (AS-KRECHT)</div>
       <div data-item>Datová / internetová přípojka</div>
     </div>
 
@@ -71,6 +94,7 @@
       <div data-item>Podlahy – vinyl / dlažba</div>
       <div data-item>Vnitřní dveře</div>
       <div data-item>Schodiště – provedení a zábradlí</div>
+      <div data-item>Krbová vložka (6 kW) – výběr a napojení na komín</div>
     </div>
 
     <div class="clgroup" data-group="Dokončení a okolí">
@@ -84,9 +108,12 @@
     </div>
   </div>
 
-  <p class="note">Toto je výchozí šablona – položky lze libovolně upravit, doplnit nebo smazat.
-  Napiš, co chceš přidat či změnit.</p>
+  <p class="note">Položky lze libovolně upravit, doplnit nebo smazat – napiš, co chceš přidat či změnit.</p>
 </div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
+</footer>
 
 <script>
 const KEY = 'rdmodrice-checklist-v1';
