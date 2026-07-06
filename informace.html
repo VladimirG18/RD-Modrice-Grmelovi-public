@@ -4,71 +4,195 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RD Modřice – Informace o domě</title>
-<meta name="description" content="Rozměry, plochy místností, konstrukce a materiály rodinného domu v Modřicích." />
+<meta name="description" content="Přesné údaje z projektové dokumentace rodinného domu v Modřicích – plochy místností, konstrukce, materiály, technika a pozemek." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
 </head>
 <body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
 <div class="content">
-  <a class="backlink" href="index.html">← Rozcestník</a>
-
+  <span class="eyebrow">Z projektové dokumentace</span>
   <h1>Informace o domě</h1>
-  <p class="lead">Dvoupodlažní rodinný dům · projekt rodiny Grmelových</p>
+  <p class="lead">Novostavba rodinného domu 5+kk na parcelách č. 1292/40 a 1295/2, k.ú. Modřice.
+  Nepodsklepený dům s&nbsp;1&nbsp;nadzemním podlažím a&nbsp;obytným podkrovím, zastřešený sedlovou střechou.</p>
 
-  <h2>Základní rozměry</h2>
-  <div class="grid2">
-    <div class="row"><span>Půdorysné rozměry</span><b>cca 11,2 × 11,0 m</b></div>
-    <div class="row"><span>Výška k hřebeni</span><b>cca 8,85 m</b></div>
-    <div class="row"><span>Světlá výška 1.&nbsp;NP</span><b>cca 2,95 m</b></div>
-    <div class="row"><span>Počet podlaží</span><b>2 nadzemní (1NP + 2NP)</b></div>
-    <div class="row"><span>Schodišťové stupně</span><b>16</b></div>
-    <div class="row"><span>Počet místností</span><b>15</b></div>
+  <div class="stats">
+    <div class="stat"><b>123,5 m²</b><span>zastavěná plocha</span></div>
+    <div class="stat"><b>196,6 m²</b><span>podlahová plocha</span></div>
+    <div class="stat"><b>872 m³</b><span>obestavěný prostor</span></div>
+    <div class="stat"><b>8,35 m</b><span>výška stavby</span></div>
   </div>
 
-  <h2>Plochy místností – 1.&nbsp;NP</h2>
-  <table>
-    <tr><th>Č.</th><th>Místnost</th><th class="num">Plocha</th></tr>
-    <tr><td>101</td><td>Zádveří / hala</td><td class="num">6,4 m²</td></tr>
-    <tr><td>102</td><td>WC + sprcha</td><td class="num">2,4 m²</td></tr>
-    <tr><td>103</td><td>Pracovna</td><td class="num">11,4 m²</td></tr>
-    <tr><td>104</td><td>Obývací pokoj + KK</td><td class="num">35,7 m²</td></tr>
-    <tr><td>105</td><td>Spíž</td><td class="num">1,8 m²</td></tr>
-    <tr><td>106</td><td>Schodiště</td><td class="num">3,7 m²</td></tr>
-    <tr><td>107</td><td>Garáž</td><td class="num">19,9 m²</td></tr>
-    <tr class="sum"><td></td><td>Celkem 1.&nbsp;NP</td><td class="num">81,3 m²</td></tr>
-  </table>
-
-  <h2>Plochy místností – 2.&nbsp;NP</h2>
-  <table>
-    <tr><th>Č.</th><th>Místnost</th><th class="num">Plocha</th></tr>
-    <tr><td>201</td><td>Chodba</td><td class="num">7,3 m²</td></tr>
-    <tr><td>202</td><td>Technická místnost</td><td class="num">6,7 m²</td></tr>
-    <tr><td>203</td><td>Koupelna</td><td class="num">8,7 m²</td></tr>
-    <tr><td>204</td><td>Dětský pokoj</td><td class="num">12,3 m²</td></tr>
-    <tr><td>205</td><td>Dětský pokoj</td><td class="num">13,3 m²</td></tr>
-    <tr><td>206</td><td>WC</td><td class="num">1,4 m²</td></tr>
-    <tr><td>207</td><td>Ložnice</td><td class="num">16,5 m²</td></tr>
-    <tr><td>208</td><td>Šatna</td><td class="num">4,8 m²</td></tr>
-    <tr class="sum"><td></td><td>Celkem 2.&nbsp;NP</td><td class="num">71,0 m²</td></tr>
-  </table>
-
-  <h2>Užitná plocha celkem</h2>
+  <h2>Základní údaje</h2>
   <div class="grid2">
-    <div class="row"><span>Součet ploch místností</span><b>cca 152,3 m²</b></div>
+    <div class="row"><span>Dispozice</span><b>5+kk · 1.NP + podkroví</b></div>
+    <div class="row"><span>Půdorysné rozměry</span><b>11,225 × 11,0 m</b></div>
+    <div class="row"><span>Střecha</span><b>sedlová, sklon 33°</b></div>
+    <div class="row"><span>Hřeben</span><b>rovnoběžně s ulicí, +8,195 m</b></div>
+    <div class="row"><span>Okap</span><b>+4,309 m</b></div>
+    <div class="row"><span>Koruna komínu</span><b>+8,845 m</b></div>
+    <div class="row"><span>Podlaha podkroví</span><b>+2,950 m</b></div>
+    <div class="row"><span>Založení stavby</span><b>−1,250 m</b></div>
+    <div class="row"><span>±0,000 (podlaha 1.NP)</span><b>212,95 m n. m. (Bpv)</b></div>
+    <div class="row"><span>Pozemek</span><b>228 m² · zastavěnost 54 %</b></div>
+    <div class="row"><span>Parkování</span><b>1 stání v garáži + 1 na vjezdu</b></div>
+    <div class="row"><span>Účel dokumentace</span><b>územní souhlas a ohlášení stavby</b></div>
   </div>
 
-  <h2>Konstrukce a materiály</h2>
+  <h2>Místnosti – 1. nadzemní podlaží</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Č.</th><th>Místnost</th><th>Podlaha</th><th class="num">Plocha</th></tr>
+    <tr><td>101</td><td>Zádveří / vstupní hala</td><td>keramická dlažba</td><td class="num">7,89 m²</td></tr>
+    <tr><td>102</td><td>WC + sprcha</td><td>keramická dlažba</td><td class="num">2,78 m²</td></tr>
+    <tr><td>103</td><td>Pracovna</td><td>dřevo / vinyl</td><td class="num">12,40 m²</td></tr>
+    <tr><td>104</td><td>Obývací pokoj + kuchyňský kout</td><td>dřevo / vinyl</td><td class="num">30,29 m²</td></tr>
+    <tr><td>105</td><td>Spíž</td><td>vinyl</td><td class="num">2,10 m²</td></tr>
+    <tr><td>106</td><td>Schodiště</td><td>keramická dlažba</td><td class="num">4,20 m²</td></tr>
+    <tr><td>107</td><td>Garáž</td><td>keramická dlažba</td><td class="num">21,85 m²</td></tr>
+    <tr class="sum"><td></td><td colspan="2">Celkem 1. NP</td><td class="num">81,51 m²</td></tr>
+  </table>
+  </div>
+
+  <h2>Místnosti – podkroví</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Č.</th><th>Místnost</th><th>Podlaha</th><th class="num">Plocha</th></tr>
+    <tr><td>201</td><td>Chodba</td><td>dřevo / vinyl</td><td class="num">10,28 m²</td></tr>
+    <tr><td>202</td><td>Technická místnost</td><td>keramická dlažba</td><td class="num">6,73 m²</td></tr>
+    <tr><td>203</td><td>Koupelna</td><td>keramická dlažba</td><td class="num">9,30 m²</td></tr>
+    <tr><td>204</td><td>Dětský pokoj</td><td>dřevo / vinyl</td><td class="num">13,52 m²</td></tr>
+    <tr><td>205</td><td>Dětský pokoj</td><td>dřevo / vinyl</td><td class="num">15,25 m²</td></tr>
+    <tr><td>206</td><td>WC</td><td>keramická dlažba</td><td class="num">1,65 m²</td></tr>
+    <tr><td>207</td><td>Ložnice</td><td>dřevo / vinyl</td><td class="num">18,48 m²</td></tr>
+    <tr><td>208</td><td>Šatna</td><td>dřevo / vinyl</td><td class="num">5,35 m²</td></tr>
+    <tr class="sum"><td></td><td colspan="2">Celkem podkroví</td><td class="num">80,56 m²</td></tr>
+  </table>
+  </div>
+
+  <p class="note">Součet ploch všech místností je <b>162,07 m²</b>. K tomu venkovní zapuštěná
+  terasa v podkroví (betonová dlažba na terčích, šířka 5,2 m) a kryté závětří u vstupu.
+  Plochy jsou převzaté z legend místností ve výkresech půdorysů.</p>
+
+  <h2>Konstrukce</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Konstrukce</th><th>Provedení dle projektu</th></tr>
+    <tr><td>Obvodové zdivo</td><td>cihelné bloky tl. <b>450 mm</b> (jednovrstvé, bez zateplení)</td></tr>
+    <tr><td>Vnitřní nosné zdivo</td><td>cihelné bloky tl. 250 mm</td></tr>
+    <tr><td>Příčky</td><td>pórobeton nebo SDK, tl. 100 a 150 mm</td></tr>
+    <tr><td>Strop nad 1. NP</td><td>železobetonový monolitický, tl. 200 mm, věnec v. 250 mm</td></tr>
+    <tr><td>Schodiště</td><td>16 stupňů × 184/260 mm, zábradlí v. 900 mm</td></tr>
+    <tr><td>Krov</td><td>hambálkový, krokve 100/180 mm, ocelová + dřevěné vaznice</td></tr>
+    <tr><td>Střešní krytina</td><td>Bramac Turmalin, tmavě šedá · pojistná difuzní fólie</td></tr>
+    <tr><td>Komín</td><td>systémový (Schiedel), s vymetacím a vybíracím otvorem</td></tr>
+    <tr><td>Základy</td><td>základové pasy s deskou, podkladní beton s kari sítí, založení −1,25 m</td></tr>
+  </table>
+  </div>
+
+  <h3>Izolace a skladby</h3>
   <ul class="tidy">
-    <li>Nosné konstrukce: <b>železobeton</b></li>
-    <li>Vnitřní příčky: zděné</li>
-    <li>Fasáda: <b>omítka</b> (světle šedá)</li>
-    <li>Střecha: krytina v <b>tmavě šedé</b></li>
-    <li>Podlahy: <b>vinyl</b> + <b>dlažba</b></li>
-    <li>Výplně otvorů: prosklené (okna), dřevěné prvky</li>
-    <li>Venkovní: terasa + terénní úpravy</li>
+    <li>Střecha: minerální vlna <b>350 mm</b> mezi a pod krokvemi, parozábrana, SDK podhled</li>
+    <li>Podlaha na terénu: polystyren <b>EPS-S 180 mm</b>, betonová mazanina 50 mm</li>
+    <li>Podlaha podkroví: kročejová izolace EPS-T 30 mm</li>
+    <li>Terasa: spádová tepelná izolace 250–350 mm, mPVC fólie, dlažba na terčích</li>
+    <li>Hydroizolace spodní stavby: <b>2× asfaltový pás SBS</b> se skelnou rohoží, vytažená 300 mm nad terén
+      – slouží zároveň jako protiradonová bariéra (pozemek má <b>střední radonový index</b>)</li>
   </ul>
 
-  <p class="note">Hodnoty jsou orientační a byly odměřeny přímo z 3D modelu (jednotky v metrech).
-  Plochy místností odpovídají vnitřním podlahovým plochám. Pro přesné údaje slouží projektová dokumentace.</p>
+  <h2>Povrchy a barevnost fasád</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Ozn.</th><th>Prvek</th><th>Provedení</th></tr>
+    <tr><td>A</td><td>Fasádní omítka</td><td><span class="swatch" style="background:#dcdcda"></span>silikátová, velmi světlá šedá / bílá (odstín určí investor)</td></tr>
+    <tr><td>B</td><td>Střešní krytina</td><td><span class="swatch" style="background:#2e3033"></span>keramická/betonová taška Bramac Turmalin, tmavě šedá</td></tr>
+    <tr><td>C</td><td>Okrajové lišty střechy</td><td><span class="swatch" style="background:#3a3d42"></span>klempířské prvky, tmavá šedá</td></tr>
+    <tr><td>D</td><td>Okna a dveře</td><td><span class="swatch" style="background:#33373c"></span>hliníkové, tmavá šedá (antracit)</td></tr>
+    <tr><td>E</td><td>Sokl</td><td><span class="swatch" style="background:#4a4d52"></span>omyvatelná omítka, tmavá šedá</td></tr>
+    <tr><td>F</td><td>Obklad (závětří, terasa)</td><td><span class="swatch" style="background:#3c4046"></span>keramický, tmavě šedý</td></tr>
+    <tr><td>G</td><td>Zábradlí terasy</td><td>skleněné v. 1 m; u oken podkroví nerezové síťky v ocelovém rámu</td></tr>
+    <tr><td>H</td><td>Garážová vrata</td><td><span class="swatch" style="background:#383b40"></span>sekční, tmavá šedá – od ulice i do zahrady</td></tr>
+  </table>
+  </div>
+
+  <h2>Technické zařízení budovy</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Systém</th><th>Řešení dle projektu</th></tr>
+    <tr><td>Vytápění</td><td>plynový kondenzační kotel <b>18 kW</b> (technická místnost v podkroví),
+      teplovodní <b>podlahové vytápění</b>, v koupelně žebříkové těleso</td></tr>
+    <tr><td>Doplňkový zdroj</td><td><b>krbová vložka 6 kW</b> v obývacím pokoji, s přívodem vzduchu a odkouřením komínem</td></tr>
+    <tr><td>Ohřev vody</td><td>zásobník TUV u kotle</td></tr>
+    <tr><td>Větrání</td><td>nucené – <b>centrální rekuperační jednotka</b> (min. 150 m³/h),
+      WC a koupelny s odtahovými ventilátory nad střechu</td></tr>
+    <tr><td>Splašková kanalizace</td><td>podzemní jímka na vyvážení <b>6,4 m³</b></td></tr>
+    <tr><td>Dešťové vody</td><td>ze střechy do retenční nádrže a vsaku <b>4× AS-KRECHT</b> v zahradě
+      (2,2 m od domu); zpevněné plochy vsakem na pozemku</td></tr>
+    <tr><td>Vodovod</td><td>přípojka PE 100 RC 32×3,0 mm, dl. 4,1 m, vodoměrná šachta v předzahrádce</td></tr>
+    <tr><td>Plyn</td><td>přípojka PE 100 RC 40×3,7 mm, dl. 4,1 m, HUP na hranici pozemku</td></tr>
+    <tr><td>Elektro</td><td>nová přípojka NN; hromosvod na střeše</td></tr>
+    <tr><td>Dešťové svody</td><td>plechové, vedené po fasádě (tmavě šedé)</td></tr>
+  </table>
+  </div>
+
+  <h2>Pozemek a osazení domu</h2>
+  <ul class="tidy">
+    <li>Ulice je na <b>severní</b> straně – uliční fasáda drží uliční čáru, hřeben je s ní rovnoběžný.</li>
+    <li>Vstup i vjezd z ulice: kryté závětří s betonovou dlažbou, sjezd šířky 3 m (sklon 8,7 %).</li>
+    <li>Garáž má sekční vrata na obě strany – z ulice i do zahrady.</li>
+    <li>Západní štítová zeď je <b>300 mm od sousedního domu</b>; mezera se vyplní tepelnou izolací.</li>
+    <li>Zahrada a terasa jsou orientované na <b>jih</b>; zeleň na pozemku 96 m².</li>
+    <li>Před zahájením stavby bude odstraněna stávající garáž na pozemku.</li>
+    <li>Radonový průzkum: střední index · hydrogeologický posudek: vsakování možné (kv = 2,9×10⁻⁶ m/s).</li>
+  </ul>
+
+  <h2>Vizualizace</h2>
+  <div class="gallery">
+    <figure><img src="assets/img/render_zahrada.jpg" alt="Pohled ze zahrady – jižní fasáda s terasou" loading="lazy" /><figcaption>Ze zahrady – terasa v podkroví a HS portál obýváku</figcaption></figure>
+    <figure><img src="assets/img/render_ulice.jpg" alt="Pohled z ulice – severní fasáda se závětřím" loading="lazy" /><figcaption>Z ulice – závětří s vjezdem do garáže</figcaption></figure>
+    <figure><img src="assets/img/render_nadhled.jpg" alt="Nadhled od jihovýchodu" loading="lazy" /><figcaption>Nadhled – střecha se střešními okny</figcaption></figure>
+    <figure><img src="assets/img/render_podkrovi.jpg" alt="Dispozice podkroví bez střechy" loading="lazy" /><figcaption>Podkroví – dispozice bez střechy</figcaption></figure>
+  </div>
+  <p class="note">Vizualizace jsou generované parametrickým 3D modelem sestaveným přesně podle
+  kót projektové dokumentace – stejný model si můžete prohlédnout interaktivně v sekci
+  <a href="model.html">3D model</a>.</p>
+
+  <h2>Projektová dokumentace</h2>
+  <ul class="tidy">
+    <li>Souhrnná technická zpráva a průvodní list (v2)</li>
+    <li>Výkresy: půdorys 1. NP · půdorys podkroví · řez · pohledy · základy · sjezd</li>
+    <li>Situační výkresy vč. koordinačního (10/2024) a katastrálního</li>
+    <li>Požárně bezpečnostní řešení (10/2024)</li>
+    <li>Hydrogeologické posouzení vsakování (10/2024) · protokol o měření radonu</li>
+  </ul>
+  <p class="note">Autorizovaná osoba: Ing. arch. Jiří Bradáč · vypracovali Ing. arch. Jan Kokeš,
+  Ing. arch. Václav Kokeš, Ing. arch. Zdeněk Pospíšil (07/2023) · koordinační situace
+  a přípojky: Ing. Radek Vala (10/2024). Kompletní dokumentace je uložena v soukromém archivu projektu.</p>
 </div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
+</footer>
+
 </body>
 </html>

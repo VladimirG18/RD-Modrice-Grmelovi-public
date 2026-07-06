@@ -4,55 +4,105 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RD Modřice – Grmelovi</title>
-<meta name="description" content="Rozcestník projektu rodinného domu v Modřicích – 3D model, informace, checklist a harmonogram stavby." />
+<meta name="description" content="Novostavba rodinného domu 5+kk v Modřicích – interaktivní 3D model, informace z projektové dokumentace, materiály, harmonogram a poznámky." />
+<meta property="og:title" content="RD Modřice – Grmelovi" />
+<meta property="og:description" content="Novostavba rodinného domu 5+kk v Modřicích – 3D model a informace o projektu." />
+<meta property="og:image" content="https://vladimirg18.github.io/RD-Modrice-Grmelovi-public/assets/img/render_zahrada.jpg" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
 </head>
 <body>
-<div class="hub">
-  <div class="hub-head">
-    <h1>Rodinný dům Modřice</h1>
-    <p>Projekt rodiny Grmelových · rozcestník</p>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <div>
+    <span class="eyebrow">Novostavba · Modřice, p.č. 1292/40 a 1295/2</span>
+    <h1>Stavíme dům<br />v&nbsp;Modřicích</h1>
+    <p>Rodinný dům 5+kk se sedlovou střechou, zapuštěnou terasou v&nbsp;podkroví
+      a garáží průjezdnou do zahrady. Všechno o&nbsp;projektu na jednom místě –
+      od interaktivního 3D modelu po harmonogram stavby.</p>
+    <div class="actions">
+      <a class="btn primary" href="model.html">🏠 Prohlédnout 3D model</a>
+      <a class="btn" href="informace.html">Informace o domě</a>
+    </div>
   </div>
+  <div class="heroimg">
+    <img src="assets/img/render_zahrada.jpg" alt="Vizualizace domu ze zahrady – jižní fasáda s terasou" />
+  </div>
+</section>
+
+<div class="hubwrap">
+  <div class="stats">
+    <div class="stat"><b>5+kk</b><span>dispozice · 2 podlaží</span></div>
+    <div class="stat"><b>162 m²</b><span>plocha místností</span></div>
+    <div class="stat"><b>123,5 m²</b><span>zastavěná plocha</span></div>
+    <div class="stat"><b>872 m³</b><span>obestavěný prostor</span></div>
+  </div>
+
+  <div style="height:18px"></div>
 
   <div class="cards">
     <a class="card" href="model.html">
-      <span class="ic">🏠</span>
+      <span class="ic">🏠</span><span class="go">→</span>
       <h2>3D model</h2>
-      <p>Interaktivní model domu – procházka interiérem, vypínání vrstev, pohled do místností.</p>
+      <p>Interaktivní model s&nbsp;vnitřní dispozicí – procházka domem, vypínání vrstev, pohled do místností.</p>
     </a>
 
     <a class="card" href="informace.html">
-      <span class="ic">ℹ️</span>
+      <span class="ic">ℹ️</span><span class="go">→</span>
       <h2>Informace o domě</h2>
-      <p>Rozměry, plochy jednotlivých místností, konstrukce a materiály.</p>
+      <p>Přesné údaje z&nbsp;projektové dokumentace – plochy místností, konstrukce, technika, pozemek.</p>
     </a>
 
     <a class="card" href="material.html">
-      <span class="ic">🧱</span>
+      <span class="ic">🧱</span><span class="go">→</span>
       <h2>Stavební materiál</h2>
-      <p>Uvažované materiály stavby – zdivo, konstrukce. Zatím orientačně, nutno ověřit.</p>
-    </a>
-
-    <a class="card" href="checklist.html">
-      <span class="ic">✅</span>
-      <h2>Checklist</h2>
-      <p>Úkoly a rozhodnutí napříč stavbou. Odškrtnutí se ukládá ve tvém prohlížeči.</p>
+      <p>Materiály a&nbsp;skladby dle projektu – zdivo, střecha, izolace, vytápění – plus co je ještě k&nbsp;výběru.</p>
     </a>
 
     <a class="card" href="harmonogram.html">
-      <span class="ic">📅</span>
+      <span class="ic">📅</span><span class="go">→</span>
       <h2>Harmonogram stavby</h2>
-      <p>Fáze výstavby s termíny a aktuálním stavem.</p>
+      <p>Fáze výstavby s&nbsp;termíny a&nbsp;stavem – co je hotové, co probíhá a&nbsp;co nás čeká.</p>
+    </a>
+
+    <a class="card" href="checklist.html">
+      <span class="ic">✅</span><span class="go">→</span>
+      <h2>Checklist</h2>
+      <p>Úkoly a&nbsp;rozhodnutí napříč stavbou. Odškrtnutí se ukládá ve tvém prohlížeči.</p>
     </a>
 
     <a class="card" href="poznamky.html">
-      <span class="ic">📝</span>
+      <span class="ic">📝</span><span class="go">→</span>
       <h2>Poznámky</h2>
-      <p>Společné poznámky – každý zapíše pod svým jménem (Lucka, Vladimír, Jirka, Jarka).</p>
+      <p>Společné poznámky v&nbsp;reálném čase – každý zapíše pod svým jménem (Lucka, Vladimír, Jirka, Jarka).</p>
     </a>
   </div>
-
-  <div class="hub-foot">Stránka projektu RD Modřice · Grmelovi</div>
 </div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
+  Vizualizace jsou generované přímo z dokumentace.
+</footer>
+
 </body>
 </html>

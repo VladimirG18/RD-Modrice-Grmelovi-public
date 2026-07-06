@@ -5,73 +5,122 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RD Modřice – Harmonogram stavby</title>
 <meta name="description" content="Harmonogram výstavby rodinného domu v Modřicích – fáze, termíny a stav." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
 </head>
 <body>
-<div class="content">
-  <a class="backlink" href="index.html">← Rozcestník</a>
 
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content">
+  <span class="eyebrow">Plán výstavby</span>
   <h1>Harmonogram stavby</h1>
-  <p class="lead">Orientační fáze výstavby s termíny a aktuálním stavem. Šablona k doplnění skutečných dat.</p>
+  <p class="lead">Fáze výstavby s termíny a aktuálním stavem. Hotové kroky vycházejí
+  z dokumentace, termíny dalších fází doplníme podle skutečnosti.</p>
 
   <div class="timeline">
-    <div class="phase">
-      <h3>1. Příprava a projekt <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Pozemek, průzkumy, projektová dokumentace, stavební povolení, výběr dodavatele.</p>
+    <div class="phase done">
+      <h3>1. Projektová dokumentace <span class="statetag done">hotovo</span></h3>
+      <div class="when">07/2023</div>
+      <p>Architektonicko-stavební řešení pro územní souhlas a ohlášení stavby
+      (Ing. arch. Bradáč a kol.) – půdorysy, řez, pohledy, situace, technická zpráva.</p>
+    </div>
+
+    <div class="phase done">
+      <h3>2. Průzkumy a profese <span class="statetag done">hotovo</span></h3>
+      <div class="when">10/2024</div>
+      <p>Radonový průzkum (střední index), hydrogeologické posouzení vsakování,
+      požárně bezpečnostní řešení, koordinační situace s přípojkami vody a plynu.</p>
+    </div>
+
+    <div class="phase active">
+      <h3>3. Povolení a příprava <span class="statetag active">probíhá</span></h3>
+      <div class="when">—</div>
+      <p>Vyjádření správců sítí, územní souhlas / ohlášení stavby, výběr dodavatele,
+      rozpočet. Před zahájením se odstraní stávající garáž na pozemku.</p>
     </div>
 
     <div class="phase">
-      <h3>2. Přípojky a zemní práce <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Přípojky inženýrských sítí, skrývka ornice, vytyčení stavby, výkopy.</p>
+      <h3>4. Přípojky a zemní práce <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Přípojky vody (PE 32×3,0 + vodoměrná šachta), plynu (PE 40×3,7 + HUP) a NN,
+      skrývka, vytyčení stavby, výkopy, jímka a vsakovací systém AS-KRECHT.</p>
     </div>
 
     <div class="phase">
-      <h3>3. Základy <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Základové pasy a deska, ležaté rozvody, hydroizolace.</p>
+      <h3>5. Základy <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Základové pasy a deska (založení −1,25 m), ležaté rozvody, podkladní beton
+      s kari sítí, hydroizolace 2× SBS s protiradonovou funkcí.</p>
     </div>
 
     <div class="phase">
-      <h3>4. Hrubá stavba <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Svislé konstrukce 1.&nbsp;NP, strop, svislé konstrukce 2.&nbsp;NP, schodiště.</p>
+      <h3>6. Hrubá stavba <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Zdivo 1. NP (bloky 450/250 mm), železobetonový strop s věncem, zdivo podkroví,
+      schodiště, komín.</p>
     </div>
 
     <div class="phase">
-      <h3>5. Zastřešení <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Krov, střešní krytina, klempířské prvky, okna a vstupní dveře (uzavření stavby).</p>
+      <h3>7. Zastřešení <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Hambálkový krov (krokve 100/180), krytina Bramac Turmalin, klempířské prvky,
+      střešní okna, hliníková okna a vstupní dveře – uzavření hrubé stavby.</p>
     </div>
 
     <div class="phase">
-      <h3>6. Rozvody a instalace <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Elektroinstalace, voda a odpady, vytápění, vzduchotechnika/rekuperace.</p>
+      <h3>8. Rozvody a instalace <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Elektroinstalace, voda a kanalizace, plynový kondenzační kotel 18 kW,
+      podlahové vytápění, rekuperace, krbová vložka.</p>
     </div>
 
     <div class="phase">
-      <h3>7. Vnitřní dokončovací práce <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Omítky, podlahy, obklady a dlažby, vnitřní dveře, malby, kuchyně a koupelny.</p>
+      <h3>9. Vnitřní dokončovací práce <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Omítky, podlahy (dlažba + dřevo/vinyl), obklady, SDK podhledy, vnitřní dveře,
+      malby, kuchyně a koupelny.</p>
     </div>
 
     <div class="phase">
-      <h3>8. Fasáda a okolí <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Zateplení a fasáda, terasa, oplocení, zpevněné plochy, zahrada.</p>
+      <h3>10. Fasáda a okolí <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Silikátová omítka, tmavý sokl a obklady, terasa s dlažbou na terčích a skleněným
+      zábradlím, sjezd, zpevněné plochy, zahrada.</p>
     </div>
 
     <div class="phase">
-      <h3>9. Kolaudace a stěhování <span class="statetag">termín doplnit</span></h3>
-      <div class="when">— · — </div>
-      <p>Závěrečná kontrola, kolaudace, nastěhování.</p>
+      <h3>11. Kolaudace a stěhování <span class="statetag">plánováno</span></h3>
+      <div class="when">—</div>
+      <p>Závěrečná kontrola, kolaudace, nastěhování. 🎉</p>
     </div>
   </div>
 
-  <p class="note">Toto je výchozí šablona harmonogramu. Pošli mi skutečné termíny jednotlivých fází
-  (a stav: hotovo / probíhá / plánováno) a já je sem doplním – včetně barevného odlišení stavu.</p>
+  <p class="note">Termíny fází 3–11 doplníme, jakmile budou známé – stačí je poslat
+  a přidáme i barevné odlišení stavu (hotovo / probíhá / plánováno).</p>
 </div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
+</footer>
+
 </body>
 </html>
