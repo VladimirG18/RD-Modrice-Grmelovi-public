@@ -263,11 +263,13 @@ function registerMaterial(mesh){
 // PolygonOffsetem povrchové vrstvy nepatrně předsadíme dopředu a vnitřní líc
 // posuneme dozadu – každá dvojice tak má jasného vítěze a nic nebliká.
 function applyDepthFix(){
-  const forward = /E_sokl_tmavy|F_obklad_tmavy|kacirek|beton_dlazba|asfalt/;
-  const back = /interier_bily/;
+  const forward = /E_sokl_tmavy|F_obklad_tmavy|kacirek|beton_dlazba|asfalt/; // nášlapné/obkladové vrstvy dopředu
+  const ground  = /travnik/;        // trávník (podklad terénu) dozadu – silněji, protože terén se často díváme po hraně (grazing)
+  const back    = /interier_bily/;  // vnitřní líc dozadu (zvenčí vyhraje fasáda)
   for(const name in materialsByName){
     let f = 0, u = 0;
     if(forward.test(name)){ f = -1; u = -2; }
+    else if(ground.test(name)){ f = 2; u = 2; }
     else if(back.test(name)){ f = 1; u = 2; }
     else continue;
     materialsByName[name].forEach(m=>{
