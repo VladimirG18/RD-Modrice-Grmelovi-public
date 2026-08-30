@@ -256,6 +256,18 @@ function registerMaterial(mesh){
   });
 }
 
+// Rámy oken sdílejí materiál (D_okna_antracit) s dveřmi, vraty i terasovým
+// portálem. Okenní rámy proto odpojíme na vlastní materiál (D_ramy_oken),
+// aby je konfigurátor barvil samostatně – jen okna, ne dveře ani vrata.
+let ramyOkenMat = null;
+function splitWindowFrames(mesh){
+  const m = mesh.material;
+  if(!m || Array.isArray(m) || m.name !== 'D_okna_antracit') return;
+  if(!/okno/i.test(mesh.name || '')) return;   // jen okenní rámy (okno_*, stresni_okno_*)
+  if(!ramyOkenMat){ ramyOkenMat = m.clone(); ramyOkenMat.name = 'D_ramy_oken'; }
+  mesh.material = ramyOkenMat;
+}
+
 // Oprava „blikání" ploch (z-fighting): některé části modelu leží přesně v téže
 // rovině – obkladové a nášlapné vrstvy na podkladu (sokl a obklad na omítce,
 // kačírek a dlažba na trávníku) a vnitřní líc stěn v rovině obvodové stěny.
@@ -297,6 +309,7 @@ loader.load('RDModrice.glb', (gltf) => {
       o.castShadow = true; o.receiveShadow = true;
       if(o.material){
         o.material.side = THREE.DoubleSide; // ať jsou stěny vidět i zevnitř
+        splitWindowFrames(o);
         registerMaterial(o);
       }
       groups[classify(o.name)].push(o);
@@ -339,7 +352,7 @@ const CFG_ITEMS = [
     swatches:['#efeee9','#e7e0d0','#d9c8a6','#c9a87a','#b7b4ac','#7c7b75'] },
   { id:'strecha', label:'Střecha',            mats:['B_krytina_tmave_seda'],
     swatches:['#2b2c2e','#15161a','#3b3d42','#8a3b2a','#5a3a2a','#71503a'] },
-  { id:'okna',    label:'Okna, dveře, rámy',  mats:['D_okna_antracit'],
+  { id:'okna',    label:'Rámy oken',          mats:['D_ramy_oken'],
     swatches:['#2a2b2d','#141414','#e9e8e4','#6b4a28','#3a2a1e','#9a9ca0'] },
   { id:'vrata',   label:'Garážová vrata',     mats:['H_vrata_tmava'],
     swatches:['#26272a','#141414','#6b4a28','#8a8c90','#e9e8e4'] },
