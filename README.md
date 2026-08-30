@@ -6,7 +6,8 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
 
 - `index.html` – **rozcestník** s hero vizualizací a přehledem projektu.
 - `model.html` – interaktivní **3D model** domu (otáčení, zoom, procházka, vrstvy,
-  popisky místností, vnitřní dispozice).
+  popisky místností, vnitřní dispozice) + **konfigurátor barev** fasády, střechy,
+  oken a dalších prvků.
 - `informace.html` – **informace o domě** z projektové dokumentace (plochy místností,
   konstrukce, povrchy, technika, pozemek, vizualizace).
 - `material.html` – **stavební materiály** a skladby dle projektu.
@@ -48,6 +49,10 @@ python3 -m http.server 8000
 - **🏠 Pohled do místností** – schová střechu a obvodové stěny a podívá se shora dovnitř.
 - **Vrstvy** – samostatné vypínání střechy, obvodových stěn, pater (1NP/2NP), výplní
   oken, terénu a popisků místností.
+- **🎨 Barvy domu (konfigurátor)** – nastavení barev jednotlivých prvků fasády:
+  omítka, střešní krytina, okna a rámy, garážová vrata, klempířské prvky, sokl,
+  obklad terasy a zábradlí. Na výběr jsou přednastavené vzorníky i vlastní barva,
+  rychlé kombinace stylů a návrat k původním barvám. Výběr se ukládá v prohlížeči.
 
 ## Technologie
 

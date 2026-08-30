@@ -73,7 +73,42 @@
   #walkOverlay p{ margin:.3rem 0; color:var(--muted); font-size:.85rem; line-height:1.5; }
   kbd{ background:#0e1116; border:1px solid #2b333d; border-bottom-width:2px; border-radius:5px; padding:1px 6px; font-size:.8rem; }
 
-  @media (max-width:640px){ #panel{ width:188px; top:56px; } #titlebar{ display:none; } }
+  /* panel je posuvný, ať se vejde i s konfigurátorem barev */
+  #panelBody{ max-height:calc(100vh - 92px); overflow-y:auto; overflow-x:hidden;
+    margin-right:-6px; padding-right:6px; }
+  #panelBody::-webkit-scrollbar{ width:8px; }
+  #panelBody::-webkit-scrollbar-thumb{ background:#2b333d; border-radius:4px; }
+  #panelBody::-webkit-scrollbar-track{ background:transparent; }
+
+  /* konfigurátor barev */
+  .subhead{ display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%;
+    background:none; border:none; color:var(--text); font:inherit; font-size:.82rem; font-weight:600;
+    cursor:pointer; padding:2px; }
+  .subhead:hover{ color:var(--accent); }
+  .subhead #cfgChevron{ color:var(--muted); }
+  #cfgBody{ margin-top:6px; }
+  #cfgBody.collapsed{ display:none; }
+  .cfg-cap{ display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--muted); margin:8px 0 5px; }
+  .style-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .style-btn{ font-size:.72rem; padding:5px 8px; border:1px solid #2b333d; border-radius:7px;
+    background:#1f2630; color:var(--text); cursor:pointer; }
+  .style-btn:hover{ border-color:var(--accent); }
+  .cfg-item{ margin:9px 0; }
+  .cfg-item .name{ font-size:.8rem; margin-bottom:5px; color:var(--text); }
+  .sw-row{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .sw{ width:20px; height:20px; border-radius:50%; border:2px solid #2b333d; cursor:pointer;
+    padding:0; transition:transform .1s; }
+  .sw:hover{ transform:scale(1.12); }
+  .sw.active{ border-color:var(--text); box-shadow:0 0 0 2px var(--accent); }
+  .sw-custom{ width:22px; height:22px; padding:0; border:none; background:none; cursor:pointer; }
+  .sw-custom::-webkit-color-swatch-wrapper{ padding:0; }
+  .sw-custom::-webkit-color-swatch{ border:2px dashed #6b7686; border-radius:50%; }
+  .sw-custom::-moz-color-swatch{ border:2px dashed #6b7686; border-radius:50%; }
+  .cfg-note{ margin:8px 0 0; font-size:.72rem; color:var(--muted); line-height:1.4; }
+
+  @media (max-width:640px){ #panel{ width:200px; top:56px; } #titlebar{ display:none; }
+    #panelBody{ max-height:calc(100vh - 84px); } }
 </style>
 </head>
 <body>
@@ -84,7 +119,7 @@
 
 <div id="titlebar">
   <h1>Rodinný dům Modřice – Grmelovi</h1>
-  <span>interaktivní 3D model · procházka interiérem</span>
+  <span>interaktivní 3D model · procházka interiérem · konfigurátor barev</span>
 </div>
 
 <div id="panel">
@@ -100,6 +135,19 @@
     <label><input type="checkbox" id="t-glass" checked> Výplně oken</label>
     <label><input type="checkbox" id="t-terrain" checked> Terén</label>
     <label><input type="checkbox" id="t-labels" checked> Popisky místností</label>
+    <div class="sep"></div>
+
+    <button id="cfgToggle" class="subhead" aria-expanded="true" title="Skrýt / zobrazit barvy">
+      <span>🎨 Barvy domu</span><span id="cfgChevron">▾</span>
+    </button>
+    <div id="cfgBody">
+      <span class="cfg-cap">Rychlé styly</span>
+      <div class="style-row" id="styleRow"></div>
+      <div id="cfgItems"></div>
+      <button class="btn" id="resetColors">↺ Původní barvy</button>
+      <p class="cfg-note">Barvy jsou orientační – pro představu, jak dům může vypadat. Výběr se uloží v prohlížeči.</p>
+    </div>
+
     <div class="sep"></div>
     <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
     <button class="btn" id="dollhouse">🏠 Pohled do místností</button>
@@ -192,6 +240,22 @@ function classify(name){
   return 'other';
 }
 
+// --- Materiály pro konfigurátor barev (klíč = název materiálu z modelu) ---
+const materialsByName = {};
+function registerMaterial(mesh){
+  // Popisky místností (txt_*) sdílejí materiál s klempířskými prvky.
+  // Odpojíme je vlastní kopií, aby změna barvy lišt neměnila i texty.
+  if(/^txt_/i.test(mesh.name)){
+    if(mesh.material && mesh.material.clone) mesh.material = mesh.material.clone();
+    return;
+  }
+  const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  mats.forEach(m=>{
+    if(!m || !m.name) return;
+    (materialsByName[m.name] || (materialsByName[m.name] = new Set())).add(m);
+  });
+}
+
 let modelSize = 10, modelCenter = new THREE.Vector3();
 
 // --- Načtení modelu ---
@@ -202,7 +266,10 @@ loader.load('RDModrice.glb', (gltf) => {
   model.traverse(o => {
     if(o.isMesh){
       o.castShadow = true; o.receiveShadow = true;
-      if(o.material){ o.material.side = THREE.DoubleSide; } // ať jsou stěny vidět i zevnitř
+      if(o.material){
+        o.material.side = THREE.DoubleSide; // ať jsou stěny vidět i zevnitř
+        registerMaterial(o);
+      }
       groups[classify(o.name)].push(o);
     }
   });
@@ -218,6 +285,7 @@ loader.load('RDModrice.glb', (gltf) => {
   orbit.minDistance = modelSize * 0.02;
   orbit.maxDistance = modelSize * 6;
   resetView();
+  buildConfigurator();
 
   document.getElementById('loader').classList.add('hide');
   animate();
@@ -232,6 +300,158 @@ function resetView(){
   camera.position.set(modelCenter.x + d*0.7, modelCenter.y + d*0.5, modelCenter.z + d*0.7);
   orbit.target.copy(modelCenter);
   orbit.update();
+}
+
+// ===================== Konfigurátor barev =====================
+// Každý prvek míří na jeden nebo více materiálů z modelu (klíč = jeho název).
+const CFG_ITEMS = [
+  { id:'fasada',  label:'Fasáda / omítka',    mats:['A_omitka_svetle_seda'],
+    swatches:['#efeee9','#e7e0d0','#d9c8a6','#c9a87a','#b7b4ac','#7c7b75'] },
+  { id:'strecha', label:'Střecha',            mats:['B_krytina_tmave_seda'],
+    swatches:['#2b2c2e','#15161a','#3b3d42','#8a3b2a','#5a3a2a','#71503a'] },
+  { id:'okna',    label:'Okna, dveře, rámy',  mats:['D_okna_antracit'],
+    swatches:['#2a2b2d','#141414','#e9e8e4','#6b4a28','#3a2a1e','#9a9ca0'] },
+  { id:'vrata',   label:'Garážová vrata',     mats:['H_vrata_tmava'],
+    swatches:['#26272a','#141414','#6b4a28','#8a8c90','#e9e8e4'] },
+  { id:'klemp',   label:'Klempířské prvky',   mats:['C_lista_tmava_seda'],
+    swatches:['#2c2e31','#141414','#3b3d42','#5a3a2a','#8a8c90'] },
+  { id:'sokl',    label:'Sokl',               mats:['E_sokl_tmavy'],
+    swatches:['#3b3b3e','#26272a','#6e6a62','#4a342a','#141414'] },
+  { id:'obklad',  label:'Obklad terasy',      mats:['F_obklad_tmavy'],
+    swatches:['#2a2b2e','#3b3d42','#6b4a28','#8a857c','#e4e2dc'] },
+  { id:'ocel',    label:'Zábradlí / ocel',    mats:['G_ocel'],
+    swatches:['#4e5257','#2a2b2d','#141414','#c9cacd'] },
+];
+
+// Rychlé kombinace (co není uvedeno, zůstane v původní barvě).
+const CFG_STYLES = [
+  { name:'Výchozí', reset:true },
+  { name:'Bílá + antracit',   colors:{ fasada:'#efeee9', strecha:'#2b2c2e', okna:'#2a2b2d', vrata:'#26272a', klemp:'#2c2e31', sokl:'#3b3b3e', obklad:'#2a2b2e' } },
+  { name:'Krémová + cihlová', colors:{ fasada:'#e7e0d0', strecha:'#8a3b2a', okna:'#3a2a1e', vrata:'#6b4a28', klemp:'#5a3a2a', sokl:'#4a342a', obklad:'#6b4a28' } },
+  { name:'Šedá + grafit',     colors:{ fasada:'#b7b4ac', strecha:'#3b3d42', okna:'#141414', vrata:'#141414', klemp:'#3b3d42', sokl:'#26272a', obklad:'#3b3d42' } },
+  { name:'Písková + hnědá',   colors:{ fasada:'#d9c8a6', strecha:'#5a3a2a', okna:'#6b4a28', vrata:'#6b4a28', klemp:'#5a3a2a', sokl:'#4a342a', obklad:'#6b4a28' } },
+];
+
+const COLORS_KEY = 'rdmodrice-colors';
+const colorState = {};      // id -> aktuální hex
+const colorDefaults = {};   // id -> původní hex z modelu
+
+function loadColors(){ try{ return JSON.parse(localStorage.getItem(COLORS_KEY)) || {}; }catch(e){ return {}; } }
+function saveColors(){ try{ localStorage.setItem(COLORS_KEY, JSON.stringify(colorState)); }catch(e){} }
+
+function setItemColor(id, hex){
+  const item = CFG_ITEMS.find(i=>i.id===id);
+  if(!item || !hex) return;
+  hex = hex.toLowerCase();
+  item.mats.forEach(name=>{
+    const set = materialsByName[name];
+    if(set) set.forEach(m=> m.color.set(hex));
+  });
+  colorState[id] = hex;
+}
+
+function applyStyle(style){
+  CFG_ITEMS.forEach(item=>{
+    const hex = style.reset ? colorDefaults[item.id]
+                            : ((style.colors && style.colors[item.id]) || colorDefaults[item.id]);
+    setItemColor(item.id, hex);
+  });
+  saveColors();
+  if(buildConfigurator._refresh) buildConfigurator._refresh();
+}
+
+function buildConfigurator(){
+  const itemsWrap = document.getElementById('cfgItems');
+  const styleRow  = document.getElementById('styleRow');
+  if(!itemsWrap || !styleRow) return;
+
+  const saved = loadColors();
+
+  // původní barvy přímo z modelu (pro reset a výchozí vzorník)
+  CFG_ITEMS.forEach(item=>{
+    const set = materialsByName[item.mats[0]];
+    const first = set && set.size ? [...set][0] : null;
+    colorDefaults[item.id] = first ? ('#'+first.color.getHexString()) : item.swatches[0];
+  });
+
+  // rychlé styly
+  CFG_STYLES.forEach(style=>{
+    const b = document.createElement('button');
+    b.className = 'style-btn';
+    b.textContent = style.name;
+    b.addEventListener('click', ()=> applyStyle(style));
+    styleRow.appendChild(b);
+  });
+
+  const refreshers = [];
+
+  CFG_ITEMS.forEach(item=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'cfg-item';
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = item.label;
+    wrap.appendChild(name);
+
+    const row = document.createElement('div');
+    row.className = 'sw-row';
+
+    // vzorník = původní barva + přednastavené (bez duplicit)
+    const options = [];
+    const seen = new Set();
+    [colorDefaults[item.id], ...item.swatches].forEach(h=>{
+      const hx = (h||'').toLowerCase();
+      if(hx && !seen.has(hx)){ seen.add(hx); options.push(hx); }
+    });
+
+    const swBtns = [];
+    options.forEach(hx=>{
+      const s = document.createElement('button');
+      s.className = 'sw';
+      s.style.background = hx;
+      s.title = (hx === colorDefaults[item.id].toLowerCase()) ? 'Původní barva' : hx;
+      s.addEventListener('click', ()=>{ setItemColor(item.id, hx); saveColors(); refresh(); });
+      row.appendChild(s);
+      swBtns.push({ el:s, hex:hx });
+    });
+
+    // vlastní barva (nativní výběr)
+    const custom = document.createElement('input');
+    custom.type = 'color'; custom.className = 'sw-custom'; custom.title = 'Vlastní barva';
+    custom.addEventListener('input', ()=>{ setItemColor(item.id, custom.value); saveColors(); refresh(); });
+    row.appendChild(custom);
+
+    wrap.appendChild(row);
+    itemsWrap.appendChild(wrap);
+
+    refreshers.push(()=>{
+      const cur = (colorState[item.id] || '').toLowerCase();
+      swBtns.forEach(b=> b.el.classList.toggle('active', b.hex === cur));
+      custom.value = /^#[0-9a-f]{6}$/.test(cur) ? cur : colorDefaults[item.id];
+    });
+  });
+
+  function refresh(){ refreshers.forEach(fn=>fn()); }
+  buildConfigurator._refresh = refresh;
+
+  // počáteční barvy: uložené z prohlížeče, jinak původní z modelu
+  CFG_ITEMS.forEach(item=>{
+    setItemColor(item.id, (saved && saved[item.id]) || colorDefaults[item.id]);
+  });
+  refresh();
+
+  document.getElementById('resetColors').addEventListener('click', ()=> applyStyle({ reset:true }));
+
+  // sbalování sekce barev
+  const cfgToggle = document.getElementById('cfgToggle');
+  const cfgBody = document.getElementById('cfgBody');
+  const cfgChevron = document.getElementById('cfgChevron');
+  cfgToggle.addEventListener('click', ()=>{
+    const c = cfgBody.classList.toggle('collapsed');
+    cfgToggle.setAttribute('aria-expanded', String(!c));
+    cfgChevron.textContent = c ? '▸' : '▾';
+  });
 }
 
 // --- Přepínače vrstev ---
