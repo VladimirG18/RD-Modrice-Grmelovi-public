@@ -50,9 +50,10 @@ python3 -m http.server 8000
 - **Vrstvy** – samostatné vypínání střechy, obvodových stěn, pater (1NP/2NP), výplní
   oken, terénu a popisků místností.
 - **🎨 Barvy domu (konfigurátor)** – nastavení barev jednotlivých prvků fasády:
-  omítka, střešní krytina, okna a rámy, garážová vrata, klempířské prvky, sokl,
-  obklad terasy a zábradlí. Na výběr jsou přednastavené vzorníky i vlastní barva,
-  rychlé kombinace stylů a návrat k původním barvám. Výběr se ukládá v prohlížeči.
+  omítka, střešní krytina, rámy oken, garážová vrata, klempířské prvky, sokl,
+  obklad terasy a zábradlí. Každý prvek je samostatný (např. rámy oken se mění
+  nezávisle na dveřích a vratech). Na výběr jsou přednastavené vzorníky i vlastní
+  barva, rychlé kombinace stylů a návrat k původním barvám. Výběr se ukládá v prohlížeči.
 
 ## Technologie
 
