@@ -256,6 +256,26 @@ function registerMaterial(mesh){
   });
 }
 
+// Oprava „blikání" ploch (z-fighting): některé části modelu leží přesně v téže
+// rovině – obkladové a nášlapné vrstvy na podkladu (sokl a obklad na omítce,
+// kačírek a dlažba na trávníku) a vnitřní líc stěn v rovině obvodové stěny.
+// Bez jednoznačného pořadí se renderer mezi nimi „pere“ a plocha bliká.
+// PolygonOffsetem povrchové vrstvy nepatrně předsadíme dopředu a vnitřní líc
+// posuneme dozadu – každá dvojice tak má jasného vítěze a nic nebliká.
+function applyDepthFix(){
+  const forward = /E_sokl_tmavy|F_obklad_tmavy|kacirek|beton_dlazba|asfalt/;
+  const back = /interier_bily/;
+  for(const name in materialsByName){
+    let f = 0, u = 0;
+    if(forward.test(name)){ f = -1; u = -2; }
+    else if(back.test(name)){ f = 1; u = 2; }
+    else continue;
+    materialsByName[name].forEach(m=>{
+      m.polygonOffset = true; m.polygonOffsetFactor = f; m.polygonOffsetUnits = u;
+    });
+  }
+}
+
 let modelSize = 10, modelCenter = new THREE.Vector3();
 
 // --- Načtení modelu ---
@@ -273,6 +293,7 @@ loader.load('RDModrice.glb', (gltf) => {
       groups[classify(o.name)].push(o);
     }
   });
+  applyDepthFix();
   scene.add(model);
 
   // vycentrování a nastavení kamery
