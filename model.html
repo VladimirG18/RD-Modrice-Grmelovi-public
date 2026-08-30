@@ -266,7 +266,14 @@ function applyDepthFix(){
   const forward = /E_sokl_tmavy|F_obklad_tmavy|kacirek|beton_dlazba|asfalt/; // nášlapné/obkladové vrstvy dopředu
   const ground  = /travnik/;        // trávník (podklad terénu) dozadu – silněji, protože terén se často díváme po hraně (grazing)
   const back    = /interier_bily/;  // vnitřní líc dozadu (zvenčí vyhraje fasáda)
+  // Podlahy jsou tenké desky (~1 cm) s oboustranným materiálem – při pohledu po
+  // hraně se perou jejich horní a spodní plocha (schodovitý rastr, např. v garáži).
+  // Podlahu je potřeba vidět jen shora, takže ji přepneme na jednostrannou.
+  const slab    = /podlaha_dlazba|podlaha_drevo/;
   for(const name in materialsByName){
+    if(slab.test(name)){
+      materialsByName[name].forEach(m=>{ m.side = THREE.FrontSide; });
+    }
     let f = 0, u = 0;
     if(forward.test(name)){ f = -1; u = -2; }
     else if(ground.test(name)){ f = 2; u = 2; }
