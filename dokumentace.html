@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Projektová dokumentace</title>
+<meta name="description" content="Výkresy z projektové dokumentace rodinného domu v Modřicích k prohlížení – půdorys 1.NP, podkroví, řez, pohledy a sjezd (PDF)." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+<style>
+  /* výběr dokumentů */
+  .docbar{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 16px; }
+  .doctab{ display:inline-flex; align-items:center; gap:8px; padding:9px 14px; border-radius:11px;
+    border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit;
+    font-size:.9rem; font-weight:600; cursor:pointer; box-shadow:var(--shadow-sm); }
+  .doctab:hover{ border-color:var(--accent); }
+  .doctab[aria-selected="true"]{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); }
+  .doctab .ic{ font-size:1.05rem; line-height:1; }
+  /* prohlížeč PDF */
+  .viewer{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    overflow:hidden; box-shadow:var(--shadow-md); }
+  .vhead{ display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap;
+    padding:12px 16px; border-bottom:1px solid var(--border); background:var(--surface-2); }
+  .vhead .vtitle{ min-width:0; }
+  .vhead h2{ margin:0; font-size:1rem; display:block; letter-spacing:-.01em; }
+  .vhead h2::after{ display:none; }
+  .vhead .vsub{ color:var(--muted); font-size:.82rem; }
+  .vlinks{ display:flex; gap:8px; flex:0 0 auto; }
+  .vlinks a{ display:inline-flex; align-items:center; gap:6px; font-size:.82rem; padding:7px 12px;
+    border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-weight:600; }
+  .vlinks a:hover{ border-color:var(--accent); text-decoration:none; }
+  .viewer iframe{ display:block; width:100%; height:min(80vh, 940px); border:0; background:#525659; }
+  @media (max-width:560px){ .viewer iframe{ height:68vh; } .vlinks a span{ display:none; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="dokumentace.html">Dokumentace</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <span class="eyebrow">Z projektové dokumentace</span>
+  <h1>Projektová dokumentace</h1>
+  <p class="lead">Výkresy z&nbsp;projektu k&nbsp;prohlížení přímo v&nbsp;prohlížeči. Vyber dokument níže;
+  každý lze také otevřít na celou obrazovku nebo stáhnout.</p>
+
+  <div class="docbar" id="docbar" role="tablist" aria-label="Výběr dokumentu"></div>
+
+  <div class="viewer">
+    <div class="vhead">
+      <div class="vtitle">
+        <h2 id="docTitle">—</h2>
+        <span class="vsub" id="docSub"></span>
+      </div>
+      <div class="vlinks">
+        <a id="docOpen" href="#" target="_blank" rel="noopener">↗ <span>Otevřít</span></a>
+        <a id="docDownload" href="#" download>⬇ <span>Stáhnout</span></a>
+      </div>
+    </div>
+    <iframe id="docFrame" title="Náhled dokumentu" src="about:blank"></iframe>
+  </div>
+
+  <p class="note">Zdroj: projektová dokumentace (07/2023), koordinační situace (10/2024). Formát PDF.
+  Pokud se náhled nezobrazí (např. na některých mobilech), otevři dokument tlačítkem <b>Otevřít</b>.</p>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — výkresy z projektové dokumentace. Zobrazení PDF zajišťuje prohlížeč zařízení.
+</footer>
+
+<script>
+(function(){
+  var DOCS = [
+    { id:'pudorys1', title:'Půdorys 1.NP',     sub:'Dispozice přízemí (1. nadzemní podlaží)', icon:'📐', file:'dokumentace/pudorys-1np.pdf' },
+    { id:'podkrovi', title:'Podkroví (2.NP)',  sub:'Dispozice obytného podkroví',            icon:'📐', file:'dokumentace/podkrovi-2np.pdf' },
+    { id:'rez',      title:'Řez',              sub:'Svislý řez domem',                        icon:'📏', file:'dokumentace/rez.pdf' },
+    { id:'pohledy',  title:'Pohledy',          sub:'Pohledy na fasády ze všech stran',        icon:'🏛️', file:'dokumentace/pohledy.pdf' },
+    { id:'sjezd',    title:'Sjezd',            sub:'Napojení sjezdu na komunikaci',           icon:'🚗', file:'dokumentace/sjezd.pdf' },
+  ];
+
+  var bar    = document.getElementById('docbar');
+  var frame  = document.getElementById('docFrame');
+  var elT    = document.getElementById('docTitle');
+  var elS    = document.getElementById('docSub');
+  var elOpen = document.getElementById('docOpen');
+  var elDown = document.getElementById('docDownload');
+  var tabs   = [];
+
+  function select(i){
+    var d = DOCS[i];
+    tabs.forEach(function(t,j){ t.setAttribute('aria-selected', String(j===i)); });
+    elT.textContent = d.title;
+    elS.textContent = d.sub;
+    elOpen.href = d.file;
+    elDown.href = d.file;
+    elDown.setAttribute('download', d.file.split('/').pop());
+    // #view=Fit pomůže vejít stránku na výšku prohlížeče
+    frame.src = d.file + '#view=Fit&toolbar=1';
+    try{ history.replaceState(null, '', '#' + d.id); }catch(e){}
+  }
+
+  DOCS.forEach(function(d,i){
+    var b = document.createElement('button');
+    b.className = 'doctab'; b.type = 'button'; b.setAttribute('role','tab');
+    b.setAttribute('aria-selected','false');
+    b.innerHTML = '<span class="ic">'+d.icon+'</span>'+d.title;
+    b.addEventListener('click', function(){ select(i); });
+    bar.appendChild(b); tabs.push(b);
+  });
+
+  // výchozí dokument – dle #hash, jinak první
+  var start = 0;
+  var h = (location.hash || '').replace('#','');
+  if(h){ var k = DOCS.findIndex(function(d){ return d.id===h; }); if(k>=0) start = k; }
+  select(start);
+})();
+</script>
+
+</body>
+</html>
