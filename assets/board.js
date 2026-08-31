@@ -37,6 +37,12 @@ const GROUPS = [...new Set(CATS.map(c => c.group))];
 const AUTHORS = ['Lucka', 'Vladimír', 'Jirka', 'Jarka'];
 const FB_VER  = 'https://www.gstatic.com/firebasejs/10.12.2';
 const INLINE_TARGET = 600 * 1024; // max velikost obrázku uloženého přímo do databáze (bezpečně pod limit 1 MB na dokument)
+// Nahrávané obrázky se ukládají rovnou do Firestore (spolehlivé a okamžité, není potřeba
+// povolovat Firebase Storage). Až bude Storage v projektu povolené, stačí přepnout na true –
+// obrázky pak půjdou do Storage (lepší kvalita, v databázi jen odkaz) a nástěnka zůstane svižná
+// i při velkém množství fotek. Zbytek kódu (nahrávání s časovým limitem, mazání ze Storage)
+// je připravený a začne se používat automaticky.
+const USE_STORAGE = false;
 
 /* ---------- Pomocné funkce ---------- */
 const slug = s => (s || '').toLowerCase()
@@ -129,18 +135,20 @@ async function firebaseBackend(collectionName, storageDir){
   const db  = getFirestore(app);
   const col = collection(db, collectionName);
 
-  // Storage je volitelné. Když se nenačte, není povolené nebo nereaguje, obrázek se uloží
-  // (zmenšený) přímo do Firestore – stejnou cestou jako odkazy. Bez časového limitu by
-  // nahrávání do nefunkčního Storage viselo (Firebase SDK opakuje pokus i mnoho minut).
+  // Storage se používá jen když je zapnuté přepínačem USE_STORAGE výše. Když se nenačte,
+  // není povolené nebo nereaguje, obrázek se uloží (zmenšený) přímo do Firestore – stejnou
+  // cestou jako odkazy. Časový limit brání zaseknutí (Firebase SDK jinak opakuje pokus i mnoho minut).
   let storage = null, sRef, uploadBytes, getDownloadURL, deleteObject;
   let storageOk = true;           // po prvním selhání Storage přestaneme zkoušet (žádné čekání)
   const STORAGE_TIMEOUT = 8000;   // ms – limit na nahrání do Storage, pak fallback do Firestore
-  try {
-    const st = await import(`${FB_VER}/firebase-storage.js`);
-    storage = st.getStorage(app);
-    try { storage.maxUploadRetryTime = STORAGE_TIMEOUT; storage.maxOperationRetryTime = STORAGE_TIMEOUT; } catch(e){}
-    sRef = st.ref; uploadBytes = st.uploadBytes; getDownloadURL = st.getDownloadURL; deleteObject = st.deleteObject;
-  } catch(e){ console.warn('Firebase Storage nedostupné, obrázky se uloží do databáze.', e); }
+  if(USE_STORAGE){
+    try {
+      const st = await import(`${FB_VER}/firebase-storage.js`);
+      storage = st.getStorage(app);
+      try { storage.maxUploadRetryTime = STORAGE_TIMEOUT; storage.maxOperationRetryTime = STORAGE_TIMEOUT; } catch(e){}
+      sRef = st.ref; uploadBytes = st.uploadBytes; getDownloadURL = st.getDownloadURL; deleteObject = st.deleteObject;
+    } catch(e){ console.warn('Firebase Storage nedostupné, obrázky se uloží do databáze.', e); }
+  }
 
   // Nahrání do Storage s tvrdým časovým limitem; při selhání/timeoutu vrátí null.
   async function tryStorage(file){
@@ -172,10 +180,12 @@ async function firebaseBackend(collectionName, storageDir){
         err => { console.error(err); if(onError) onError(err); });
     },
     async putImage(file){
-      // 1) zkusit Firebase Storage (plná kvalita, v databázi jen odkaz) – s časovým limitem
-      const viaStorage = await tryStorage(file);
-      if(viaStorage) return viaStorage;
-      // 2) spolehlivý fallback: komprimovaný obrázek přímo do Firestore
+      // 1) když je Storage zapnuté a funguje, ulož obrázek tam (v databázi jen odkaz)
+      if(USE_STORAGE){
+        const viaStorage = await tryStorage(file);
+        if(viaStorage) return viaStorage;
+      }
+      // 2) výchozí spolehlivá cesta: komprimovaný obrázek rovnou do Firestore (okamžité)
       const blob = await compressForInline(file);
       return { type:'image', src: await blobToDataURL(blob), inline:true };
     },
