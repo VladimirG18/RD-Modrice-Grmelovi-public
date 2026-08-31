@@ -53,7 +53,9 @@ python3 -m http.server 8000
   omítka, střešní krytina, rámy oken, garážová vrata, klempířské prvky, sokl,
   obklad terasy a zábradlí. Každý prvek je samostatný (např. rámy oken se mění
   nezávisle na dveřích a vratech). Na výběr jsou přednastavené vzorníky i vlastní
-  barva, rychlé kombinace stylů a návrat k původním barvám. Výběr se ukládá v prohlížeči.
+  barva, rychlé kombinace stylů a návrat k původním barvám. Barvy jsou živý náhled;
+  tlačítkem **💾 Uložit konfiguraci** se výběr uloží do prohlížeče a pamatuje se
+  i po zavření a znovuotevření (neuložené změny se po znovunačtení vrátí na uloženou verzi).
 
 ## Technologie
 
