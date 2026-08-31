@@ -11,8 +11,8 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
 - `informace.html` – **informace o domě** z projektové dokumentace (plochy místností,
   konstrukce, povrchy, technika, pozemek, vizualizace).
 - `material.html` – **stavební materiály** a skladby dle projektu.
-- `dokumentace.html` – **projektová dokumentace** k prohlížení (PDF výkresy: půdorys 1.NP,
-  podkroví, řez, pohledy, sjezd); soubory jsou ve složce `dokumentace/`.
+- `dokumentace.html` – **projektová dokumentace** k prohlížení (PDF výkresy: základy, půdorys 1.NP,
+  podkroví, řez, pohledy, sjezd, koordinační situace); soubory jsou ve složce `dokumentace/`.
 - `checklist.html` – **checklist** úkolů a rozhodnutí (ukládá se v prohlížeči).
 - `harmonogram.html` – **harmonogram stavby** (fáze a termíny).
 - `poznamky.html` – **sdílené poznámky** (Firebase Firestore, realtime).
