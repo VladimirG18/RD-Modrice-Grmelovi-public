@@ -106,6 +106,9 @@
   .sw-custom::-webkit-color-swatch{ border:2px dashed #6b7686; border-radius:50%; }
   .sw-custom::-moz-color-swatch{ border:2px dashed #6b7686; border-radius:50%; }
   .cfg-note{ margin:8px 0 0; font-size:.72rem; color:var(--muted); line-height:1.4; }
+  .cfg-status{ font-size:.75rem; margin:4px 2px 2px; min-height:1.1em; color:var(--muted); }
+  .cfg-status.saved{ color:#5fd08a; }
+  .cfg-status.dirty{ color:var(--accent); }
 
   @media (max-width:640px){ #panel{ width:200px; top:56px; } #titlebar{ display:none; }
     #panelBody{ max-height:calc(100vh - 84px); } }
@@ -144,8 +147,10 @@
       <span class="cfg-cap">Rychlé styly</span>
       <div class="style-row" id="styleRow"></div>
       <div id="cfgItems"></div>
+      <button class="btn primary" id="saveColors">💾 Uložit konfiguraci</button>
+      <div id="cfgStatus" class="cfg-status"></div>
       <button class="btn" id="resetColors">↺ Původní barvy</button>
-      <p class="cfg-note">Barvy jsou orientační – pro představu, jak dům může vypadat. Výběr se uloží v prohlížeči.</p>
+      <p class="cfg-note">Barvy jsou orientační. Po uložení se konfigurace pamatuje v tomto prohlížeči i po zavření a znovuotevření.</p>
     </div>
 
     <div class="sep"></div>
@@ -421,6 +426,18 @@ const colorDefaults = {};   // id -> původní hex z modelu
 function loadColors(){ try{ return JSON.parse(localStorage.getItem(COLORS_KEY)) || {}; }catch(e){ return {}; } }
 function saveColors(){ try{ localStorage.setItem(COLORS_KEY, JSON.stringify(colorState)); }catch(e){} }
 
+// stav uložení – barvy jsou živý náhled, do prohlížeče se zapíšou až tlačítkem
+let colorsDirty = false;    // jsou neuložené změny?
+let colorsSaved = false;    // existuje uložená konfigurace?
+function updateSaveUI(){
+  const st = document.getElementById('cfgStatus');
+  if(!st) return;
+  if(colorsDirty){ st.textContent = '● Neuložené změny'; st.className = 'cfg-status dirty'; }
+  else if(colorsSaved){ st.textContent = '✓ Uloženo v prohlížeči'; st.className = 'cfg-status saved'; }
+  else { st.textContent = ''; st.className = 'cfg-status'; }
+}
+function markColorsDirty(){ colorsDirty = true; updateSaveUI(); }
+
 function setItemColor(id, hex){
   const item = CFG_ITEMS.find(i=>i.id===id);
   if(!item || !hex) return;
@@ -438,7 +455,7 @@ function applyStyle(style){
                             : ((style.colors && style.colors[item.id]) || colorDefaults[item.id]);
     setItemColor(item.id, hex);
   });
-  saveColors();
+  markColorsDirty();
   if(buildConfigurator._refresh) buildConfigurator._refresh();
 }
 
@@ -493,7 +510,7 @@ function buildConfigurator(){
       s.className = 'sw';
       s.style.background = hx;
       s.title = (hx === colorDefaults[item.id].toLowerCase()) ? 'Původní barva' : hx;
-      s.addEventListener('click', ()=>{ setItemColor(item.id, hx); saveColors(); refresh(); });
+      s.addEventListener('click', ()=>{ setItemColor(item.id, hx); markColorsDirty(); refresh(); });
       row.appendChild(s);
       swBtns.push({ el:s, hex:hx });
     });
@@ -501,7 +518,7 @@ function buildConfigurator(){
     // vlastní barva (nativní výběr)
     const custom = document.createElement('input');
     custom.type = 'color'; custom.className = 'sw-custom'; custom.title = 'Vlastní barva';
-    custom.addEventListener('input', ()=>{ setItemColor(item.id, custom.value); saveColors(); refresh(); });
+    custom.addEventListener('input', ()=>{ setItemColor(item.id, custom.value); markColorsDirty(); refresh(); });
     row.appendChild(custom);
 
     wrap.appendChild(row);
@@ -522,6 +539,16 @@ function buildConfigurator(){
     setItemColor(item.id, (saved && saved[item.id]) || colorDefaults[item.id]);
   });
   refresh();
+
+  // stav uložení: při načtení bereme uloženou konfiguraci jako „uloženou"
+  colorsSaved = !!(saved && Object.keys(saved).length);
+  colorsDirty = false;
+  updateSaveUI();
+
+  // uložení konfigurace na výslovné potvrzení
+  document.getElementById('saveColors').addEventListener('click', ()=>{
+    saveColors(); colorsSaved = true; colorsDirty = false; updateSaveUI();
+  });
 
   document.getElementById('resetColors').addEventListener('click', ()=> applyStyle({ reset:true }));
 
