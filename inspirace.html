@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Inspirace</title>
+<meta name="description" content="Sdílená nástěnka inspirace pro rodinný dům v Modřicích – odkazy na obrázky a stránky, rozčleněné podle exteriéru a jednotlivých místností." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="dokumentace.html">Dokumentace</a>
+      <a href="vizualizace.html">Vizualizace</a>
+      <a href="inspirace.html">Inspirace</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <span class="eyebrow">Sdílená nástěnka</span>
+  <h1>Inspirace</h1>
+  <p class="lead">Sbírka nápadů, ze kterých se budeme inspirovat – vlož odkaz na obrázek
+  nebo stránku (Pinterest, e-shop, článek…). Můžeš přidat i&nbsp;vlastní obrázek. Vše se rovnou
+  zařadí podle exteriéru a&nbsp;jednotlivých místností a&nbsp;sdílí se všem v&nbsp;rodině.</p>
+
+  <div id="board"></div>
+
+  <p class="note">Odkazy i&nbsp;obrázky se ukládají do sdílené online databáze (Firebase) a&nbsp;vidí je
+  všichni v&nbsp;reálném čase. Pokud online úložiště není dostupné, uloží se dočasně jen v&nbsp;tomto prohlížeči.</p>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — sdílená nástěnka inspirace projektu.
+</footer>
+
+<script type="module">
+  import { initBoard } from './assets/board.js';
+  initBoard({
+    mount: '#board',
+    collection: 'inspirace',
+    storageDir: 'inspirace',
+    localKey: 'rdmodrice-inspirace-v1',
+    allowUpload: true,
+    linkPlaceholder: 'https://… (odkaz na obrázek nebo stránku)',
+    linkLabel: 'Odkaz na obrázek (zobrazí se náhled) nebo na stránku (zobrazí se jako odkaz).',
+    emptyHint: 'Zatím tu není žádná inspirace. Vlož první odkaz výše – rovnou vyber, kam patří.'
+  });
+</script>
+
+</body>
+</html>
