@@ -322,6 +322,18 @@ function mergeGarageDoorFrames(root){
   root.traverse(o=>{ if(o.isMesh && /vrata_(sever|jih)_ram/i.test(o.name || '')) o.material = mat; });
 }
 
+// Zapuštěná terasa v podkroví: tmavé plné plochy zadní stěny (boční pilíře a
+// parapet pod fixním zasklením) nahradíme prosklením – stejným sklem jako okna –
+// aby celá zadní stěna terasy byla průhledná prosklená stěna a bylo skrz ni vidět
+// do interiéru. Boční ostění recesu (…_bok) zůstává tmavým obkladem (drží hloubku).
+function glazeTerraceWall(root){
+  const set = materialsByName['sklo_okna'];
+  const glass = set && set.size ? [...set][0] : null;
+  if(!glass) return;
+  const names = /^RD_Obvod_terasa_(pilir_[ZV]|parapet)$/;
+  root.traverse(o=>{ if(o.isMesh && names.test(o.name || '')){ o.material = glass; o.castShadow = false; } });
+}
+
 // Oprava „blikání" ploch (z-fighting): některé části modelu leží přesně v téže
 // rovině – obkladové a nášlapné vrstvy na podkladu (sokl a obklad na omítce,
 // kačírek a dlažba na trávníku) a vnitřní líc stěn v rovině obvodové stěny.
@@ -372,6 +384,7 @@ loader.load('RDModrice.glb', (gltf) => {
   applyDepthFix();
   buildRoofWindowFrames(model);
   mergeGarageDoorFrames(model);
+  glazeTerraceWall(model);
   scene.add(model);
 
   // vycentrování a nastavení kamery
