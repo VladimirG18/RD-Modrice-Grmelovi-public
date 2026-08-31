@@ -272,6 +272,40 @@ function splitWindowFrames(mesh){
   mesh.material = ramyOkenMat;
 }
 
+// Střešní okna jsou v modelu plný blok, který zakrývá prosklení. Blok
+// nahradíme tenkým rámečkem kolem existující (průhledné) skleněné tabule –
+// se stejným colorovatelným materiálem jako rámy stěnových oken (D_ramy_oken),
+// takže střešní okna vypadají jako okna a barví je ovladač „Rámy oken".
+function buildRoofWindowFrames(root){
+  const frames = {}, glass = {};
+  root.traverse(o=>{ if(!o.isMesh) return;
+    let m = /stresni_okno_sklo_([NS]\d+)$/.exec(o.name); if(m){ glass[m[1]] = o; return; }
+    m = /stresni_okno_([NS]\d+)$/.exec(o.name); if(m){ frames[m[1]] = o; }
+  });
+  if(!ramyOkenMat){
+    const any = Object.values(frames)[0]; if(!any) return;
+    ramyOkenMat = any.material.clone(); ramyOkenMat.name = 'D_ramy_oken';
+    (materialsByName['D_ramy_oken'] || (materialsByName['D_ramy_oken'] = new Set())).add(ramyOkenMat);
+  }
+  const bar = (s,c)=>{ const g = new THREE.BoxGeometry(s[0], s[1], s[2]); g.translate(c[0], c[1], c[2]); return g; };
+  for(const key in frames){
+    const fB = frames[key], gB = glass[key]; if(!gB) continue;
+    fB.geometry.computeBoundingBox(); gB.geometry.computeBoundingBox();
+    const f = fB.geometry.boundingBox, g = gB.geometry.boundingBox;
+    const fx0=f.min.x, fx1=f.max.x, fz0=f.min.z, fz1=f.max.z, fy1=f.max.y;
+    const gx0=g.min.x, gx1=g.max.x, gz0=g.min.z, gz1=g.max.z, gy0=g.min.y;
+    const y0 = gy0 - 0.02, y1 = fy1, yc = (y0+y1)/2, yh = y1 - y0;   // rámeček kolem skla
+    const geos = [
+      bar([gx0-fx0, yh, fz1-fz0], [(fx0+gx0)/2, yc, (fz0+fz1)/2]),   // levá lišta (x)
+      bar([fx1-gx1, yh, fz1-fz0], [(gx1+fx1)/2, yc, (fz0+fz1)/2]),   // pravá lišta (x)
+      bar([gx1-gx0, yh, gz0-fz0], [(gx0+gx1)/2, yc, (fz0+gz0)/2]),   // spodní lišta (z)
+      bar([gx1-gx0, yh, fz1-gz1], [(gx0+gx1)/2, yc, (gz1+fz1)/2]),   // horní lišta (z)
+    ];
+    geos.forEach(geo=>{ const mesh = new THREE.Mesh(geo, ramyOkenMat); mesh.castShadow = true; mesh.receiveShadow = true; gB.add(mesh); });
+    if(fB.parent) fB.parent.remove(fB);   // odstraníme plný blok (nahrazen rámečkem)
+  }
+}
+
 // Oprava „blikání" ploch (z-fighting): některé části modelu leží přesně v téže
 // rovině – obkladové a nášlapné vrstvy na podkladu (sokl a obklad na omítce,
 // kačírek a dlažba na trávníku) a vnitřní líc stěn v rovině obvodové stěny.
@@ -320,6 +354,7 @@ loader.load('RDModrice.glb', (gltf) => {
     }
   });
   applyDepthFix();
+  buildRoofWindowFrames(model);
   scene.add(model);
 
   // vycentrování a nastavení kamery
