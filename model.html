@@ -263,7 +263,11 @@ let ramyOkenMat = null;
 function splitWindowFrames(mesh){
   const m = mesh.material;
   if(!m || Array.isArray(m) || m.name !== 'D_okna_antracit') return;
-  if(!/okno/i.test(mesh.name || '')) return;   // jen okenní rámy (okno_*, stresni_okno_*)
+  const name = mesh.name || '';
+  // jen rámy stěnových oken (okno_*). Střešní okna (stresni_okno_*) jsou v modelu
+  // plný blok, ne tenký rám – obarvení by obarvilo celé okno, proto je vynecháme
+  // (zůstanou neutrálně tmavá se sklem jako reálné střešní okno).
+  if(!/okno/i.test(name) || /stresni/i.test(name)) return;
   if(!ramyOkenMat){ ramyOkenMat = m.clone(); ramyOkenMat.name = 'D_ramy_oken'; }
   mesh.material = ramyOkenMat;
 }
