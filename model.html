@@ -322,15 +322,15 @@ function mergeGarageDoorFrames(root){
   root.traverse(o=>{ if(o.isMesh && /vrata_(sever|jih)_ram/i.test(o.name || '')) o.material = mat; });
 }
 
-// Zapuštěná terasa v podkroví: tmavé plné plochy zadní stěny (boční pilíře a
-// parapet pod fixním zasklením) nahradíme prosklením – stejným sklem jako okna –
-// aby celá zadní stěna terasy byla průhledná prosklená stěna a bylo skrz ni vidět
-// do interiéru. Boční ostění recesu (…_bok) zůstává tmavým obkladem (drží hloubku).
+// Zapuštěná terasa v podkroví: tmavé plné plochy stěn terasy (boční pilíře a
+// parapet zadní stěny i boční ostění recesu) nahradíme prosklením – stejným sklem
+// jako okna – aby byla terasa celá prosklená a průhledná a bylo skrz ni vidět do
+// interiéru. Sklu se navíc vypne vrhání stínu.
 function glazeTerraceWall(root){
   const set = materialsByName['sklo_okna'];
   const glass = set && set.size ? [...set][0] : null;
   if(!glass) return;
-  const names = /^RD_Obvod_terasa_(pilir_[ZV]|parapet)$/;
+  const names = /^RD_Obvod_terasa_(pilir_[ZV]|parapet|bok\d*)$/;
   root.traverse(o=>{ if(o.isMesh && names.test(o.name || '')){ o.material = glass; o.castShadow = false; } });
 }
 
