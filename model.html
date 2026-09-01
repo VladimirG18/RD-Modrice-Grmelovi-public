@@ -401,7 +401,9 @@ function glazeTerraceWall(root){
   const set = materialsByName['sklo_okna'];
   const glass = set && set.size ? [...set][0] : null;
   if(!glass) return;
-  const names = /^RD_Obvod_terasa_(pilir_[ZV]|parapet|bok\d*)$/;
+  // prosklení jen VLEVO: levý pilíř + boky. Pravý pilíř a parapet zůstávají plné
+  // (pravá půlka zadní stěny terasy je plná stěna – viz solidify_terrace_right).
+  const names = /^RD_Obvod_terasa_(pilir_Z|bok\d*)$/;
   root.traverse(o=>{ if(o.isMesh && names.test(o.name || '')){ o.material = glass; o.castShadow = false; } });
 }
 

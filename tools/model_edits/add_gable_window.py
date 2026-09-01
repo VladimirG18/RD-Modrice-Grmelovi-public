@@ -122,11 +122,13 @@ def notch_trim(name, x0, x1):
     if mx[0] > x1 + 0.01:
         box(name + "_b", x1, mx[0], mn[1], mx[1], mn[2], mx[2], mat, col)
 
-def add_bent_window(tag, OX0, OX1, remove_keys, orig_open, eave, gutter, eave_notch):
+def add_bent_window(tag, OX0, OX1, remove_keys, orig_open, eave, gutter, eave_notch, spy0=0.01):
     """tag: přípona názvů nových objektů ('' západ, 'V' východ); OX0,OX1: X okna;
     remove_keys: substringy původních oken k odstranění; orig_open=(x0,x1): X
     původního fasádního otvoru (pro špalety); eave/gutter: okapní lišta+žlab;
-    eave_notch: True=naříznout (zbytek okapu zůstane) / False=smazat celé."""
+    eave_notch: True=naříznout (zbytek okapu zůstane) / False=smazat celé;
+    spy0: přední Y líce špalet (0.00 = zarovnané s lícem stěny, ať nevznikne
+    zapuštěný obdélníkový panel; ~0.01 = mírně zapuštěné)."""
     scn = bpy.context.scene.collection
     smp = bpy.data.objects.get("RD_Obvod_stena_jih")
     tcol = smp.users_collection[0] if smp and smp.users_collection else scn
@@ -175,8 +177,25 @@ def add_bent_window(tag, OX0, OX1, remove_keys, orig_open, eave, gutter, eave_no
     if omit:
         ox0, ox1 = orig_open
         box("RD_Obvod_parapet_okno_zal%s" % tag,  OX0, OX1, 0.00, 0.45, ZSILL-0.70, ZSILL+0.01, omit, tcol)
-        box("RD_Obvod_spaleta_okno_zal%s_L" % tag, ox0, OX0, 0.01, 0.45, 3.45, 4.06, omit, tcol)
-        box("RD_Obvod_spaleta_okno_zal%s_P" % tag, OX1, ox1, 0.01, 0.45, 3.45, 4.06, omit, tcol)
+        box("RD_Obvod_spaleta_okno_zal%s_L" % tag, ox0, OX0, spy0, 0.45, 3.45, 4.05, omit, tcol)
+        box("RD_Obvod_spaleta_okno_zal%s_P" % tag, OX1, ox1, spy0, 0.45, 3.45, 4.05, omit, tcol)
+
+def solidify_terrace_right():
+    """Prosklení zadní stěny terasy nechat jen VLEVO (prosklené dveře + levý
+    pilíř). PRAVOU půlku udělat plnou stěnou: odstranit pravé fixní prosklení
+    (sklo + rámy + sloupek) a doplnit plnou stěnu v obkladu (jako pilíř/parapet).
+    Prosklení pravého pilíře a parapetu se navíc vypne v model.html
+    (funkce glazeTerraceWall – ta nově prosklívá jen levý pilíř a boky)."""
+    scn = bpy.context.scene.collection
+    smp = bpy.data.objects.get("RD_Obvod_terasa_pilir_V") or bpy.data.objects.get("RD_Obvod_stena_jih")
+    tcol = smp.users_collection[0] if smp and smp.users_collection else scn
+    obklad = get_mat("F_obklad_tmavy")
+    for o in list(bpy.data.objects):
+        if o.type == 'MESH' and "terasa_fix" in o.name:   # sklo + rámy pravého fixního prosklení
+            bpy.data.objects.remove(o, do_unlink=True)
+    if obklad:
+        # plná stěna do otvoru po fixním prosklení (nad parapetem po nadpraží)
+        box("RD_Obvod_terasa_stena_P", 4.85, 6.55, 2.30, 2.55, 3.30, 5.55, obklad, tcol)
 
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -192,8 +211,11 @@ def main():
     # rozměrů, vycentrované na fasádní otvor (dlouhý okap jih1 se jen nařízne)
     add_bent_window("V", 8.65, 9.80,
         ("stresni_okno_S1", "stresni_okno_sklo_S1", "stresni_okno_S2", "stresni_okno_sklo_S2", "okno_S2_1", "sitka_S_1"),
-        (8.45, 10.00),
-        "RD_strecha_lista_okap_jih1", "RD_strecha_zlab_jih1", eave_notch=True)
+        (8.48, 9.98),   # skutečný otvor S2_1 (rám 8.48–9.98) → špalety přesně do otvoru
+        "RD_strecha_lista_okap_jih1", "RD_strecha_zlab_jih1", eave_notch=True, spy0=0.00)
+
+    # Terasa: prosklení nechat jen vlevo; pravou půlku zadní stěny udělat plnou.
+    solidify_terrace_right()
 
     bpy.ops.object.select_all(action='DESELECT')
     # POZN.: model.html načítá glTF bez DRACOLoaderu → export MUSÍ být bez Draco.
