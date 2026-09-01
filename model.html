@@ -112,6 +112,35 @@
 
   @media (max-width:640px){ #panel{ width:200px; top:56px; } #titlebar{ display:none; }
     #panelBody{ max-height:calc(100vh - 84px); } }
+
+  /* nástěnka „Navrhnout úpravu" */
+  #reqModal{ position:fixed; inset:0; z-index:11; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.55); padding:16px; }
+  #reqModal.open{ display:flex; }
+  .req-card{ width:min(460px,96vw); max-height:92vh; overflow:auto; background:var(--panel);
+    border:1px solid #2b333d; border-radius:14px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.55); position:relative; }
+  .req-card h3{ margin:.1rem 0 .3rem; font-size:1rem; }
+  .req-sub{ margin:.2rem 0 .9rem; color:var(--muted); font-size:.8rem; line-height:1.5; }
+  .req-x{ position:absolute; top:9px; right:11px; background:none; border:none; color:var(--muted); font-size:1.15rem; cursor:pointer; line-height:1; }
+  .req-x:hover{ color:var(--text); }
+  .req-grid{ display:flex; gap:10px; flex-wrap:wrap; }
+  .req-grid label{ flex:1 1 45%; display:flex; flex-direction:column; gap:4px; font-size:.7rem;
+    text-transform:uppercase; letter-spacing:.4px; color:var(--muted); }
+  .req-card select, .req-card textarea{ width:100%; background:#0e1116; border:1px solid #2b333d; border-radius:8px;
+    color:var(--text); font:inherit; font-size:.85rem; padding:8px 9px; }
+  .req-card textarea{ resize:vertical; min-height:82px; margin-top:10px; }
+  .req-inc{ display:flex; align-items:center; gap:8px; margin:11px 0 8px; font-size:.8rem; color:var(--text); cursor:pointer; }
+  .req-inc input{ accent-color:var(--accent); width:16px; height:16px; }
+  .req-preview{ border-radius:8px; overflow:hidden; }
+  .req-preview img{ width:100%; display:block; border:1px solid #2b333d; border-radius:8px; }
+  .req-actions{ display:flex; gap:8px; margin-top:12px; }
+  .req-actions .btn{ margin-top:0; }
+  .req-note{ font-size:.72rem; color:var(--muted); margin-top:9px; min-height:1em; }
+  .req-note.ok{ color:#5fd08a; }
+  .req-toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(18px); z-index:12;
+    background:var(--panel); border:1px solid #2b333d; border-radius:10px; padding:10px 16px; font-size:.85rem;
+    box-shadow:0 10px 30px rgba(0,0,0,.5); opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; }
+  .req-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -157,6 +186,11 @@
     <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
     <button class="btn" id="dollhouse">🏠 Pohled do místností</button>
     <button class="btn" id="resetBtn">↺ Resetovat pohled</button>
+
+    <div class="sep"></div>
+    <h2>Návrhy úprav</h2>
+    <button class="btn primary" id="reqOpen">✏️ Navrhnout úpravu</button>
+    <a class="btn" id="reqList" href="pozadavky.html">📋 Seznam požadavků</a>
   </div>
 </div>
 
@@ -172,6 +206,27 @@
     <p><kbd>Esc</kbd> ukončí procházku</p>
   </div>
 </div>
+
+<div id="reqModal" aria-hidden="true">
+  <div class="req-card" role="dialog" aria-modal="true" aria-label="Navrhnout úpravu modelu">
+    <button class="req-x" id="reqClose" aria-label="Zavřít">✕</button>
+    <h3>✏️ Navrhnout úpravu modelu</h3>
+    <p class="req-sub">Napiš, co v&nbsp;modelu upravit. Přiložím i&nbsp;aktuální pohled a&nbsp;náhled, ať je jasné, čeho se to týká. Požadavek pak zapracuji do modelu a&nbsp;nasadím.</p>
+    <div class="req-grid">
+      <label>Kdo <select id="reqAuthor"></select></label>
+      <label>Čeho se týká <select id="reqArea"></select></label>
+    </div>
+    <textarea id="reqText" rows="4" placeholder="Např. „Zvětšit okno v ložnici na jih“, „Fasádu udělat světlejší“, „Přidat okno do štítu nad garáží“…"></textarea>
+    <label class="req-inc"><input type="checkbox" id="reqInclude" checked> Přiložit aktuální pohled + náhled</label>
+    <div class="req-preview" id="reqPreview"></div>
+    <div class="req-actions">
+      <button class="btn" id="reqCancel" type="button">Zrušit</button>
+      <button class="btn primary" id="reqSend" type="button">Odeslat požadavek</button>
+    </div>
+    <div class="req-note" id="reqNote"></div>
+  </div>
+</div>
+<div id="reqToast" class="req-toast" role="status"></div>
 
 <div id="loader">
   <div>Načítám 3D model domu…</div>
@@ -192,6 +247,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { createStore, AUTHORS, AREAS, hashToView } from './assets/pozadavky.js';
 
 const app = document.getElementById('app');
 
@@ -397,6 +453,7 @@ loader.load('RDModrice.glb', (gltf) => {
   orbit.minDistance = modelSize * 0.02;
   orbit.maxDistance = modelSize * 6;
   resetView();
+  applyPendingView();   // pokud přišel odkaz s uloženým pohledem (#view=…)
   buildConfigurator();
 
   document.getElementById('loader').classList.add('hide');
@@ -693,6 +750,98 @@ window.addEventListener('resize', ()=>{
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// ===================== Návrhy úprav (nástěnka požadavků) =====================
+const reqModal   = document.getElementById('reqModal');
+const reqAuthor  = document.getElementById('reqAuthor');
+const reqArea    = document.getElementById('reqArea');
+const reqText    = document.getElementById('reqText');
+const reqInclude = document.getElementById('reqInclude');
+const reqPreview = document.getElementById('reqPreview');
+const reqNote    = document.getElementById('reqNote');
+const reqToastEl = document.getElementById('reqToast');
+const REQ_AKEY   = 'rdmodrice-board-author';
+
+reqAuthor.innerHTML = AUTHORS.map(a => `<option>${a}</option>`).join('');
+reqArea.innerHTML   = AREAS.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('');
+try { const la = localStorage.getItem(REQ_AKEY); if(la && AUTHORS.includes(la)) reqAuthor.value = la; } catch(e){}
+
+// backend (Firestore s fallbackem) – načítá se na pozadí, ať je hned k dispozici
+const reqStorePromise = createStore({});
+
+let capturedView = null, capturedThumb = null;
+
+function captureCurrent(){
+  capturedView = {
+    p: [camera.position.x, camera.position.y, camera.position.z].map(n => +n.toFixed(3)),
+    t: [orbit.target.x, orbit.target.y, orbit.target.z].map(n => +n.toFixed(3)),
+  };
+  capturedThumb = null;
+  try {
+    renderer.render(scene, camera);                 // vykreslit aktuální snímek…
+    const src = renderer.domElement;
+    const sw = src.width || 820, sh = src.height || 600;
+    const tw = Math.min(820, sw), th = Math.max(1, Math.round(tw * sh / sw));
+    const c = document.createElement('canvas'); c.width = tw; c.height = th;
+    c.getContext('2d').drawImage(src, 0, 0, tw, th); // …a hned ho zmenšit do náhledu
+    capturedThumb = c.toDataURL('image/jpeg', 0.6);
+  } catch(e){ console.warn('náhled se nepodařilo zachytit', e); }
+  updatePreview();
+}
+function updatePreview(){
+  reqPreview.innerHTML = (reqInclude.checked && capturedThumb)
+    ? `<img src="${capturedThumb}" alt="Náhled aktuálního pohledu">` : '';
+}
+function openReq(){
+  captureCurrent();
+  reqNote.textContent = ''; reqNote.className = 'req-note';
+  reqModal.classList.add('open'); reqModal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => reqText.focus(), 30);
+}
+function closeReq(){ reqModal.classList.remove('open'); reqModal.setAttribute('aria-hidden', 'true'); }
+
+function toast(msg){
+  reqToastEl.textContent = msg; reqToastEl.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => reqToastEl.classList.remove('show'), 2800);
+}
+
+async function submitReq(){
+  const text = (reqText.value || '').trim();
+  if(!text){ reqText.focus(); return; }
+  reqNote.textContent = 'Odesílám…'; reqNote.className = 'req-note';
+  try { localStorage.setItem(REQ_AKEY, reqAuthor.value); } catch(e){}
+  const item = { text, author:reqAuthor.value, area:reqArea.value, status:'novy', ts:Date.now() };
+  if(reqInclude.checked){
+    if(capturedView)  item.view  = capturedView;
+    if(capturedThumb) item.thumb = capturedThumb;
+  }
+  try {
+    const store = await reqStorePromise;
+    await store.add(item);
+    reqText.value = '';
+    closeReq();
+    toast(store.shared ? '✅ Požadavek odeslán. Díky!' : '✅ Uloženo (jen v tomto prohlížeči).');
+  } catch(e){ console.error(e); reqNote.textContent = 'Nepodařilo se odeslat, zkus to prosím znovu.'; }
+}
+
+document.getElementById('reqOpen').addEventListener('click', openReq);
+document.getElementById('reqClose').addEventListener('click', closeReq);
+document.getElementById('reqCancel').addEventListener('click', closeReq);
+document.getElementById('reqSend').addEventListener('click', submitReq);
+reqInclude.addEventListener('change', updatePreview);
+reqModal.addEventListener('click', e => { if(e.target === reqModal) closeReq(); });
+window.addEventListener('keydown', e => { if(e.key === 'Escape' && reqModal.classList.contains('open')) closeReq(); });
+
+// otevření uloženého pohledu z odkazu (#view=px,py,pz,tx,ty,tz) – volá se po načtení modelu
+function applyPendingView(){
+  const m = /[#&]view=([^&]+)/.exec(location.hash || '');
+  if(!m) return;
+  const v = hashToView(decodeURIComponent(m[1]));
+  if(!v) return;
+  camera.position.set(v.p[0], v.p[1], v.p[2]);
+  orbit.target.set(v.t[0], v.t[1], v.t[2]);
+  orbit.update();
+}
 </script>
 </body>
 </html>

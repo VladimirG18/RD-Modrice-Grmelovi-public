@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Požadavky na úpravy modelu</title>
+<meta name="description" content="Sdílená nástěnka požadavků na úpravy 3D modelu rodinného domu v Modřicích – zadej, co upravit, sleduj stav." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+<style>
+  .req-intro{ display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px 16px; margin:14px 0 18px; box-shadow:var(--shadow-sm); }
+  .req-intro .ic{ font-size:1.4rem; line-height:1.2; }
+  .req-intro p{ margin:0; font-size:.9rem; color:var(--muted); line-height:1.55; }
+  .req-intro a{ font-weight:600; }
+
+  .req-form{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; box-shadow:var(--shadow-sm); margin-bottom:16px; }
+  .req-form .frow{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+  .req-form label{ display:flex; flex-direction:column; gap:4px; font-size:.72rem; text-transform:uppercase;
+    letter-spacing:.4px; color:var(--muted); flex:1 1 180px; }
+  .req-form select, .req-form textarea{ font:inherit; font-size:.92rem; color:var(--text); background:var(--bg);
+    border:1px solid var(--border-strong); border-radius:10px; padding:9px 11px; width:100%; }
+  .req-form textarea{ resize:vertical; min-height:76px; }
+  .req-form .send{ margin-top:2px; }
+
+  .req-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 16px; }
+  .rqchip{ font-size:.82rem; padding:6px 12px; border:1px solid var(--border); border-radius:999px;
+    background:var(--surface); color:var(--text); cursor:pointer; display:inline-flex; gap:6px; align-items:center; }
+  .rqchip:hover{ border-color:var(--accent); }
+  .rqchip.on{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); font-weight:600; }
+  .rqchip b{ font-weight:700; opacity:.7; }
+
+  .rq-sec{ margin:0 0 20px; }
+  .rq-sec-head{ font-size:.78rem; text-transform:uppercase; letter-spacing:.6px; color:var(--muted);
+    margin:0 0 10px; display:flex; align-items:center; gap:8px; }
+  .rq-sec-head .n{ background:var(--surface-2); border-radius:999px; padding:1px 9px; font-size:.75rem; }
+
+  .rq-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+  .rq-card{ background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--border-strong);
+    border-radius:var(--radius); padding:12px 14px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:9px; }
+  .rq-card.st-hotovo{ opacity:.72; }
+  .rq-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .rq-badges{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .rq-badge{ font-size:.72rem; padding:2px 8px; border-radius:999px; background:var(--surface-2);
+    color:var(--muted); border:1px solid var(--border); white-space:nowrap; }
+  .rq-badge.st{ font-weight:600; }
+  .rq-badge.st-novy{ color:var(--accent-ink); background:var(--accent-soft); border-color:transparent; }
+  .rq-badge.st-probiha{ color:var(--warn); background:var(--warn-soft); border-color:transparent; }
+  .rq-badge.st-hotovo{ color:var(--ok); background:var(--ok-soft); border-color:transparent; }
+  .rq-del{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:.95rem; padding:2px 4px; border-radius:6px; }
+  .rq-del:hover{ color:var(--danger); background:var(--surface-2); }
+  .rq-text{ font-size:.95rem; line-height:1.5; color:var(--text); white-space:pre-wrap; word-break:break-word; }
+  .rq-thumb{ display:block; border:0; padding:0; background:none; cursor:pointer; border-radius:10px; overflow:hidden; }
+  .rq-thumb img{ width:100%; display:block; border:1px solid var(--border); border-radius:10px; }
+  .rq-meta{ font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .rq-actions{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:2px; }
+  .rq-view{ font-size:.78rem; padding:5px 10px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); text-decoration:none; }
+  .rq-view:hover{ border-color:var(--accent); text-decoration:none; }
+  .rq-set{ margin-left:auto; display:flex; gap:4px; }
+  .rq-sbtn{ font-size:.72rem; padding:4px 8px; border:1px solid var(--border); border-radius:7px;
+    background:var(--surface); color:var(--muted); cursor:pointer; }
+  .rq-sbtn:hover{ border-color:var(--accent); color:var(--text); }
+  .rq-sbtn.on{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); font-weight:600; }
+
+  .rq-light{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.8); padding:20px; }
+  .rq-light.open{ display:flex; }
+  .rq-light img{ max-width:96vw; max-height:92vh; border-radius:10px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="dokumentace.html">Dokumentace</a>
+      <a href="vizualizace.html">Vizualizace</a>
+      <a href="inspirace.html">Inspirace</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+      <a href="pozadavky.html" aria-current="page">Požadavky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content">
+  <span class="eyebrow">Návrhy úprav 3D modelu</span>
+  <h1>Požadavky na úpravy modelu</h1>
+  <p class="lead">Sem se zapisují požadavky, co v&nbsp;3D modelu upravit. Postupně je zapracuji
+  do modelu a nasadím – u&nbsp;každého uvidíš stav (nový → rozpracováno → hotovo).</p>
+
+  <div class="req-intro">
+    <span class="ic">💡</span>
+    <p>Nejlepší je zadat požadavek přímo <a href="model.html">ve 3D modelu</a> tlačítkem
+    <b>„✏️ Navrhnout úpravu"</b> – přiloží se i aktuální pohled a náhled, ať je jasné, čeho se to týká.
+    Tady můžeš přidat i požadavek jen textem.</p>
+  </div>
+
+  <div id="status" class="statusbar"></div>
+
+  <div class="req-form">
+    <div class="frow">
+      <label>Kdo přidává
+        <select id="author"></select>
+      </label>
+      <label>Čeho se týká
+        <select id="area"></select>
+      </label>
+    </div>
+    <textarea id="text" placeholder="Co v modelu upravit? Např. „Zvětšit okno v ložnici na jih“, „Fasádu udělat světlejší“… (Ctrl+Enter odešle)"></textarea>
+    <div class="frow" style="margin:10px 0 0; justify-content:flex-end">
+      <button class="send" id="add">Přidat požadavek</button>
+    </div>
+  </div>
+
+  <div class="req-chips" id="chips"></div>
+  <div id="list"></div>
+
+  <p class="note" id="footnote"></p>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — požadavky na úpravy 3D modelu. Zpracování a nasazení probíhá přes generátor modelu.
+</footer>
+
+<div class="rq-light" id="light"><img id="lightImg" alt="Náhled požadavku" /></div>
+
+<script type="module">
+import { createStore, AUTHORS, AREAS, AREA_BY_ID, STATUSES, STATUS_BY_ID,
+         esc, slug, fmtDate, viewToHash } from './assets/pozadavky.js';
+
+const $ = id => document.getElementById(id);
+const authorEl = $('author'), areaEl = $('area'), textEl = $('text'), addBtn = $('add');
+const statusEl = $('status'), footEl = $('footnote'), chipsEl = $('chips'), listEl = $('list');
+const AKEY = 'rdmodrice-board-author';
+
+authorEl.innerHTML = AUTHORS.map(a => `<option>${esc(a)}</option>`).join('');
+areaEl.innerHTML = AREAS.map(a => `<option value="${a.id}">${a.icon} ${esc(a.name)}</option>`).join('');
+try { const la = localStorage.getItem(AKEY); if(la && AUTHORS.includes(la)) authorEl.value = la; } catch(e){}
+authorEl.addEventListener('change', () => { try { localStorage.setItem(AKEY, authorEl.value); } catch(e){} });
+
+let items = [], filter = null, backend = null;
+
+function setStatus(kind, html){ statusEl.className = 'statusbar' + (kind ? ' ' + kind : ''); statusEl.innerHTML = html; }
+
+function counts(){ const m = {}; items.forEach(i => { const s = i.status || 'novy'; m[s] = (m[s]||0)+1; }); return m; }
+
+function renderChips(){
+  const c = counts();
+  let h = `<button class="rqchip${filter===null?' on':''}" data-f="">Vše <b>${items.length}</b></button>`;
+  STATUSES.forEach(s => {
+    h += `<button class="rqchip${filter===s.id?' on':''}" data-f="${s.id}">${s.icon} ${esc(s.name)} <b>${c[s.id]||0}</b></button>`;
+  });
+  chipsEl.innerHTML = h;
+}
+
+function cardHTML(it){
+  const st = it.status || 'novy';
+  const s = slug(it.author);
+  const area = AREA_BY_ID[it.area];
+  const areaBadge = area ? `<span class="rq-badge">${area.icon} ${esc(area.name)}</span>` : '';
+  const stName = (STATUS_BY_ID[st]||{}).name || st;
+  const thumb = it.thumb ? `<button class="rq-thumb" data-img="${esc(it.id)}"><img src="${esc(it.thumb)}" alt="Náhled pohledu" loading="lazy"></button>` : '';
+  const viewBtn = it.view ? `<a class="rq-view" href="model.html#view=${encodeURIComponent(viewToHash(it.view))}" target="_blank" rel="noopener">🎥 Otevřít pohled</a>` : '';
+  const setBtns = STATUSES.map(x =>
+    `<button class="rq-sbtn${x.id===st?' on':''}" data-set="${esc(it.id)}" data-status="${x.id}" title="${esc(x.name)}">${x.icon}</button>`).join('');
+  return `<article class="rq-card st-${st} border-${s}" data-id="${esc(it.id)}">
+    <div class="rq-top">
+      <div class="rq-badges">
+        <span class="rq-badge st st-${st}">${(STATUS_BY_ID[st]||{}).icon||''} ${esc(stName)}</span>
+        ${areaBadge}
+      </div>
+      <button class="rq-del" data-del="${esc(it.id)}" title="Smazat" aria-label="Smazat">🗑</button>
+    </div>
+    <div class="rq-text">${esc(it.text)}</div>
+    ${thumb}
+    <div class="rq-meta"><span class="who who-${s}">${esc(it.author||'')}</span> · <span>${esc(fmtDate(it.ts))}</span></div>
+    <div class="rq-actions">
+      ${viewBtn}
+      <span class="rq-set">${setBtns}</span>
+    </div>
+  </article>`;
+}
+
+function render(){
+  renderChips();
+  let list = items;
+  if(filter) list = list.filter(i => (i.status||'novy') === filter);
+  if(!list.length){
+    listEl.innerHTML = `<div class="empty">${items.length ? 'V tomto stavu zatím nic není.' : 'Zatím tu nejsou žádné požadavky. Přidej první výše nebo přímo ve 3D modelu.'}</div>`;
+    return;
+  }
+  // seskupit dle stavu v pořadí STATUSES
+  let html = '';
+  const groups = filter ? [STATUS_BY_ID[filter]] : STATUSES;
+  groups.forEach(g => {
+    const inG = list.filter(i => (i.status||'novy') === g.id);
+    if(!inG.length) return;
+    html += `<section class="rq-sec">
+      <h2 class="rq-sec-head">${g.icon} ${esc(g.name)} <span class="n">${inG.length}</span></h2>
+      <div class="rq-grid">${inG.map(cardHTML).join('')}</div>
+    </section>`;
+  });
+  listEl.innerHTML = html;
+}
+
+/* --- backend --- */
+backend = await createStore({
+  onItems: (list, shared) => { items = list; render(); },
+  onStatus: (kind, html) => {
+    setStatus(kind, html);
+    footEl.textContent = kind === 'ok'
+      ? 'Požadavky se ukládají do sdílené online databáze (Firebase) a aktualizují se všem v reálném čase.'
+      : 'Požadavky se zatím ukládají jen v tomto prohlížeči.';
+  }
+});
+
+/* --- přidání --- */
+async function addReq(){
+  const text = (textEl.value||'').trim();
+  if(!text){ textEl.focus(); return; }
+  try { localStorage.setItem(AKEY, authorEl.value); } catch(e){}
+  addBtn.disabled = true;
+  try {
+    await backend.add({ text, author:authorEl.value, area:areaEl.value, status:'novy', ts:Date.now() });
+    textEl.value = '';
+  } catch(e){ console.error(e); alert('Požadavek se nepodařilo uložit.'); }
+  finally { addBtn.disabled = false; textEl.focus(); }
+}
+addBtn.addEventListener('click', addReq);
+textEl.addEventListener('keydown', e => { if((e.ctrlKey||e.metaKey) && e.key === 'Enter') addReq(); });
+
+/* --- interakce v seznamu --- */
+chipsEl.addEventListener('click', e => {
+  const b = e.target.closest('.rqchip'); if(!b) return;
+  filter = b.dataset.f || null; render();
+});
+listEl.addEventListener('click', e => {
+  const del = e.target.closest('.rq-del');
+  if(del){ const it = items.find(i => i.id === del.dataset.del);
+    if(it && confirm('Smazat tento požadavek?')) backend.remove(it.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+    return; }
+  const set = e.target.closest('.rq-sbtn');
+  if(set){ backend.update(set.dataset.set, { status:set.dataset.status }).catch(err => { console.error(err); alert('Změna stavu se nepodařila.'); }); return; }
+  const img = e.target.closest('.rq-thumb');
+  if(img){ const it = items.find(i => i.id === img.dataset.img); if(it && it.thumb){ $('lightImg').src = it.thumb; $('light').classList.add('open'); } }
+});
+$('light').addEventListener('click', () => { $('light').classList.remove('open'); $('lightImg').src=''; });
+window.addEventListener('keydown', e => { if(e.key === 'Escape') { $('light').classList.remove('open'); } });
+</script>
+</body>
+</html>
