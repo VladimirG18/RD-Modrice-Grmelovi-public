@@ -20,11 +20,18 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
 - `checklist.html` – **checklist** úkolů a rozhodnutí (ukládá se v prohlížeči).
 - `harmonogram.html` – **harmonogram stavby** (fáze a termíny).
 - `poznamky.html` – **sdílené poznámky** (Firebase Firestore, realtime).
+- `pozadavky.html` – **požadavky na úpravy 3D modelu**: sdílená nástěnka, kam se
+  zadávají textové požadavky (prompty), co v modelu upravit; u každého je stav
+  (nový → rozpracováno → hotovo). Požadavek jde přidat i přímo ve 3D modelu
+  tlačítkem „✏️ Navrhnout úpravu" – přiloží se aktuální pohled kamery a náhled.
 - `assets/style.css` – sdílený design systém (světlý + tmavý režim).
 - `assets/site.js` – přepínání vzhledu a zvýraznění navigace.
 - `assets/board.js` – sdílený modul nástěnek (Vizualizace i Inspirace): kategorie, nahrávání
   a komprese obrázků, ukládání do Firebase (Firestore + Storage) s fallbackem na `localStorage`,
   filtrování a lightbox.
+- `assets/pozadavky.js` – backend nástěnky **Požadavky na úpravy modelu** (Firestore kolekce
+  `pozadavky` s fallbackem na `localStorage`, realtime) + pomůcky (oblasti, stavy, kódování
+  pohledu kamery do odkazu `model.html#view=…`).
 - `assets/img/` – vizualizace generované z projektové dokumentace.
 - `RDModrice.glb` – samotný 3D model domu ve formátu glTF (binární `.glb`);
   generuje se parametrickým skriptem z privátního repozitáře projektu.
@@ -83,6 +90,22 @@ automaticky zmenší pro rychlé načítání; pokud Storage není povolené, ul
 obrázek přímo do Firestore. Když je Firebase nedostupný, nástěnka spadne na lokální úložiště
 prohlížeče. Pro sdílení napříč zařízeními musí pravidla Firestore (a případně Storage) povolit
 zápis do kolekcí `vizualizace` a `inspirace` – stejně jako u kolekce `poznamky`.
+
+## Požadavky na úpravy modelu
+
+Stránka `pozadavky.html` je společná nástěnka, kam rodina zadává, co v 3D modelu upravit
+(„prompty" / požadavky). Grafické úpravy modelu se dělají mimo prohlížeč – přegenerováním
+souboru `RDModrice.glb` (skripty v `tools/model_edits/`) a nasazením přes GitHub Pages –
+proto nástěnka požadavky **sbírá a sleduje jejich stav** (nový → rozpracováno → hotovo),
+samotnou úpravu neprovádí automaticky.
+
+- **Zadání přímo z modelu** – tlačítko **„✏️ Navrhnout úpravu"** v `model.html` otevře
+  formulář, který k požadavku přiloží **aktuální pohled kamery** a **náhled** (screenshot).
+  Uložený pohled jde z nástěnky otevřít odkazem (`model.html#view=…`), který kameru nastaví
+  přesně tam, odkud byl požadavek zadán.
+- Data se **sdílejí v reálném čase** přes Firebase (Firestore, kolekce `pozadavky`); při
+  nedostupnosti spadnou na lokální úložiště prohlížeče. Pravidla Firestore musí povolit
+  zápis do kolekce `pozadavky` – stejně jako u `poznamky`, `vizualizace` a `inspirace`.
 
 ## Technologie
 
