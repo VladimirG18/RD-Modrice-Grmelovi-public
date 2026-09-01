@@ -102,23 +102,33 @@ def main():
     tcol = smp.users_collection[0] if smp and smp.users_collection else scn
     sklo = get_mat("sklo_okna"); ram = get_mat("D_okna_antracit")
 
-    # odstranit původní střešní okno S0 a fasádní okno S2_0
+    # odstranit původní střešní okno S0, fasádní okno S2_0 i jeho síťku (sitka_S_0),
+    # jinak by na stěně zůstal viset prázdný rámeček síťky původního okna
     for o in list(bpy.data.objects):
-        if any(k in o.name for k in ("stresni_okno_S0", "stresni_okno_sklo_S0", "okno_S2_0")):
+        if any(k in o.name for k in ("stresni_okno_S0", "stresni_okno_sklo_S0", "okno_S2_0", "sitka_S_0")):
             bpy.data.objects.remove(o, do_unlink=True)
 
     # prořez stěny (kvádr skrz stěnu)
     wc = box("wcut", OX0, OX1, -0.12, 0.57, ZSILL-0.7, ZCORNER+0.06, None, scn)
     cut("RD_Obvod_stena_jih", wc, scn); bpy.data.objects.remove(wc, do_unlink=True)
 
-    # prořez střechy + okapní lišty + žlabu (pás od přesahu až po spádu nahoru)
+    # prořez střechy (pás od přesahu až po spádu nahoru) – JEN střešní plocha.
+    # Okapní lišta ani žlab se NEbooleanují: FLOAT solver by jejich tenký bbox
+    # „nafoukl" na rozsah cutteru a v modelu by zůstaly vypadat jako kvádry.
     rc = box("rcut", OX0, OX1, -0.75, SY_TOP+0.12, 3.9, 6.4, None, scn)
-    for tn in ("RD_strecha_strecha_jih", "RD_strecha_lista_okap_jih0", "RD_strecha_zlab_jih0"):
-        cut(tn, rc, scn)
+    cut("RD_strecha_strecha_jih", rc, scn)
     bpy.data.objects.remove(rc, do_unlink=True)
 
     # pojistka: dořezat případné zbytky přesahu střechy v šířce okna
     del_faces_box("RD_strecha_strecha_jih", OX0-0.03, OX1+0.03, -0.70, 0.05, 4.0, 4.8)
+
+    # okapní lišta + žlab u okna: západní segment (jih0) je stejně přerušený
+    # terasou, tak ho celý odebereme – u okna tím nezůstane žádný přečnívající
+    # kus (jinak konce visí jižně a vypadají jako kvádry navíc).
+    for tn in ("RD_strecha_lista_okap_jih0", "RD_strecha_zlab_jih0"):
+        o = bpy.data.objects.get(tn)
+        if o:
+            bpy.data.objects.remove(o, do_unlink=True)
 
     # zasklení – svislá (stěna) + šikmá (střecha)
     box("vypln_okno_zal_svisla", OX0+FR, OX1-FR, WYG-0.006, WYG+0.006, ZSILL+FR, ZCORNER, sklo, tcol)
