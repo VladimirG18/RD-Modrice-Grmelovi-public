@@ -144,6 +144,17 @@ def main():
         sloped("RD_strecha_okno_zal_ram_H", OX0, OX1, SY_TOP-FR, SY_TOP, RA, RB, -0.04, 0.05, ram, tcol)
         box("RD_strecha_okno_zal_ram_ohyb", OX0, OX1, 0.00, WYG+0.05, ZCORNER-0.05, ZCORNER+0.02, ram, tcol)
 
+    # výplň zdi kolem okna (omítka). Prořez otvoru šel pod parapet (do plné stěny mezi
+    # patry) a nové okno je užší než původní otvor S2_0 (X ~0.45–1.80, Z 3.45–4.05),
+    # takže by pod oknem i po stranách prosvítal interiér. Doplníme:
+    #   - parapet pod oknem (řezaná díra, zarovnaný vnější líc),
+    #   - boční špalety k původnímu otvoru (mírně zapuštěné, ať se nervou s lícem stěny).
+    omit = get_mat("A_omitka_svetle_seda")
+    if omit:
+        box("RD_Obvod_parapet_okno_zal", OX0, OX1, 0.00, 0.45, ZSILL-0.70, ZSILL+0.01, omit, tcol)
+        box("RD_Obvod_spaleta_okno_zal_L", 0.45, OX0, 0.01, 0.45, 3.45, 4.06, omit, tcol)
+        box("RD_Obvod_spaleta_okno_zal_P", OX1, 1.80, 0.01, 0.45, 3.45, 4.06, omit, tcol)
+
     bpy.ops.object.select_all(action='DESELECT')
     # POZN.: model.html načítá glTF bez DRACOLoaderu → export MUSÍ být bez Draco.
     bpy.ops.export_scene.gltf(filepath=GLB_OUT, export_format='GLB', use_selection=False,
