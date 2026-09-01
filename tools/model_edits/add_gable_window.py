@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 """
-Zalomené okno na západním štítu (RD Modřice).
+Zalomená (spojená střešní+fasádní) okna na jižní straně RD Modřice.
 
-Spojí původní střešní okno (S0) a fasádní okno (S2_0) na západním konci jižní
-strany do JEDNOHO zalomeného okna: svislá tabule ve stěně přechází přes okap do
-šikmé tabule na střeše. Provede se prořez otvoru (stěna + okap + střecha) a vloží
-se zasklení + rám. Model se edituje přímo v hotovém RDModrice.glb (parametrický
-generátor detailního modelu není k dispozici).
+Nahradí původní oddělená okna JEDNÍM zalomeným oknem, které přechází ze stěny
+přes okap do šikmé tabule na střeše (svislá + šikmá tabule s rámem). Dělá se to
+na dvou místech jižní strany:
+
+  * ZÁPADNÍ štít – střešní okno S0 + fasádní okno S2_0 → jedno okno (X 0.55–1.70),
+  * VÝCHODNÍ strana – 2 střešní okna S1, S2 + fasádní okno S2_1 → jedno okno
+    (X 8.65–9.80), stejných rozměrů jako na západě.
+
+Postup pro každé okno: odstranit původní okna (vč. síťky), prořezat otvor
+(stěna + střecha), okap buď smazat (západ – krátký, přerušený terasou) nebo
+naříznout (východ – dlouhý okap zůstává po stranách), vložit zasklení + rám a
+doplnit omítku pod oknem (parapet) i po stranách (špalety), aby neprosvítal
+interiér. Model se edituje přímo v hotovém RDModrice.glb (parametrický generátor
+detailního modelu není k dispozici).
 
 Použití (Blender jako Python modul – balík `bpy`):
     pip install bpy
@@ -14,6 +23,7 @@ Použití (Blender jako Python modul – balík `bpy`):
 Výchozí VSTUP i VYSTUP = ../../RDModrice.glb (uprav dle potřeby).
 
 Souřadnice bpy po importu glTF: X západ→východ, Y jih(≈0)→sever, Z výška.
+POZN.: model.html načítá glTF bez DRACOLoaderu → export MUSÍ být bez Draco.
 """
 import bpy, bmesh, os, sys
 from mathutils import Vector
@@ -24,8 +34,7 @@ argv = sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else sys.argv[1:]
 GLB_IN  = argv[0] if len(argv) > 0 else _default
 GLB_OUT = argv[1] if len(argv) > 1 else _default
 
-# ---- parametry okna ----
-OX0, OX1 = 0.55, 1.70     # X rozsah okna (šířka)
+# ---- společné parametry okna ----
 FR   = 0.06               # rámeček
 ZSILL   = 3.55            # spodek svislé části
 ZCORNER = 4.52            # roh (přechod svislá→šikmá) u okapu
@@ -73,7 +82,7 @@ def sloped(name, x0, x1, y0, y1, a, b, dz_lo, dz_hi, mat, col):
         me.materials.append(mat)
     return ob
 
-def cut(target_name, cutter, scn):
+def cut(target_name, cutter):
     t = bpy.data.objects.get(target_name)
     if not t:
         return
@@ -94,66 +103,97 @@ def del_faces_box(objname, x0, x1, y0, y1, z0, z1):
         bmesh.ops.delete(bm, geom=kill, context='FACES')
     bm.to_mesh(me); bm.free()
 
-def main():
-    bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.ops.import_scene.gltf(filepath=GLB_IN)
+def notch_trim(name, x0, x1):
+    """Rozřízne osově zarovnaný kvádr (okapní lišta / žlab) na kus vlevo (…_a) a
+    vpravo (…_b) od [x0,x1]. Boxy se REKONSTRUUJÍ z PŮVODNÍHO bboxu (ne po
+    booleanu), aby se jejich rozměr „nenafoukl" – proto se lišta ani žlab
+    NEbooleanují. Oba profily jsou osově zarovnané kvádry, takže tvar zůstane."""
+    o = bpy.data.objects.get(name)
+    if not o:
+        return
+    bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
+    mn = [min(c[i] for c in bb) for i in range(3)]
+    mx = [max(c[i] for c in bb) for i in range(3)]
+    mat = o.data.materials[0] if o.data.materials else None
+    col = o.users_collection[0] if o.users_collection else bpy.context.scene.collection
+    bpy.data.objects.remove(o, do_unlink=True)
+    if mn[0] < x0 - 0.01:
+        box(name + "_a", mn[0], x0, mn[1], mx[1], mn[2], mx[2], mat, col)
+    if mx[0] > x1 + 0.01:
+        box(name + "_b", x1, mx[0], mn[1], mx[1], mn[2], mx[2], mat, col)
+
+def add_bent_window(tag, OX0, OX1, remove_keys, orig_open, eave, gutter, eave_notch):
+    """tag: přípona názvů nových objektů ('' západ, 'V' východ); OX0,OX1: X okna;
+    remove_keys: substringy původních oken k odstranění; orig_open=(x0,x1): X
+    původního fasádního otvoru (pro špalety); eave/gutter: okapní lišta+žlab;
+    eave_notch: True=naříznout (zbytek okapu zůstane) / False=smazat celé."""
     scn = bpy.context.scene.collection
     smp = bpy.data.objects.get("RD_Obvod_stena_jih")
     tcol = smp.users_collection[0] if smp and smp.users_collection else scn
-    sklo = get_mat("sklo_okna"); ram = get_mat("D_okna_antracit")
+    sklo = get_mat("sklo_okna"); ram = get_mat("D_okna_antracit"); omit = get_mat("A_omitka_svetle_seda")
 
-    # odstranit původní střešní okno S0, fasádní okno S2_0 i jeho síťku (sitka_S_0),
-    # jinak by na stěně zůstal viset prázdný rámeček síťky původního okna
+    # odstranit původní střešní i fasádní okna vč. jejich síťky
     for o in list(bpy.data.objects):
-        if any(k in o.name for k in ("stresni_okno_S0", "stresni_okno_sklo_S0", "okno_S2_0", "sitka_S_0")):
+        if any(k in o.name for k in remove_keys):
             bpy.data.objects.remove(o, do_unlink=True)
 
     # prořez stěny (kvádr skrz stěnu)
     wc = box("wcut", OX0, OX1, -0.12, 0.57, ZSILL-0.7, ZCORNER+0.06, None, scn)
-    cut("RD_Obvod_stena_jih", wc, scn); bpy.data.objects.remove(wc, do_unlink=True)
+    cut("RD_Obvod_stena_jih", wc); bpy.data.objects.remove(wc, do_unlink=True)
 
-    # prořez střechy (pás od přesahu až po spádu nahoru) – JEN střešní plocha.
-    # Okapní lišta ani žlab se NEbooleanují: FLOAT solver by jejich tenký bbox
-    # „nafoukl" na rozsah cutteru a v modelu by zůstaly vypadat jako kvádry.
+    # prořez střechy (pás od přesahu až po spádu nahoru) – JEN střešní plocha
     rc = box("rcut", OX0, OX1, -0.75, SY_TOP+0.12, 3.9, 6.4, None, scn)
-    cut("RD_strecha_strecha_jih", rc, scn)
-    bpy.data.objects.remove(rc, do_unlink=True)
-
-    # pojistka: dořezat případné zbytky přesahu střechy v šířce okna
+    cut("RD_strecha_strecha_jih", rc); bpy.data.objects.remove(rc, do_unlink=True)
     del_faces_box("RD_strecha_strecha_jih", OX0-0.03, OX1+0.03, -0.70, 0.05, 4.0, 4.8)
 
-    # okapní lišta + žlab u okna: západní segment (jih0) je stejně přerušený
-    # terasou, tak ho celý odebereme – u okna tím nezůstane žádný přečnívající
-    # kus (jinak konce visí jižně a vypadají jako kvádry navíc).
-    for tn in ("RD_strecha_lista_okap_jih0", "RD_strecha_zlab_jih0"):
-        o = bpy.data.objects.get(tn)
-        if o:
-            bpy.data.objects.remove(o, do_unlink=True)
+    # okapní lišta + žlab: naříznout (dlouhý okap) nebo smazat celé (krátký)
+    if eave_notch:
+        notch_trim(eave,   OX0-0.05, OX1+0.05)
+        notch_trim(gutter, OX0-0.05, OX1+0.05)
+    else:
+        for tn in (eave, gutter):
+            o = bpy.data.objects.get(tn)
+            if o:
+                bpy.data.objects.remove(o, do_unlink=True)
 
     # zasklení – svislá (stěna) + šikmá (střecha)
-    box("vypln_okno_zal_svisla", OX0+FR, OX1-FR, WYG-0.006, WYG+0.006, ZSILL+FR, ZCORNER, sklo, tcol)
-    sloped("vypln_okno_zal_sikma", OX0+FR, OX1-FR, SY_BOT, SY_TOP-FR, RA, RB, -0.005, 0.005, sklo, tcol)
+    box("vypln_okno_zal%s_svisla" % tag, OX0+FR, OX1-FR, WYG-0.006, WYG+0.006, ZSILL+FR, ZCORNER, sklo, tcol)
+    sloped("vypln_okno_zal%s_sikma" % tag, OX0+FR, OX1-FR, SY_BOT, SY_TOP-FR, RA, RB, -0.005, 0.005, sklo, tcol)
 
     # rám (D_okna_antracit → na webu se barví ovladačem „Rámy oken")
     if ram:
-        box("RD_Obvod_okno_zal_ram_L", OX0, OX0+FR, WYG-0.03, WYG+0.05, ZSILL, ZCORNER, ram, tcol)
-        box("RD_Obvod_okno_zal_ram_P", OX1-FR, OX1, WYG-0.03, WYG+0.05, ZSILL, ZCORNER, ram, tcol)
-        box("RD_Obvod_okno_zal_ram_D", OX0, OX1, WYG-0.03, WYG+0.05, ZSILL, ZSILL+FR, ram, tcol)
-        sloped("RD_strecha_okno_zal_ram_Ls", OX0, OX0+FR, SY_BOT, SY_TOP, RA, RB, -0.04, 0.05, ram, tcol)
-        sloped("RD_strecha_okno_zal_ram_Ps", OX1-FR, OX1, SY_BOT, SY_TOP, RA, RB, -0.04, 0.05, ram, tcol)
-        sloped("RD_strecha_okno_zal_ram_H", OX0, OX1, SY_TOP-FR, SY_TOP, RA, RB, -0.04, 0.05, ram, tcol)
-        box("RD_strecha_okno_zal_ram_ohyb", OX0, OX1, 0.00, WYG+0.05, ZCORNER-0.05, ZCORNER+0.02, ram, tcol)
+        box("RD_Obvod_okno_zal%s_ram_L" % tag, OX0, OX0+FR, WYG-0.03, WYG+0.05, ZSILL, ZCORNER, ram, tcol)
+        box("RD_Obvod_okno_zal%s_ram_P" % tag, OX1-FR, OX1, WYG-0.03, WYG+0.05, ZSILL, ZCORNER, ram, tcol)
+        box("RD_Obvod_okno_zal%s_ram_D" % tag, OX0, OX1, WYG-0.03, WYG+0.05, ZSILL, ZSILL+FR, ram, tcol)
+        sloped("RD_strecha_okno_zal%s_ram_Ls" % tag, OX0, OX0+FR, SY_BOT, SY_TOP, RA, RB, -0.04, 0.05, ram, tcol)
+        sloped("RD_strecha_okno_zal%s_ram_Ps" % tag, OX1-FR, OX1, SY_BOT, SY_TOP, RA, RB, -0.04, 0.05, ram, tcol)
+        sloped("RD_strecha_okno_zal%s_ram_H" % tag, OX0, OX1, SY_TOP-FR, SY_TOP, RA, RB, -0.04, 0.05, ram, tcol)
+        box("RD_strecha_okno_zal%s_ram_ohyb" % tag, OX0, OX1, 0.00, WYG+0.05, ZCORNER-0.05, ZCORNER+0.02, ram, tcol)
 
-    # výplň zdi kolem okna (omítka). Prořez otvoru šel pod parapet (do plné stěny mezi
-    # patry) a nové okno je užší než původní otvor S2_0 (X ~0.45–1.80, Z 3.45–4.05),
-    # takže by pod oknem i po stranách prosvítal interiér. Doplníme:
-    #   - parapet pod oknem (řezaná díra, zarovnaný vnější líc),
-    #   - boční špalety k původnímu otvoru (mírně zapuštěné, ať se nervou s lícem stěny).
-    omit = get_mat("A_omitka_svetle_seda")
+    # výplň zdi: parapet pod oknem (řez šel pod parapet) + boční špalety
+    # (nové okno je užší než původní otvor) – jinak prosvítá interiér
     if omit:
-        box("RD_Obvod_parapet_okno_zal", OX0, OX1, 0.00, 0.45, ZSILL-0.70, ZSILL+0.01, omit, tcol)
-        box("RD_Obvod_spaleta_okno_zal_L", 0.45, OX0, 0.01, 0.45, 3.45, 4.06, omit, tcol)
-        box("RD_Obvod_spaleta_okno_zal_P", OX1, 1.80, 0.01, 0.45, 3.45, 4.06, omit, tcol)
+        ox0, ox1 = orig_open
+        box("RD_Obvod_parapet_okno_zal%s" % tag,  OX0, OX1, 0.00, 0.45, ZSILL-0.70, ZSILL+0.01, omit, tcol)
+        box("RD_Obvod_spaleta_okno_zal%s_L" % tag, ox0, OX0, 0.01, 0.45, 3.45, 4.06, omit, tcol)
+        box("RD_Obvod_spaleta_okno_zal%s_P" % tag, OX1, ox1, 0.01, 0.45, 3.45, 4.06, omit, tcol)
+
+def main():
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.ops.import_scene.gltf(filepath=GLB_IN)
+
+    # ZÁPADNÍ štít – střešní S0 + fasádní S2_0 (krátký okap jih0 se smaže celý)
+    add_bent_window("", 0.55, 1.70,
+        ("stresni_okno_S0", "stresni_okno_sklo_S0", "okno_S2_0", "sitka_S_0"),
+        (0.45, 1.80),
+        "RD_strecha_lista_okap_jih0", "RD_strecha_zlab_jih0", eave_notch=False)
+
+    # VÝCHODNÍ strana – 2 střešní (S1,S2) + fasádní (S2_1) → jedno okno stejných
+    # rozměrů, vycentrované na fasádní otvor (dlouhý okap jih1 se jen nařízne)
+    add_bent_window("V", 8.65, 9.80,
+        ("stresni_okno_S1", "stresni_okno_sklo_S1", "stresni_okno_S2", "stresni_okno_sklo_S2", "okno_S2_1", "sitka_S_1"),
+        (8.45, 10.00),
+        "RD_strecha_lista_okap_jih1", "RD_strecha_zlab_jih1", eave_notch=True)
 
     bpy.ops.object.select_all(action='DESELECT')
     # POZN.: model.html načítá glTF bez DRACOLoaderu → export MUSÍ být bez Draco.
