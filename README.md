@@ -32,6 +32,9 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
 - `assets/pozadavky.js` – backend nástěnky **Požadavky na úpravy modelu** (Firestore kolekce
   `pozadavky` s fallbackem na `localStorage`, realtime) + pomůcky (oblasti, stavy, kódování
   pohledu kamery do odkazu `model.html#view=…`).
+- `assets/annotate.js` – jednoduchý **malovací nástroj** do náhledu (šipka, obdélník, kolečko,
+  čára od ruky, výběr barvy, krok zpět, smazání); kresba se složí nad screenshot pohledu, takže
+  jde v požadavku přesně označit, čeho se úprava týká.
 - `assets/img/` – vizualizace generované z projektové dokumentace.
 - `RDModrice.glb` – samotný 3D model domu ve formátu glTF (binární `.glb`);
   generuje se parametrickým skriptem z privátního repozitáře projektu.
@@ -101,8 +104,9 @@ samotnou úpravu neprovádí automaticky.
 
 - **Zadání přímo z modelu** – tlačítko **„✏️ Navrhnout úpravu"** v `model.html` otevře
   formulář, který k požadavku přiloží **aktuální pohled kamery** a **náhled** (screenshot).
-  Uložený pohled jde z nástěnky otevřít odkazem (`model.html#view=…`), který kameru nastaví
-  přesně tam, odkud byl požadavek zadán.
+  Do náhledu lze rovnou **zakreslit** (šipka, obdélník, kolečko, čára od ruky) a přesně tak
+  označit, čeho se úprava týká. Uložený pohled jde z nástěnky otevřít odkazem
+  (`model.html#view=…`), který kameru nastaví přesně tam, odkud byl požadavek zadán.
 - Data se **sdílejí v reálném čase** přes Firebase (Firestore, kolekce `pozadavky`); při
   nedostupnosti spadnou na lokální úložiště prohlížeče. Pravidla Firestore musí povolit
   zápis do kolekce `pozadavky` – stejně jako u `poznamky`, `vizualizace` a `inspirace`.
