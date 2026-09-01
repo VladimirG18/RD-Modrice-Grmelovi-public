@@ -8,9 +8,17 @@ původní parametrický generátor detailního modelu není po ruce.
 > **bez Draco komprese** (skripty to tak mají nastavené).
 
 ## `add_gable_window.py`
-Vytvoří **zalomené okno** na západním štítu: spojí původní střešní okno `S0`
-a fasádní okno `S2_0` (západní konec jižní strany) do jednoho okna, které
-přechází ze stěny přes okap na střechu (svislá + šikmá tabule s rámem).
+Vytvoří **zalomená okna** na jižní straně: každé spojí původní střešní a fasádní
+okno do jednoho okna, které přechází ze stěny přes okap na střechu (svislá +
+šikmá tabule s rámem). Dělá se to na dvou místech:
+
+* **západní štít** – střešní `S0` + fasádní `S2_0` → jedno okno (X 0.55–1.70),
+* **východní strana** – 2 střešní `S1`,`S2` + fasádní `S2_1` → jedno okno
+  (X 8.65–9.80), stejných rozměrů.
+
+Pod oknem i po jeho stranách se doplní omítka (parapet + špalety), aby
+neprosvítal interiér; dlouhý okap na východě se jen nařízne, krátký na západě
+smaže celý.
 
 ```bash
 pip install bpy          # Blender jako Python modul
