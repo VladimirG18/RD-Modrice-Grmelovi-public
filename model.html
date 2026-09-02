@@ -393,18 +393,18 @@ function mergeGarageDoorFrames(root){
   root.traverse(o=>{ if(o.isMesh && /vrata_(sever|jih)_ram/i.test(o.name || '')) o.material = mat; });
 }
 
-// Zapuštěná terasa v podkroví: tmavé plné plochy stěn terasy (boční pilíře a
-// parapet zadní stěny i boční ostění recesu) nahradíme prosklením – stejným sklem
-// jako okna – aby byla terasa celá prosklená a průhledná a bylo skrz ni vidět do
-// interiéru. Sklu se navíc vypne vrhání stínu.
-function glazeTerraceWall(root){
-  const set = materialsByName['sklo_okna'];
-  const glass = set && set.size ? [...set][0] : null;
-  if(!glass) return;
-  // prosklení jen VLEVO: levý pilíř + boky. Pravý pilíř a parapet zůstávají plné
-  // (pravá půlka zadní stěny terasy je plná stěna – viz solidify_terrace_right).
+// Zapuštěná terasa v podkroví: zadní stěna terasy je plná omítková stěna jako
+// obvodové zdivo – jediný prosklený prvek jsou vstupní terasové dveře (ty mají
+// sklo přímo v modelu). Boční pilíře (levý pilir_Z; pravý pilir_V už omítku má)
+// i boční ostění recesu (bok*) proto sjednotíme na fasádní omítku, ať celá stěna
+// splývá a nejsou z ní vidět „sloupy" ani sklo. Materiál je shodný s fasádou,
+// takže se plochy barví společně s obvodovými stěnami v konfigurátoru.
+function finishTerraceWall(root){
+  const set = materialsByName['A_omitka_svetle_seda'];
+  const omit = set && set.size ? [...set][0] : null;
+  if(!omit) return;
   const names = /^RD_Obvod_terasa_(pilir_Z|bok\d*)$/;
-  root.traverse(o=>{ if(o.isMesh && names.test(o.name || '')){ o.material = glass; o.castShadow = false; } });
+  root.traverse(o=>{ if(o.isMesh && names.test(o.name || '')){ o.material = omit; o.castShadow = true; } });
 }
 
 // Oprava „blikání" ploch (z-fighting): některé části modelu leží přesně v téže
@@ -457,7 +457,7 @@ loader.load('RDModrice.glb', (gltf) => {
   applyDepthFix();
   buildRoofWindowFrames(model);
   mergeGarageDoorFrames(model);
-  glazeTerraceWall(model);
+  finishTerraceWall(model);
   scene.add(model);
 
   // vycentrování a nastavení kamery
