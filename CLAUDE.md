@@ -89,9 +89,18 @@ Zásady (osvědčené, nešlapat vedle):
 - Vrstvy v `model.html` se třídí podle názvu objektu: `RD_strecha*`→střecha,
   `RD_Obvod*`→obvodové stěny, `vypln*`→výplně oken, `txt_*`→popisky, `RD_teren*`→terén.
   Nové objekty proto pojmenovávej touto konvencí, ať fungují vrstvy i barvení.
-- Hotové úpravy modelu: zalomená (spojená střešní+fasádní) okna na jižní straně
-  (západní štít + východní strana) – skript `tools/model_edits/add_gable_window.py`,
-  detaily v `tools/model_edits/README.md`.
+- Vrstvy patra: objekty s `1NP`/`2NP` (nebo `_1xx_`/`_2xx_`) v názvu spadají do
+  přepínačů „1. patro"/„2. patro". Interiérové doplňky proto pojmenovávej s `1NP`.
+- Hotové úpravy modelu (skripty v `tools/model_edits/`, detaily v `README.md`):
+  - `add_gable_window.py` – zalomená (spojená střešní+fasádní) okna na jižní straně
+    (západní štít + východní strana), plné/prosklené plochy zadní stěny terasy,
+    zkrácení vnitřních příček prostrkávajících do lodžie, levé terasové okno.
+  - `furnish_interior.py` – zjednodušené zařízení obýváku s kuchyní (místnost 104)
+    dle uložených vizualizací (kuchyň, ostrůvek, spotřebiče, sedačka, stoly, TV,
+    police, lamely, dubová podlaha). Nábytek má prefix `int_1NP_furn_` a vlastní
+    materiály (konfigurátor je nebarví). Skript je idempotentní.
+- **Celá sestava modelu = dva kroky** (druhý navazuje na výstup prvního):
+  `add_gable_window.py <orig.glb> RDModrice.glb` → `furnish_interior.py` (in‑place).
 
 Po úpravě modelu: zkopíruj výsledek do `RDModrice.glb`, ověř v prohlížeči (§5),
 commitni a nasaď (§1).
