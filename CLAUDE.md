@@ -125,8 +125,9 @@ jinak nezachytí). Kamera je v modulu `model.html` jako `camera`/`orbit`.
 Rodina zadává požadavky na úpravy modelu na `pozadavky.html` nebo přímo v modelu
 (tlačítko „Navrhnout úpravu"). Ukládají se do Firestore kolekce `pozadavky` s poli:
 `text`, `author`, `area`, `status` (`novy`/`probiha`/`hotovo`), `ts`, volitelně
-`view` (pohled kamery `{p:[x,y,z], t:[x,y,z]}`) a `thumb` (JPEG data URL – screenshot,
-případně s ruční kresbou).
+`view` (pohled kamery `{p:[x,y,z], t:[x,y,z]}`), `thumb` (JPEG data URL – screenshot,
+případně s ruční kresbou; při kreslení jde náhled přiblížit) a volitelně `images`
+(pole JPEG data URL – doplňující obrázky přiložené z PC/internetu, zmenšené).
 
 **Přečíst požadavky odsud** (bez appky, veřejné čtení – jako web) přes Firestore REST:
 
@@ -135,6 +136,7 @@ KEY="$(grep -oE 'AIza[0-9A-Za-z_-]+' assets/firebase-config.js | head -1)"
 curl -sS "https://firestore.googleapis.com/v1/projects/rd-modrice-e9477/databases/(default)/documents/pozadavky?key=$KEY&pageSize=50" -o /tmp/pozadavky.json
 # JSON má „typed values" (stringValue/integerValue/mapValue/arrayValue) – rozparsuj v pythonu;
 # pole `thumb` je data URL: base64 část ulož jako .jpg a otevři (uvidíš i kresbu uživatele).
+# pole `images` (je-li) = arrayValue data URL příloh – ulož a projdi stejně jako thumb.
 # pole `view` → otevři pohled v modelu jako model.html#view=px,py,pz,tx,ty,tz
 ```
 

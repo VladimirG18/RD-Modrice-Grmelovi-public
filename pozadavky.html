@@ -58,6 +58,9 @@
   .rq-text{ font-size:.95rem; line-height:1.5; color:var(--text); white-space:pre-wrap; word-break:break-word; }
   .rq-thumb{ display:block; border:0; padding:0; background:none; cursor:pointer; border-radius:10px; overflow:hidden; }
   .rq-thumb img{ width:100%; display:block; border:1px solid var(--border); border-radius:10px; }
+  .rq-imgs-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .rq-imgs-row .rq-thumb{ width:96px; }
+  .rq-imgs-row .rq-thumb img{ height:72px; object-fit:cover; }
   .rq-meta{ font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .rq-actions{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:2px; }
   .rq-view{ font-size:.78rem; padding:5px 10px; border-radius:8px; border:1px solid var(--border);
@@ -174,6 +177,10 @@ function cardHTML(it){
   const areaBadge = area ? `<span class="rq-badge">${area.icon} ${esc(area.name)}</span>` : '';
   const stName = (STATUS_BY_ID[st]||{}).name || st;
   const thumb = it.thumb ? `<button class="rq-thumb" data-img="${esc(it.id)}"><img src="${esc(it.thumb)}" alt="Náhled pohledu" loading="lazy"></button>` : '';
+  const imgsRow = Array.isArray(it.images) && it.images.length
+    ? `<div class="rq-imgs-row">${it.images.map((src, i) =>
+        `<button class="rq-thumb mini"><img src="${esc(src)}" alt="Příloha ${i+1}" loading="lazy"></button>`).join('')}</div>`
+    : '';
   const viewBtn = it.view ? `<a class="rq-view" href="model.html#view=${encodeURIComponent(viewToHash(it.view))}" target="_blank" rel="noopener">🎥 Otevřít pohled</a>` : '';
   const setBtns = STATUSES.map(x =>
     `<button class="rq-sbtn${x.id===st?' on':''}" data-set="${esc(it.id)}" data-status="${x.id}" title="${esc(x.name)}">${x.icon}</button>`).join('');
@@ -187,6 +194,7 @@ function cardHTML(it){
     </div>
     <div class="rq-text">${esc(it.text)}</div>
     ${thumb}
+    ${imgsRow}
     <div class="rq-meta"><span class="who who-${s}">${esc(it.author||'')}</span> · <span>${esc(fmtDate(it.ts))}</span></div>
     <div class="rq-actions">
       ${viewBtn}
@@ -256,7 +264,7 @@ listEl.addEventListener('click', e => {
   const set = e.target.closest('.rq-sbtn');
   if(set){ backend.update(set.dataset.set, { status:set.dataset.status }).catch(err => { console.error(err); alert('Změna stavu se nepodařila.'); }); return; }
   const img = e.target.closest('.rq-thumb');
-  if(img){ const it = items.find(i => i.id === img.dataset.img); if(it && it.thumb){ $('lightImg').src = it.thumb; $('light').classList.add('open'); } }
+  if(img){ const im = img.querySelector('img'); if(im && im.src){ $('lightImg').src = im.src; $('light').classList.add('open'); } }
 });
 $('light').addEventListener('click', () => { $('light').classList.remove('open'); $('lightImg').src=''; });
 window.addEventListener('keydown', e => { if(e.key === 'Escape') { $('light').classList.remove('open'); } });
