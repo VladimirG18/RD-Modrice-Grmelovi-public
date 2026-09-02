@@ -140,9 +140,22 @@
   .req-tools button.on{ background:var(--accent); border-color:var(--accent); color:#04121f; }
   .req-tools .col{ width:22px; height:22px; min-width:22px; padding:0; border-radius:50%; }
   .req-tools .col.on{ box-shadow:0 0 0 2px var(--panel), 0 0 0 4px var(--text); }
-  .req-canvas-wrap{ border:1px solid #2b333d; border-radius:8px; overflow:hidden; line-height:0; background:#0e1116; }
+  .req-canvas-wrap{ border:1px solid #2b333d; border-radius:8px; overflow:auto; max-height:48vh; line-height:0; background:#0e1116; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
   #reqCanvas{ width:100%; height:auto; display:block; touch-action:none; cursor:crosshair; }
+  .req-tools .zoomlbl{ font-size:.72rem; color:var(--muted); min-width:40px; text-align:center; user-select:none; }
   .req-draw-hint{ font-size:.72rem; color:var(--muted); margin-top:6px; line-height:1.4; }
+  .req-attach{ margin-top:12px; }
+  .req-attach-btn{ display:inline-flex; align-items:center; gap:6px; background:#1f2630; border:1px solid #2b333d;
+    color:var(--text); border-radius:8px; padding:8px 11px; font-size:.82rem; cursor:pointer; }
+  .req-attach-btn:hover{ border-color:var(--accent); }
+  .req-attach-hint{ font-size:.72rem; color:var(--muted); margin-top:6px; line-height:1.4; }
+  .req-imgs{ display:flex; flex-wrap:wrap; gap:8px; margin-top:9px; }
+  .req-imgs .thumb{ position:relative; width:84px; height:64px; border:1px solid #2b333d; border-radius:8px; overflow:hidden; background:#0e1116; }
+  .req-imgs .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .req-imgs .thumb button{ position:absolute; top:2px; right:2px; width:20px; height:20px; border:none; border-radius:50%;
+    background:rgba(0,0,0,.62); color:#fff; font-size:.8rem; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+  .req-imgs .thumb button:hover{ background:#e5484d; }
+  .req-card.drag{ outline:2px dashed var(--accent); outline-offset:-6px; }
   .req-actions{ display:flex; gap:8px; margin-top:12px; }
   .req-actions .btn{ margin-top:0; }
   .req-note{ font-size:.72rem; color:var(--muted); margin-top:9px; min-height:1em; }
@@ -231,7 +244,14 @@
     <div class="req-preview" id="reqPreview">
       <div class="req-tools" id="reqTools"></div>
       <div class="req-canvas-wrap"><canvas id="reqCanvas"></canvas></div>
-      <div class="req-draw-hint">Můžeš do náhledu zakreslit, čeho se to týká – vyber nástroj (šipka, obdélník, kolečko, od ruky) a nakresli přímo do obrázku.</div>
+      <div class="req-draw-hint">Můžeš do náhledu zakreslit, čeho se to týká – vyber nástroj (šipka, obdélník, kolečko, od ruky) a nakresli přímo do obrázku. Kolečkem myši nebo tlačítky +/− si obrázek přiblížíš, „✋" ho posuneš.</div>
+    </div>
+    <div class="req-attach">
+      <label class="req-attach-btn">➕ Přidat obrázky (foto, inspirace…)
+        <input type="file" id="reqFiles" accept="image/*" multiple hidden>
+      </label>
+      <div class="req-attach-hint">Můžeš přiložit fotky z počítače/telefonu nebo obrázky z internetu (i vložením přes Ctrl+V, případně přetažením sem). Přidají se k požadavku.</div>
+      <div class="req-imgs" id="reqImgs"></div>
     </div>
     <div class="req-actions">
       <button class="btn" id="reqCancel" type="button">Zrušit</button>
@@ -789,6 +809,62 @@ const reqStorePromise = createStore({});
 const annot = createAnnotator(document.getElementById('reqCanvas'), document.getElementById('reqTools'));
 let capturedView = null, captureOk = false;
 
+// --- přiložené doplňující obrázky (z PC / internetu / schránky) ---
+const reqFiles = document.getElementById('reqFiles');
+const reqImgs  = document.getElementById('reqImgs');
+const reqCard  = reqModal.querySelector('.req-card');
+let extraImages = [];
+const IMG_MAX = 6, IMG_SIDE = 1100, IMG_Q = 0.72;
+
+function downscaleToDataURL(file){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = reject;
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        const sc = Math.min(1, IMG_SIDE / Math.max(w, h));      // zmenšit na max. delší stranu (kvůli limitu databáze)
+        w = Math.max(1, Math.round(w * sc)); h = Math.max(1, Math.round(h * sc));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        try { resolve(c.toDataURL('image/jpeg', IMG_Q)); } catch(err){ reject(err); }
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+async function addFiles(files){
+  const imgs = [...files].filter(f => f && f.type && f.type.startsWith('image/'));
+  if(!imgs.length) return;
+  for(const f of imgs){
+    if(extraImages.length >= IMG_MAX){ toast('Maximálně ' + IMG_MAX + ' obrázků na jeden požadavek.'); break; }
+    try { extraImages.push(await downscaleToDataURL(f)); } catch(e){ console.warn('obrázek se nepodařilo načíst', e); }
+  }
+  renderImgs();
+}
+function renderImgs(){
+  reqImgs.innerHTML = extraImages.map((src, i) =>
+    `<div class="thumb"><img src="${src}" alt="příloha ${i+1}"><button type="button" data-i="${i}" title="Odebrat" aria-label="Odebrat">✕</button></div>`).join('');
+}
+reqImgs.addEventListener('click', e => {
+  const b = e.target.closest('button[data-i]');
+  if(b){ extraImages.splice(+b.dataset.i, 1); renderImgs(); }
+});
+reqFiles.addEventListener('change', () => { addFiles(reqFiles.files); reqFiles.value = ''; });
+// vložení ze schránky (Ctrl+V) – jen když je modal otevřený
+window.addEventListener('paste', e => {
+  if(!reqModal.classList.contains('open') || !e.clipboardData) return;
+  const files = [...e.clipboardData.items].filter(it => it.kind === 'file').map(it => it.getAsFile()).filter(Boolean);
+  if(files.length){ e.preventDefault(); addFiles(files); }
+});
+// přetažení obrázků do karty
+['dragenter','dragover'].forEach(ev => reqCard.addEventListener(ev, e => { e.preventDefault(); reqCard.classList.add('drag'); }));
+reqCard.addEventListener('dragleave', e => { if(e.target === reqCard) reqCard.classList.remove('drag'); });
+reqCard.addEventListener('drop', e => { e.preventDefault(); reqCard.classList.remove('drag'); if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+
 function captureCurrent(){
   capturedView = {
     p: [camera.position.x, camera.position.y, camera.position.z].map(n => +n.toFixed(3)),
@@ -813,6 +889,7 @@ function updatePreview(){
 }
 function openReq(){
   captureCurrent();
+  extraImages = []; renderImgs();
   reqNote.textContent = ''; reqNote.className = 'req-note';
   reqModal.classList.add('open'); reqModal.setAttribute('aria-hidden', 'false');
   setTimeout(() => reqText.focus(), 30);
@@ -833,6 +910,12 @@ async function submitReq(){
   if(reqInclude.checked && captureOk){
     if(capturedView) item.view = capturedView;
     item.thumb = annot.getDataURL(0.72);   // náhled i s případnou kresbou
+  }
+  if(extraImages.length) item.images = extraImages.slice();   // doplňující obrázky
+  // pojistka na limit dokumentu databáze (~1 MB) – kdyby přílohy byly moc velké
+  if(JSON.stringify(item).length > 1000000){
+    reqNote.textContent = 'Přílohy jsou příliš velké – odeber prosím některý obrázek a zkus to znovu.';
+    reqNote.className = 'req-note'; return;
   }
   try {
     const store = await reqStorePromise;

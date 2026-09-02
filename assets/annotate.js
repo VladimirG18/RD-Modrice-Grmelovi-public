@@ -31,6 +31,30 @@ export function createAnnotator(canvas, toolbar){
   let color = COLORS[0];
   let drawing = false;
 
+  // zoom (přiblížení kvůli přesnějšímu kreslení) + posun scrollem v obalu
+  let zoom = 1;
+  const ZMIN = 1, ZMAX = 6;
+  const wrap = () => canvas.parentElement;       // .req-canvas-wrap (scrollovací obal)
+  let zoomLabel = null;
+  function applyZoom(){
+    canvas.style.width = (zoom * 100) + '%';     // podklad se roztáhne, obal scrolluje
+    canvas.style.maxWidth = 'none';
+    if(zoomLabel) zoomLabel.textContent = Math.round(zoom * 100) + '%';
+  }
+  // přiblížení/oddálení se středem v bodě (cx,cy) v souřadnicích obalu (viewport)
+  function setZoom(z, cx, cy){
+    const w = wrap(); if(!w) { zoom = Math.min(ZMAX, Math.max(ZMIN, z)); applyZoom(); return; }
+    const r = w.getBoundingClientRect();
+    if(cx == null){ cx = r.width / 2; cy = r.height / 2; }
+    const nx = (w.scrollLeft + cx) / (canvas.offsetWidth || 1);   // relativní pozice v podkladu (0..1)
+    const ny = (w.scrollTop + cy) / (canvas.offsetHeight || 1);
+    zoom = Math.min(ZMAX, Math.max(ZMIN, Math.round(z * 100) / 100));
+    applyZoom();
+    // po změně šířky obnovit scroll tak, aby bod pod kurzorem zůstal na místě
+    w.scrollLeft = nx * canvas.offsetWidth - cx;
+    w.scrollTop  = ny * canvas.offsetHeight - cy;
+  }
+
   const lineW = () => Math.max(2.5, Math.round(canvas.width / 200));
 
   /* ---- panel nástrojů ---- */
@@ -49,8 +73,16 @@ export function createAnnotator(canvas, toolbar){
     toolbar.appendChild(sep());
     const undoB = mkBtn('↶', 'Zpět'); undoB.addEventListener('click', () => { shapes.pop(); redraw(); }); toolbar.appendChild(undoB);
     const clrB  = mkBtn('🗑', 'Smazat kresbu'); clrB.addEventListener('click', () => { shapes = []; cur = null; redraw(); }); toolbar.appendChild(clrB);
+    toolbar.appendChild(sep());
+    // ruka (posun po přiblíženém obrázku) – je to „nástroj" jako ostatní
+    const panB = mkBtn('✋', 'Posun (táhni po obrázku)'); panB.addEventListener('click', () => setTool('pan')); toolbar.appendChild(panB); toolBtns['pan'] = panB;
+    // zoom
+    const zoomOut = mkBtn('−', 'Oddálit'); zoomOut.addEventListener('click', () => setZoom(zoom - 0.5)); toolbar.appendChild(zoomOut);
+    zoomLabel = document.createElement('span'); zoomLabel.className = 'zoomlbl'; zoomLabel.textContent = '100%'; toolbar.appendChild(zoomLabel);
+    const zoomIn  = mkBtn('+', 'Přiblížit'); zoomIn.addEventListener('click', () => setZoom(zoom + 0.5)); toolbar.appendChild(zoomIn);
+    const zoomRst = mkBtn('⤢', 'Zpět na celý obrázek'); zoomRst.addEventListener('click', () => setZoom(1)); toolbar.appendChild(zoomRst);
   }
-  function setTool(t){ tool = t; for(const id in toolBtns) toolBtns[id].classList.toggle('on', id === t); }
+  function setTool(t){ tool = t; for(const id in toolBtns) toolBtns[id].classList.toggle('on', id === t); if(canvas) canvas.style.cursor = t === 'pan' ? 'grab' : 'crosshair'; }
   function setColor(c){ color = c; for(const k in colorBtns) colorBtns[k].classList.toggle('on', k === c); }
   setTool('arrow'); setColor(color);
 
@@ -92,20 +124,30 @@ export function createAnnotator(canvas, toolbar){
     const r = canvas.getBoundingClientRect();
     return { x:(e.clientX - r.left) * (canvas.width / r.width), y:(e.clientY - r.top) * (canvas.height / r.height) };
   }
+  let pan = null;   // {x,y,sl,st} – posun po přiblíženém obrázku
   canvas.addEventListener('pointerdown', e => {
     if(!base) return;
-    drawing = true; try { canvas.setPointerCapture(e.pointerId); } catch(_){}
+    try { canvas.setPointerCapture(e.pointerId); } catch(_){}
+    if(tool === 'pan'){
+      const w = wrap();
+      pan = { x:e.clientX, y:e.clientY, sl:w?w.scrollLeft:0, st:w?w.scrollTop:0 };
+      canvas.style.cursor = 'grabbing';
+      return;
+    }
+    drawing = true;
     const p = pos(e), lw = lineW();
     cur = tool === 'pen' ? { type:'pen', color, lw, pts:[p] } : { type:tool, color, lw, x0:p.x, y0:p.y, x1:p.x, y1:p.y };
     redraw();
   });
   canvas.addEventListener('pointermove', e => {
+    if(pan){ const w = wrap(); if(w){ w.scrollLeft = pan.sl - (e.clientX - pan.x); w.scrollTop = pan.st - (e.clientY - pan.y); } return; }
     if(!drawing || !cur) return;
     const p = pos(e);
     if(cur.type === 'pen') cur.pts.push(p); else { cur.x1 = p.x; cur.y1 = p.y; }
     redraw();
   });
   const end = () => {
+    if(pan){ pan = null; canvas.style.cursor = 'grab'; return; }
     if(!drawing) return; drawing = false;
     if(cur){
       const big = cur.type === 'pen' ? cur.pts.length > 1 : Math.hypot(cur.x1 - cur.x0, cur.y1 - cur.y0) > 5;
@@ -116,10 +158,17 @@ export function createAnnotator(canvas, toolbar){
   canvas.addEventListener('pointerup', end);
   canvas.addEventListener('pointercancel', end);
   canvas.addEventListener('pointerleave', end);
+  // kolečko myši = přiblížení/oddálení směrem ke kurzoru
+  canvas.addEventListener('wheel', e => {
+    if(!base) return;
+    e.preventDefault();
+    const w = wrap(); const r = w ? w.getBoundingClientRect() : canvas.getBoundingClientRect();
+    setZoom(zoom + (e.deltaY < 0 ? 0.4 : -0.4), e.clientX - r.left, e.clientY - r.top);
+  }, { passive:false });
 
   return {
     setSize(w, h){ canvas.width = w; canvas.height = h; redraw(); },
-    setBase(src){ base = src; shapes = []; cur = null; redraw(); },
+    setBase(src){ base = src; shapes = []; cur = null; zoom = 1; applyZoom(); if(wrap()){ wrap().scrollLeft = 0; wrap().scrollTop = 0; } redraw(); },
     reset(){ shapes = []; cur = null; redraw(); },
     hasDrawing(){ return shapes.length > 0; },
     getDataURL(q){ return canvas.toDataURL('image/jpeg', q || 0.72); },
