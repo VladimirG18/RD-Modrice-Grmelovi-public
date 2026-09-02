@@ -177,8 +177,12 @@ def add_bent_window(tag, OX0, OX1, remove_keys, orig_open, eave, gutter, eave_no
     if omit:
         ox0, ox1 = orig_open
         box("RD_Obvod_parapet_okno_zal%s" % tag,  OX0, OX1, 0.00, 0.45, ZSILL-0.70, ZSILL+0.01, omit, tcol)
-        box("RD_Obvod_spaleta_okno_zal%s_L" % tag, ox0, OX0, spy0, 0.45, 3.45, 4.05, omit, tcol)
-        box("RD_Obvod_spaleta_okno_zal%s_P" % tag, OX1, ox1, spy0, 0.45, 3.45, 4.05, omit, tcol)
+        # boční špalety jen když okno nevyplňuje celý otvor (jinak by vznikl
+        # samostatný obdélníkový panel vedle okna)
+        if OX0 - ox0 > 0.02:
+            box("RD_Obvod_spaleta_okno_zal%s_L" % tag, ox0, OX0, spy0, 0.45, 3.45, 4.05, omit, tcol)
+        if ox1 - OX1 > 0.02:
+            box("RD_Obvod_spaleta_okno_zal%s_P" % tag, OX1, ox1, spy0, 0.45, 3.45, 4.05, omit, tcol)
 
 def solidify_terrace_right():
     """Prosklení zadní stěny terasy nechat jen VLEVO (prosklené dveře + levý
@@ -209,9 +213,11 @@ def main():
 
     # VÝCHODNÍ strana – 2 střešní (S1,S2) + fasádní (S2_1) → jedno okno stejných
     # rozměrů, vycentrované na fasádní otvor (dlouhý okap jih1 se jen nařízne)
-    add_bent_window("V", 8.65, 9.80,
+    # okno vyplní CELÝ původní otvor S2_1 (8.48–9.98) → žádné boční špalety,
+    # vedle okna tak nezůstane samostatný omítkový obdélníček (opakovaná reklamace)
+    add_bent_window("V", 8.48, 9.98,
         ("stresni_okno_S1", "stresni_okno_sklo_S1", "stresni_okno_S2", "stresni_okno_sklo_S2", "okno_S2_1", "sitka_S_1"),
-        (8.48, 9.98),   # skutečný otvor S2_1 (rám 8.48–9.98) → špalety přesně do otvoru
+        (8.48, 9.98),
         "RD_strecha_lista_okap_jih1", "RD_strecha_zlab_jih1", eave_notch=True, spy0=0.00)
 
     # Terasa: prosklení nechat jen vlevo; pravou půlku zadní stěny udělat plnou.
