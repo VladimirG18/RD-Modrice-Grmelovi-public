@@ -208,6 +208,36 @@ def solidify_terrace_right():
             if o and o.data.materials:
                 o.data.materials[0] = omit
 
+def add_terrace_left_window():
+    """Levá plná plocha zadní stěny terasy (pilir_Z, X 2.25–3.30) → prosklené okno,
+    které navazuje na terasové dveře a je roztažené až do levého rohu lodžie.
+    Rám (antracit) i sklo kopírují terasové dveře, aby okno vypadalo jako jejich
+    prodloužení; pravá strana okna se opírá o levý rám dveří (X 3.30). Nad oknem se
+    doplní omítkové nadpraží (jako u dveří). Původní plný pilíř se odstraní."""
+    scn = bpy.context.scene.collection
+    smp = bpy.data.objects.get("RD_Obvod_terasa_pilir_Z") or bpy.data.objects.get("RD_Obvod_stena_jih")
+    tcol = smp.users_collection[0] if smp and smp.users_collection else scn
+    ram = get_mat("D_okna_antracit"); sklo = get_mat("sklo_okna"); omit = get_mat("A_omitka_svetle_seda")
+    # odstranit plný levý pilíř
+    o = bpy.data.objects.get("RD_Obvod_terasa_pilir_Z")
+    if o:
+        bpy.data.objects.remove(o, do_unlink=True)
+    if not (ram and sklo):
+        return
+    X0, X1 = 2.25, 3.30      # od levého rohu k levému rámu dveří
+    YF0, YF1 = 2.38, 2.47    # hloubka rámu (shodně s dveřmi)
+    ZD, ZH = 3.02, 5.48      # sklo mezi spodním a horním rámem (shodně s dveřmi)
+    FR = 0.07                # šířka rámu (shodně s dveřmi)
+    # rám: levý (u rohu) + spodní + horní; pravý rám netřeba – opře se o rám dveří
+    box("RD_Obvod_terasa_oknoL_ram_L", X0, X0+FR, YF0, YF1, 2.95, 5.55, ram, tcol)
+    box("RD_Obvod_terasa_oknoL_ram_D", X0, X1,    YF0, YF1, 2.95, ZD,   ram, tcol)
+    box("RD_Obvod_terasa_oknoL_ram_H", X0, X1,    YF0, YF1, ZH,   5.55, ram, tcol)
+    # sklo (od levého rámu okna k levému rámu dveří)
+    box("vypln_terasa_oknoL", X0+FR, X1, 2.42, 2.43, ZD, ZH, sklo, tcol)
+    # nadpraží nad oknem (omítka, jako u dveří)
+    if omit:
+        box("RD_Obvod_terasa_oknoL_nadprazi", X0, X1, 2.30, 2.55, 5.55, 5.80, omit, tcol)
+
 def trim_terrace_interior_stubs(y_to=2.55):
     """Vnitřní příčky – východní stěny pokojů 207 (ložnice) a 208 (šatna) – mají
     jižní konec až na Y≈2.10, takže PROSTRKÁVAJÍ skrz zadní stěnu terasy (ta je
@@ -253,6 +283,10 @@ def main():
     # Skrýt vnitřní příčky, které prostrkávaly skrz zadní stěnu terasy do lodžie
     # (dva světlé „sloupky" ve výklenku terasy).
     trim_terrace_interior_stubs()
+
+    # Levá plná plocha zadní stěny terasy → prosklené okno navazující na dveře
+    # (roztažené až do levého rohu lodžie).
+    add_terrace_left_window()
 
     bpy.ops.object.select_all(action='DESELECT')
     # POZN.: model.html načítá glTF bez DRACOLoaderu → export MUSÍ být bez Draco.
