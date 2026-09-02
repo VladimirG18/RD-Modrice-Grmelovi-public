@@ -186,20 +186,27 @@ def add_bent_window(tag, OX0, OX1, remove_keys, orig_open, eave, gutter, eave_no
 
 def solidify_terrace_right():
     """Prosklení zadní stěny terasy nechat jen VLEVO (prosklené dveře + levý
-    pilíř). PRAVOU půlku udělat plnou stěnou: odstranit pravé fixní prosklení
-    (sklo + rámy + sloupek) a doplnit plnou stěnu v obkladu (jako pilíř/parapet).
-    Prosklení pravého pilíře a parapetu se navíc vypne v model.html
-    (funkce glazeTerraceWall – ta nově prosklívá jen levý pilíř a boky)."""
+    pilíř). PRAVOU půlku udělat plnou stěnou v OMÍTCE jako obvodové stěny:
+    odstranit pravé fixní prosklení (sklo + rámy + sloupek) a doplnit plnou stěnu;
+    pravý pilíř a parapet navíc převést z tmavého obkladu na omítku, ať pravá
+    část terasy odpovídá obvodovým stěnám (a barví se ovladačem „Fasáda / omítka").
+    Prosklení pravého pilíře se vypíná i v model.html (glazeTerraceWall prosklívá
+    jen levý pilíř a boky)."""
     scn = bpy.context.scene.collection
     smp = bpy.data.objects.get("RD_Obvod_terasa_pilir_V") or bpy.data.objects.get("RD_Obvod_stena_jih")
     tcol = smp.users_collection[0] if smp and smp.users_collection else scn
-    obklad = get_mat("F_obklad_tmavy")
+    omit = get_mat("A_omitka_svetle_seda")
     for o in list(bpy.data.objects):
         if o.type == 'MESH' and "terasa_fix" in o.name:   # sklo + rámy pravého fixního prosklení
             bpy.data.objects.remove(o, do_unlink=True)
-    if obklad:
-        # plná stěna do otvoru po fixním prosklení (nad parapetem po nadpraží)
-        box("RD_Obvod_terasa_stena_P", 4.85, 6.55, 2.30, 2.55, 3.30, 5.55, obklad, tcol)
+    if omit:
+        # plná stěna do otvoru po fixním prosklení (nad parapetem po nadpraží), v omítce
+        box("RD_Obvod_terasa_stena_P", 4.85, 6.55, 2.30, 2.55, 3.30, 5.55, omit, tcol)
+        # pravé plné plochy terasy (pilíř + parapet) z obkladu na omítku
+        for nm in ("RD_Obvod_terasa_pilir_V", "RD_Obvod_terasa_parapet"):
+            o = bpy.data.objects.get(nm)
+            if o and o.data.materials:
+                o.data.materials[0] = omit
 
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
