@@ -208,6 +208,26 @@ def solidify_terrace_right():
             if o and o.data.materials:
                 o.data.materials[0] = omit
 
+def trim_terrace_interior_stubs(y_to=2.55):
+    """Vnitřní příčky – východní stěny pokojů 207 (ložnice) a 208 (šatna) – mají
+    jižní konec až na Y≈2.10, takže PROSTRKÁVAJÍ skrz zadní stěnu terasy (ta je
+    v rovině Y 2.30–2.55) do lodžie. Zvenčí pak koukají do terasy jako dva světlé
+    „sloupky" (jsou z bílého interiérového materiálu, tj. světlejší než omítka).
+    Jižní konec těchto příček zkrátíme na Y=2.55 (vnitřní líc zadní stěny terasy),
+    aby je plná stěna terasy zvenčí celé zakryla. Zbytek příčky (vč. otvoru pro
+    dveře dál na severu) zůstává beze změny."""
+    for nm in ("int_2NP_p207_vychod", "int_2NP_p208_vychod"):
+        o = bpy.data.objects.get(nm)
+        if not o or o.type != 'MESH':
+            continue
+        mw = o.matrix_world; imw = mw.inverted()
+        for v in o.data.vertices:
+            wco = mw @ v.co
+            if wco.y < y_to - 1e-4:
+                wco.y = y_to
+                v.co = imw @ wco
+        o.data.update()
+
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=GLB_IN)
@@ -229,6 +249,10 @@ def main():
 
     # Terasa: prosklení nechat jen vlevo; pravou půlku zadní stěny udělat plnou.
     solidify_terrace_right()
+
+    # Skrýt vnitřní příčky, které prostrkávaly skrz zadní stěnu terasy do lodžie
+    # (dva světlé „sloupky" ve výklenku terasy).
+    trim_terrace_interior_stubs()
 
     bpy.ops.object.select_all(action='DESELECT')
     # POZN.: model.html načítá glTF bez DRACOLoaderu → export MUSÍ být bez Draco.
