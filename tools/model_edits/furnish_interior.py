@@ -92,93 +92,87 @@ def clear_prev():
 
 def furnish(col):
     B = lambda n,*a: box(PREFIX+n, *a, col)
+    # Otočení celé sestavy o 180° kolem středu místnosti (Xc=3.95, Yc=3.375):
+    # X→CX−X, Y→CY−Y. Při pohledu ze zahrady (od jihu na sever) tím kuchyň přejde
+    # na LEVOU stranu (západ) a obývák/gauč na PRAVOU (východ). Kusy níže jsou
+    # zapsané v původní (nepřevrácené) poloze a R() je otočí; jídelní stůl a lamely
+    # se needitují otočením (viz níže), aby stůl zůstal u dveří a lamely u krbu.
+    CX, CY = 7.90, 6.75
+    def R(n, x0, x1, y0, y1, z0, z1, m):
+        return B(n, CX-x1, CX-x0, CY-y1, CY-y0, z0, z1, m)
 
     # ---- dubová podlaha obýváku (tenká deska mírně nad stávající podlahou) ----
-    B("podlaha", 0.50, 7.42, 0.50, 5.15, 0.00, 0.02, "furn_podlaha")
+    B("podlaha", 0.50, 7.42, 0.50, 5.20, 0.00, 0.02, "furn_podlaha")
 
-    # ============ KUCHYNĚ – linka do L u VÝCHODNÍ stěny (X≈7.45) ============
-    # korpusy čelem na západ (do místnosti); záda u stěny na X7.42
-    # spodní skříňky
-    B("kuch_spodni", 6.82, 7.42, 1.60, 6.05, 0.05, 0.88, "furn_bila")
-    B("kuch_sokl",   6.86, 7.42, 1.60, 6.05, 0.00, 0.05, "furn_cerna")
-    # pracovní deska (dub) s přesahem
-    B("kuch_deska",  6.76, 7.45, 1.55, 6.10, 0.88, 0.93, "furn_dub")
-    # horní skříňky (nad deskou, s mezerou u digestoře)
-    B("kuch_horni1", 7.14, 7.42, 1.60, 2.55, 1.55, 2.28, "furn_bila")
-    B("kuch_horni2", 7.14, 7.42, 3.95, 4.85, 1.55, 2.28, "furn_bila")
-    # varná deska (černá) na desce
-    B("kuch_varna",  6.92, 7.40, 2.75, 3.45, 0.93, 0.95, "furn_cerna")
-    # digestoř (nerez) nad varnou deskou – komínový tvar
-    B("kuch_dig_h",  7.10, 7.42, 2.95, 3.30, 1.95, 2.35, "furn_nerez")
-    B("kuch_dig_d",  6.98, 7.42, 2.80, 3.42, 1.75, 1.95, "furn_nerez")
-    # dřez (tmavý) zapuštěný v desce
-    B("kuch_drez",   6.98, 7.40, 4.55, 5.15, 0.90, 0.94, "furn_cerna")
-    # vysoká skříň se spotřebiči na severním konci (lednice + trouby)
-    B("kuch_vysoka", 6.82, 7.42, 5.15, 6.05, 0.00, 2.30, "furn_bila")
-    B("kuch_lednice",6.80, 7.42, 5.55, 6.03, 0.10, 2.10, "furn_nerez")  # nerez lednice
-    B("kuch_trouby", 6.80, 6.83, 5.18, 5.52, 1.15, 1.85, "furn_cerna")  # vestavěné trouby (čelo)
+    # ============ KUCHYNĚ – linka do L (po otočení u ZÁPADNÍ stěny, čelem na východ) ============
+    R("kuch_spodni", 6.82, 7.42, 1.60, 6.05, 0.05, 0.88, "furn_bila")
+    R("kuch_sokl",   6.86, 7.42, 1.60, 6.05, 0.00, 0.05, "furn_cerna")
+    R("kuch_deska",  6.76, 7.45, 1.55, 6.10, 0.88, 0.93, "furn_dub")     # pracovní deska (dub)
+    R("kuch_horni1", 7.14, 7.42, 1.60, 2.55, 1.55, 2.28, "furn_bila")    # horní skříňky
+    R("kuch_horni2", 7.14, 7.42, 3.95, 4.85, 1.55, 2.28, "furn_bila")
+    R("kuch_varna",  6.92, 7.40, 2.75, 3.45, 0.93, 0.95, "furn_cerna")   # varná deska
+    R("kuch_dig_h",  7.10, 7.42, 2.95, 3.30, 1.95, 2.35, "furn_nerez")   # digestoř (nerez)
+    R("kuch_dig_d",  6.98, 7.42, 2.80, 3.42, 1.75, 1.95, "furn_nerez")
+    R("kuch_drez",   6.98, 7.40, 4.55, 5.15, 0.90, 0.94, "furn_cerna")   # dřez
+    R("kuch_vysoka", 6.82, 7.42, 5.15, 6.05, 0.00, 2.30, "furn_bila")    # vysoká skříň
+    R("kuch_lednice",6.80, 7.42, 5.55, 6.03, 0.10, 2.10, "furn_nerez")   # nerez lednice
+    R("kuch_trouby", 6.80, 6.83, 5.18, 5.52, 1.15, 1.85, "furn_cerna")   # vestavěné trouby
 
-    # ============ KUCHYŇSKÝ OSTRŮVEK ============
-    B("ostruv_korp", 5.35, 6.15, 2.20, 4.60, 0.00, 0.90, "furn_bila")
-    B("ostruv_deska",5.22, 6.28, 2.05, 4.75, 0.90, 0.95, "furn_dub")
-    # 3 barové židle na západní straně ostrůvku (sedák + 4 nohy)
-    for i, yc in enumerate((2.55, 3.40, 4.25)):
+    # ============ KUCHYŇSKÝ OSTRŮVEK (po otočení západně od středu) ============
+    R("ostruv_korp", 5.35, 6.15, 2.20, 4.60, 0.00, 0.90, "furn_bila")
+    R("ostruv_deska",5.22, 6.28, 2.05, 4.75, 0.90, 0.95, "furn_dub")
+    for i, yc in enumerate((2.55, 3.40, 4.25)):   # 3 barové židle
         sx0, sx1 = 4.80, 5.18
-        B("stool%d_sed"%i, sx0, sx1, yc-0.19, yc+0.19, 0.75, 0.80, "furn_bila")
+        R("stool%d_sed"%i, sx0, sx1, yc-0.19, yc+0.19, 0.75, 0.80, "furn_bila")
         for lx in (sx0+0.02, sx1-0.06):
             for ly in (yc-0.17, yc+0.11):
-                B("stool%d_noha_%.0f_%.0f"%(i,lx*100,ly*100), lx, lx+0.04, ly, ly+0.04, 0.00, 0.75, "furn_dub")
+                R("stool%d_noha_%.0f_%.0f"%(i,lx*100,ly*100), lx, lx+0.04, ly, ly+0.04, 0.00, 0.75, "furn_dub")
 
-    # ============ OBÝVACÍ ČÁST ============
-    # TV sestava na ZÁPADNÍ stěně (X0.45)
-    B("tv_skrinka", 0.48, 0.82, 2.20, 4.40, 0.00, 0.48, "furn_dub_tm")
-    B("tv_panel",   0.49, 0.53, 2.70, 4.05, 0.75, 1.55, "furn_cerna")   # TV na stěně
-
-    # tmavě modrá rohová sedačka (L) – roh na SV, opěráky na severu a východě,
-    # otevřená k JZ (ke konferenčnímu stolku a TV na západě)
-    B("sofa_sed_S",  3.00, 3.72, 2.55, 4.45, 0.12, 0.46, "furn_modra")  # rameno podél východu (čelem na západ)
-    B("sofa_sed_Z",  2.30, 3.72, 4.05, 4.45, 0.12, 0.46, "furn_modra")  # rameno podél severu (čelem na jih)
-    B("sofa_zada_V", 3.72, 3.98, 2.55, 4.70, 0.12, 0.84, "furn_modra")  # opěrák východ
-    B("sofa_zada_S", 2.30, 3.98, 4.45, 4.70, 0.12, 0.84, "furn_modra")  # opěrák sever
-    B("sofa_pols_S", 3.05, 3.68, 2.60, 4.45, 0.46, 0.62, "furn_modra")  # sedáky (rameno V)
-    B("sofa_pols_Z", 2.35, 3.05, 4.05, 4.42, 0.46, 0.62, "furn_modra")  # sedáky (rameno S)
-    B("sofa_loket_J",3.00, 3.98, 2.55, 2.75, 0.12, 0.66, "furn_modra")  # loketní opěrka jih
-
-    # konferenční stolek (dub deska + černé nohy) v otevřené části sedačky
-    B("konf_deska", 2.00, 2.85, 2.95, 3.90, 0.38, 0.43, "furn_dub")
+    # ============ OBÝVACÍ ČÁST (po otočení východně, TV na VÝCHODNÍ stěně) ============
+    R("tv_skrinka", 0.48, 0.82, 2.20, 4.40, 0.00, 0.48, "furn_dub_tm")
+    R("tv_panel",   0.49, 0.53, 2.70, 4.05, 0.75, 1.55, "furn_cerna")
+    # tmavě modrá rohová sedačka (L) – po otočení otevřená k SV, čelem k TV
+    R("sofa_sed_S",  3.00, 3.72, 2.55, 4.45, 0.12, 0.46, "furn_modra")
+    R("sofa_sed_Z",  2.30, 3.72, 4.05, 4.45, 0.12, 0.46, "furn_modra")
+    R("sofa_zada_V", 3.72, 3.98, 2.55, 4.70, 0.12, 0.84, "furn_modra")
+    R("sofa_zada_S", 2.30, 3.98, 4.45, 4.70, 0.12, 0.84, "furn_modra")
+    R("sofa_pols_S", 3.05, 3.68, 2.60, 4.45, 0.46, 0.62, "furn_modra")
+    R("sofa_pols_Z", 2.35, 3.05, 4.05, 4.42, 0.46, 0.62, "furn_modra")
+    R("sofa_loket_J",3.00, 3.98, 2.55, 2.75, 0.12, 0.66, "furn_modra")
+    # konferenční stolek
+    R("konf_deska", 2.00, 2.85, 2.95, 3.90, 0.38, 0.43, "furn_dub")
     for lx in (2.04, 2.77):
         for ly in (2.99, 3.82):
-            B("konf_noha_%.0f_%.0f"%(lx*100,ly*100), lx, lx+0.05, ly, ly+0.05, 0.00, 0.38, "furn_cerna")
+            R("konf_noha_%.0f_%.0f"%(lx*100,ly*100), lx, lx+0.05, ly, ly+0.05, 0.00, 0.38, "furn_cerna")
+    # otevřená dřevěná police (po otočení SV roh u východní stěny)
+    R("police_korp", 0.48, 0.86, 0.55, 1.85, 0.00, 1.85, "furn_dub")
+    for zc in (0.45, 0.90, 1.35):
+        R("police_pol_%.0f"%(zc*100), 0.50, 0.86, 0.55, 1.85, zc, zc+0.03, "furn_dub_tm")
+    R("police_svisla", 0.50, 0.86, 1.18, 1.22, 0.00, 1.85, "furn_dub_tm")
 
-    # jídelní stůl (dub) u prosklených dveří (jih) + 4 židle
-    B("jidel_deska", 3.70, 5.60, 1.00, 1.95, 0.72, 0.77, "furn_dub")
-    for lx in (3.76, 5.48):
-        for ly in (1.06, 1.83):
+    # ============ JÍDELNÍ STŮL – zůstává u prosklených dveří (jih), NEotočený ============
+    # židle jen z jihu (u dveří) a z boků; ze severu ne, ať nekolidují s otočenou sedačkou
+    B("jidel_deska", 3.95, 5.95, 0.98, 1.92, 0.72, 0.77, "furn_dub")
+    for lx in (4.01, 5.83):
+        for ly in (1.04, 1.80):
             B("jidel_noha_%.0f_%.0f"%(lx*100,ly*100), lx, lx+0.06, ly, ly+0.06, 0.00, 0.72, "furn_dub")
-    for i, xc in enumerate((4.15, 5.15)):     # 2 židle ze severu (zády k obýváku)
-        B("chair_N%d_sed"%i, xc-0.22, xc+0.22, 2.02, 2.44, 0.44, 0.48, "furn_bila")
-        B("chair_N%d_opr"%i, xc-0.22, xc+0.22, 2.40, 2.44, 0.48, 0.90, "furn_bila")
+    for i, xc in enumerate((4.45, 5.45)):   # 2 židle z jihu (u dveří)
+        B("chair_S%d_sed"%i, xc-0.22, xc+0.22, 0.50, 0.92, 0.44, 0.48, "furn_bila")
+        B("chair_S%d_opr"%i, xc-0.22, xc+0.22, 0.50, 0.54, 0.48, 0.90, "furn_bila")
         for lx in (xc-0.20, xc+0.16):
-            for ly in (2.06, 2.38):
-                B("chair_N%d_%.0f_%.0f"%(i,lx*100,ly*100), lx, lx+0.04, ly, ly+0.04, 0.00, 0.44, "furn_dub")
-    for i, xc in enumerate((4.15, 5.15)):     # 2 židle z jihu
-        B("chair_S%d_sed"%i, xc-0.22, xc+0.22, 0.52, 0.94, 0.44, 0.48, "furn_bila")
-        B("chair_S%d_opr"%i, xc-0.22, xc+0.22, 0.52, 0.56, 0.48, 0.90, "furn_bila")
-        for lx in (xc-0.20, xc+0.16):
-            for ly in (0.56, 0.88):
+            for ly in (0.54, 0.86):
                 B("chair_S%d_%.0f_%.0f"%(i,lx*100,ly*100), lx, lx+0.04, ly, ly+0.04, 0.00, 0.44, "furn_dub")
+    for i, (ex, xc) in enumerate(((3.55, 3.79), (6.11, 6.35))):  # 2 židle na koncích stolu
+        B("chair_E%d_sed"%i, ex, ex+0.42, 1.24, 1.66, 0.44, 0.48, "furn_bila")
+        B("chair_E%d_opr"%i, (ex if i==0 else ex+0.38), (ex+0.04 if i==0 else ex+0.42), 1.24, 1.66, 0.48, 0.90, "furn_bila")
+        for lx in (ex+0.02, ex+0.36):
+            for ly in (1.28, 1.60):
+                B("chair_E%d_%.0f_%.0f"%(i,lx*100,ly*100), lx, lx+0.04, ly, ly+0.04, 0.00, 0.44, "furn_dub")
 
-    # otevřená dřevěná police u západní stěny (jižně od TV, u okna) – jako ve viz
-    B("police_korp", 0.48, 0.86, 0.55, 1.85, 0.00, 1.85, "furn_dub")
-    for zc in (0.45, 0.90, 1.35):             # vodorovné police (mezery = otevřená police)
-        B("police_pol_%.0f"%(zc*100), 0.50, 0.86, 0.55, 1.85, zc, zc+0.03, "furn_dub_tm")
-    B("police_svisla", 0.50, 0.86, 1.18, 1.22, 0.00, 1.85, "furn_dub_tm")
-
-    # dřevěné lamely – akcentní panel vedle krbu (svislé latě s mezerami)
-    lam_x0, lam_x1 = 3.72, 3.80
+    # dřevěné lamely – akcentní panel vedle krbu (svislé latě), krb se nehýbe
     for k in range(6):
         yy = 5.05 + k*0.16
-        B("lamela_%d"%k, lam_x0, lam_x1, yy, yy+0.09, 0.00, 2.30, "furn_dub_tm")
+        B("lamela_%d"%k, 3.72, 3.80, yy, yy+0.09, 0.00, 2.30, "furn_dub_tm")
 
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
