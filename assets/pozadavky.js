@@ -70,7 +70,8 @@ export function hashToView(s){
 
 /* ---- Kontext scény (barvy konfigurátoru + zapnuté vrstvy) ---- */
 /* pevné pořadí kvůli kompaktnímu (a dekódovatelnému) zápisu do odkazu */
-export const SCENE_COLORS = ['fasada','strecha','okna','vrata','klemp','sokl','obklad','ocel'];
+export const SCENE_COLORS = ['fasada','strecha','okna','vrata','klemp','sokl','obklad','ocel',
+  'dvere','zpevnene','interier','podlaha','sklo'];
 export const SCENE_LAYERS = ['roof','walls','np2','np1','glass','terrain','labels'];
 export const SCENE_LAYER_NAMES = {
   roof:'Střecha', walls:'Obvodové stěny', np2:'2. patro', np1:'1. patro',
@@ -89,9 +90,11 @@ export function sceneToHash(sc){
 export function hashToScene(s){
   if(!s || s.indexOf('_') < 0) return null;
   const [c, l] = s.split('_');
-  if(!c || c.length < SCENE_COLORS.length * 6) return null;
+  if(!c) return null;
   const colors = {};
-  SCENE_COLORS.forEach((id, i) => { const h = c.substr(i*6, 6); if(/^[0-9a-f]{6}$/i.test(h)) colors[id] = '#' + h.toLowerCase(); });
+  // dekóduj tolik barev, kolik jich řetězec nese (starší odkazy měly méně ovladačů)
+  const nc = Math.min(SCENE_COLORS.length, Math.floor(c.length / 6));
+  for(let i = 0; i < nc; i++){ const h = c.substr(i*6, 6); if(/^[0-9a-f]{6}$/i.test(h)) colors[SCENE_COLORS[i]] = '#' + h.toLowerCase(); }
   const layers = {};
   SCENE_LAYERS.forEach((id, i) => { layers[id] = (l || '')[i] !== '0'; });
   return { colors, layers };

@@ -94,6 +94,7 @@
   .style-btn{ font-size:.72rem; padding:5px 8px; border:1px solid #2b333d; border-radius:7px;
     background:#1f2630; color:var(--text); cursor:pointer; }
   .style-btn:hover{ border-color:var(--accent); }
+  .style-btn.on{ background:var(--accent); border-color:var(--accent); color:#04121f; font-weight:600; }
   .cfg-item{ margin:9px 0; }
   .cfg-item .name{ font-size:.8rem; margin-bottom:5px; color:var(--text); }
   .sw-row{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
@@ -202,6 +203,7 @@
     <label><input type="checkbox" id="t-1np" checked> 1. patro (1NP)</label>
     <label><input type="checkbox" id="t-glass" checked> Výplně oken</label>
     <label><input type="checkbox" id="t-terrain" checked> Terén</label>
+    <label><input type="checkbox" id="t-soused" checked> Sousední domy</label>
     <label><input type="checkbox" id="t-labels" checked> Popisky místností</label>
     <div class="sep"></div>
 
@@ -215,8 +217,13 @@
       <button class="btn primary" id="saveColors">💾 Uložit konfiguraci</button>
       <div id="cfgStatus" class="cfg-status"></div>
       <button class="btn" id="resetColors">↺ Původní barvy</button>
-      <p class="cfg-note">Barvy jsou orientační. Po uložení se konfigurace pamatuje v tomto prohlížeči i po zavření a znovuotevření.</p>
+      <button class="btn" id="shareColors">🔗 Zkopírovat odkaz na tuto podobu</button>
+      <p class="cfg-note">Barvy jsou orientační. Po uložení se konfigurace pamatuje v tomto prohlížeči i po zavření a znovuotevření. Odkazem pošleš svůj návrh ostatním – otevře se se stejnými barvami i vrstvami.</p>
     </div>
+
+    <div class="sep"></div>
+    <span class="cfg-cap" style="margin-top:0">🌤️ Denní doba</span>
+    <div class="style-row" id="lightRow"></div>
 
     <div class="sep"></div>
     <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
@@ -300,7 +307,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { createStore, AUTHORS, AREAS, KINDS, hashToView, hashToScene } from './assets/pozadavky.js';
+import { createStore, AUTHORS, AREAS, KINDS, viewToHash, hashToView, sceneToHash, hashToScene } from './assets/pozadavky.js';
 import { createAnnotator } from './assets/annotate.js';
 
 const app = document.getElementById('app');
@@ -341,7 +348,7 @@ orbit.dampingFactor = 0.08;
 orbit.screenSpacePanning = true;   // posun ve směru pohledu -> umožní dostat se dovnitř
 
 // --- Vrstvy (skupiny objektů podle názvu) ---
-const groups = { roof:[], walls:[], np2:[], np1:[], glass:[], terrain:[], labels:[], other:[] };
+const groups = { roof:[], walls:[], np2:[], np1:[], glass:[], terrain:[], labels:[], neighbors:[], other:[] };
 
 function classify(name){
   const n = name || '';
@@ -492,7 +499,7 @@ loader.load('RDModrice.glb', (gltf) => {
         splitWindowFrames(o);
         registerMaterial(o);
       }
-      groups[classify(o.name)].push(o);
+      groups[/soused/i.test(o.name || '') ? 'neighbors' : classify(o.name)].push(o);
     }
   });
   applyDepthFix();
@@ -549,6 +556,16 @@ const CFG_ITEMS = [
     swatches:['#2a2b2e','#3b3d42','#6b4a28','#8a857c','#e4e2dc'] },
   { id:'ocel',    label:'Zábradlí / ocel',    mats:['G_ocel'],
     swatches:['#4e5257','#2a2b2d','#141414','#c9cacd'] },
+  { id:'dvere',   label:'Vstupní / terasové dveře', mats:['D_okna_antracit'],
+    swatches:['#2a2b2d','#141414','#3a2a1e','#6b4a28','#e9e8e4','#3b5a3a'] },
+  { id:'zpevnene',label:'Zpevněné plochy (vjezd)',  mats:['beton_dlazba','asfalt','kacirek'],
+    swatches:['#8a8c90','#6e7074','#b7b4ac','#4a4c50','#c9a87a'] },
+  { id:'interier',label:'Interiér – stěny',    mats:['interier_bily'],
+    swatches:['#efeee9','#e7e0d0','#dfe3e8','#c9c7c0','#b0a99a'] },
+  { id:'podlaha', label:'Podlahy',             mats:['podlaha_drevo','podlaha_dlazba'],
+    swatches:['#b5813f','#8a5a2b','#d9b382','#9a9ca0','#6e7074'] },
+  { id:'sklo',    label:'Sklo / zasklení',     mats:['sklo_okna','sklo_zabradli'],
+    swatches:['#cfe3ef','#a9b6bd','#7d8a90','#5a6a72','#b9a17a'] },
 ];
 
 // Rychlé kombinace (co není uvedeno, zůstane v původní barvě).
@@ -562,7 +579,8 @@ const CFG_STYLES = [
 
 const COLORS_KEY = 'rdmodrice-colors';
 const colorState = {};      // id -> aktuální hex
-const colorDefaults = {};   // id -> původní hex z modelu
+const colorDefaults = {};   // id -> původní hex z modelu (reprezentativní, z prvního materiálu)
+const origColors = {};      // název materiálu -> původní hex (pro přesný reset u víc­materiálových prvků)
 
 function loadColors(){ try{ return JSON.parse(localStorage.getItem(COLORS_KEY)) || {}; }catch(e){ return {}; } }
 function saveColors(){ try{ localStorage.setItem(COLORS_KEY, JSON.stringify(colorState)); }catch(e){} }
@@ -590,14 +608,47 @@ function setItemColor(id, hex){
   colorState[id] = hex;
 }
 
+// návrat na PŮVODNÍ barvy – u víc­materiálových prvků (vjezd, podlahy, sklo)
+// obnoví každý materiál zvlášť, ať se nesloučí do jedné barvy.
+function resetItem(id){
+  const item = CFG_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  item.mats.forEach(name=>{
+    const o = origColors[name], set = materialsByName[name];
+    if(o && set) set.forEach(m=> m.color.set(o));
+  });
+  colorState[id] = colorDefaults[id];
+}
+
 function applyStyle(style){
   CFG_ITEMS.forEach(item=>{
-    const hex = style.reset ? colorDefaults[item.id]
-                            : ((style.colors && style.colors[item.id]) || colorDefaults[item.id]);
-    setItemColor(item.id, hex);
+    if(style.reset) resetItem(item.id);
+    else setItemColor(item.id, (style.colors && style.colors[item.id]) || colorDefaults[item.id]);
   });
   markColorsDirty();
   if(buildConfigurator._refresh) buildConfigurator._refresh();
+}
+
+// „Sdílet podobu odkazem" – zabalí aktuální pohled + barvy + vrstvy do URL a zkopíruje.
+function fallbackCopy(text){
+  try{
+    const ta = document.createElement('textarea'); ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    const ok = document.execCommand('copy'); document.body.removeChild(ta); return ok;
+  }catch(e){ return false; }
+}
+function shareLook(){
+  const view = { p:[camera.position.x, camera.position.y, camera.position.z].map(n => +n.toFixed(2)),
+                 t:[orbit.target.x, orbit.target.y, orbit.target.z].map(n => +n.toFixed(2)) };
+  const url = location.origin + location.pathname
+    + '#view=' + encodeURIComponent(viewToHash(view))
+    + '&scene=' + encodeURIComponent(sceneToHash(captureScene()));
+  const ok = () => toast('🔗 Odkaz na tuto podobu zkopírován do schránky.');
+  const fb = () => { if(fallbackCopy(url)) ok(); else prompt('Zkopíruj odkaz na tuto podobu:', url); };
+  if(navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(ok).catch(fb);
+  else fb();
 }
 
 function buildConfigurator(){
@@ -609,6 +660,11 @@ function buildConfigurator(){
 
   // původní barvy přímo z modelu (pro reset a výchozí vzorník)
   CFG_ITEMS.forEach(item=>{
+    item.mats.forEach(name=>{                         // původní barva každého materiálu (pro přesný reset)
+      const s = materialsByName[name];
+      const f = s && s.size ? [...s][0] : null;
+      if(f && !(name in origColors)) origColors[name] = '#'+f.color.getHexString();
+    });
     const set = materialsByName[item.mats[0]];
     const first = set && set.size ? [...set][0] : null;
     colorDefaults[item.id] = first ? ('#'+first.color.getHexString()) : item.swatches[0];
@@ -675,9 +731,11 @@ function buildConfigurator(){
   function refresh(){ refreshers.forEach(fn=>fn()); }
   buildConfigurator._refresh = refresh;
 
-  // počáteční barvy: uložené z prohlížeče, jinak původní z modelu
+  // počáteční barvy: jen uložené z prohlížeče se aplikují; jinak necháme materiály
+  // v jejich vlastních původních barvách (u víc­materiálových prvků se tím nesloučí).
   CFG_ITEMS.forEach(item=>{
-    setItemColor(item.id, (saved && saved[item.id]) || colorDefaults[item.id]);
+    if(saved && saved[item.id]) setItemColor(item.id, saved[item.id]);
+    else colorState[item.id] = colorDefaults[item.id];
   });
   refresh();
 
@@ -692,6 +750,9 @@ function buildConfigurator(){
   });
 
   document.getElementById('resetColors').addEventListener('click', ()=> applyStyle({ reset:true }));
+
+  const shareBtn = document.getElementById('shareColors');
+  if(shareBtn) shareBtn.addEventListener('click', shareLook);
 
   // sbalování sekce barev
   const cfgToggle = document.getElementById('cfgToggle');
@@ -711,7 +772,30 @@ function bind(id, key){
   });
 }
 bind('t-roof','roof'); bind('t-walls','walls'); bind('t-2np','np2');
-bind('t-1np','np1'); bind('t-glass','glass'); bind('t-terrain','terrain'); bind('t-labels','labels');
+bind('t-1np','np1'); bind('t-glass','glass'); bind('t-terrain','terrain');
+bind('t-soused','neighbors'); bind('t-labels','labels');
+
+// --- Denní doba (osvětlení): posune slunce, jeho barvu/sílu a pozadí ---
+const LIGHT_PRESETS = [
+  { name:'☀️ Poledne', sun:[1, 2, 1],       col:0xffffff, si:2.0, fi:0.6, bg:0x11151c },
+  { name:'🌅 Ráno',    sun:[-1.3, 0.9, 1.1], col:0xffe6bf, si:1.7, fi:0.5, bg:0x121319 },
+  { name:'🌆 Večer',   sun:[1.5, 0.6, -0.7], col:0xffb27a, si:1.5, fi:0.5, bg:0x15111b },
+];
+function applyLight(p){
+  sun.position.set(p.sun[0], p.sun[1], p.sun[2]);
+  sun.color.set(p.col); sun.intensity = p.si;
+  fill.intensity = p.fi;
+  scene.background.set(p.bg);
+}
+(function buildLightRow(){
+  const row = document.getElementById('lightRow'); if(!row) return;
+  LIGHT_PRESETS.forEach((p, i) => {
+    const b = document.createElement('button'); b.className = 'style-btn'; b.textContent = p.name;
+    b.addEventListener('click', () => { applyLight(p); [...row.children].forEach(c => c.classList.remove('on')); b.classList.add('on'); });
+    row.appendChild(b);
+    if(i === 0) b.classList.add('on');
+  });
+})();
 
 // rychlý "domečkový" pohled: schová střechu + obvodové stěny a nadhled shora
 document.getElementById('dollhouse').addEventListener('click', ()=>{
@@ -1079,7 +1163,11 @@ function applyPendingScene(){
   const sc = hashToScene(decodeURIComponent(m[1]));
   if(!sc) return;
   if(sc.colors){
-    CFG_ITEMS.forEach(it => { if(sc.colors[it.id]) setItemColor(it.id, sc.colors[it.id]); });
+    CFG_ITEMS.forEach(it => {
+      const c = sc.colors[it.id]; if(!c) return;
+      if(c.toLowerCase() === (colorDefaults[it.id] || '').toLowerCase()) resetItem(it.id);  // beze změny → přesné původní barvy
+      else setItemColor(it.id, c);
+    });
     if(buildConfigurator._refresh) buildConfigurator._refresh();
   }
   const map = { roof:'t-roof', walls:'t-walls', np2:'t-2np', np1:'t-1np', glass:'t-glass', terrain:'t-terrain', labels:'t-labels' };
