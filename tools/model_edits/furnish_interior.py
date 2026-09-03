@@ -174,6 +174,28 @@ def furnish(col):
         yy = 5.05 + k*0.16
         B("lamela_%d"%k, 3.72, 3.80, yy, yy+0.09, 0.00, 2.30, "furn_dub_tm")
 
+    # ---- posuny kusů dle požadavků z nástěnky (nástroj „Posunout prvek") ----
+    # Zadané ve three.js; přepočet do bpy §4:  ΔX = dx,  ΔY = -dz,  ΔZ = dy.
+    # Srovnáno podle záměru, ať nevzniknou překryvy: kuchyňský ostrůvek se všemi
+    # 3 barovými židlemi jede na jih jako jeden celek (0,70 m; rozestupy zůstávají),
+    # gauč a konferenční stolek jedou do rohu společně stejným vektorem
+    # (45 cm východ + 40 cm sever) → stolek zůstane před gaučem.
+    MOVES = {
+        "ostruv": (0.00, -0.70, 0.00),
+        "stool0": (0.00, -0.70, 0.00),
+        "stool1": (0.00, -0.70, 0.00),
+        "stool2": (0.00, -0.70, 0.00),
+        "sofa":   (0.45,  0.40, 0.00),
+        "konf":   (0.45,  0.40, 0.00),
+    }
+    for o in list(col.objects):
+        if o.type != 'MESH' or not o.name.startswith(PREFIX):
+            continue
+        key = o.name[len(PREFIX):].split('_')[0]
+        d = MOVES.get(key)
+        if d:
+            o.location.x += d[0]; o.location.y += d[1]; o.location.z += d[2]
+
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=GLB_IN)
