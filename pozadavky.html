@@ -61,6 +61,16 @@
   .rq-imgs-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
   .rq-imgs-row .rq-thumb{ width:96px; }
   .rq-imgs-row .rq-thumb img{ height:72px; object-fit:cover; }
+  .rq-badge.kind{ background:var(--accent-soft); color:var(--accent-ink); border-color:transparent; font-weight:600; }
+  .rq-ctx{ display:flex; flex-wrap:wrap; gap:6px; margin-top:-2px; }
+  .rq-badge.ctx{ background:var(--surface-2); color:var(--text); border-color:var(--border); font-weight:500; }
+
+  .bk-cap{ display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); margin:2px 0 6px; }
+  .bk-row{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px; }
+  .bkchip{ font-size:.82rem; padding:5px 11px; border:1px solid var(--border); border-radius:999px;
+    background:var(--bg); color:var(--text); cursor:pointer; display:inline-flex; gap:5px; align-items:center; }
+  .bkchip:hover{ border-color:var(--accent); }
+  .bkchip.on{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); font-weight:600; }
   .rq-meta{ font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .rq-actions{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:2px; }
   .rq-view{ font-size:.78rem; padding:5px 10px; border-radius:8px; border:1px solid var(--border);
@@ -123,6 +133,8 @@
         <select id="area"></select>
       </label>
     </div>
+    <span class="bk-cap">Druh úpravy (nepovinné)</span>
+    <div class="bk-row" id="bkinds" role="group" aria-label="Druh úpravy"></div>
     <textarea id="text" placeholder="Co v modelu upravit? Např. „Zvětšit okno v ložnici na jih“, „Fasádu udělat světlejší“… (Ctrl+Enter odešle)"></textarea>
     <div class="frow" style="margin:10px 0 0; justify-content:flex-end">
       <button class="send" id="add">Přidat požadavek</button>
@@ -142,8 +154,8 @@
 <div class="rq-light" id="light"><img id="lightImg" alt="Náhled požadavku" /></div>
 
 <script type="module">
-import { createStore, AUTHORS, AREAS, AREA_BY_ID, STATUSES, STATUS_BY_ID,
-         esc, slug, fmtDate, viewToHash } from './assets/pozadavky.js';
+import { createStore, AUTHORS, AREAS, AREA_BY_ID, KINDS, KIND_BY_ID, STATUSES, STATUS_BY_ID,
+         esc, slug, fmtDate, viewToHash, sceneToHash, SCENE_LAYERS, SCENE_LAYER_NAMES } from './assets/pozadavky.js';
 
 const $ = id => document.getElementById(id);
 const authorEl = $('author'), areaEl = $('area'), textEl = $('text'), addBtn = $('add');
@@ -154,6 +166,19 @@ authorEl.innerHTML = AUTHORS.map(a => `<option>${esc(a)}</option>`).join('');
 areaEl.innerHTML = AREAS.map(a => `<option value="${a.id}">${a.icon} ${esc(a.name)}</option>`).join('');
 try { const la = localStorage.getItem(AKEY); if(la && AUTHORS.includes(la)) authorEl.value = la; } catch(e){}
 authorEl.addEventListener('change', () => { try { localStorage.setItem(AKEY, authorEl.value); } catch(e){} });
+
+// rychlé volby typu úpravy (nepovinné)
+const bkindsEl = $('bkinds');
+let bkind = null;
+function renderBKinds(){
+  bkindsEl.innerHTML = KINDS.map(k =>
+    `<button type="button" class="bkchip${k.id===bkind?' on':''}" data-k="${k.id}">${k.icon} ${esc(k.name)}</button>`).join('');
+}
+bkindsEl.addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]'); if(!b) return;
+  bkind = (bkind === b.dataset.k) ? null : b.dataset.k; renderBKinds();
+});
+renderBKinds();
 
 let items = [], filter = null, backend = null;
 
@@ -175,13 +200,26 @@ function cardHTML(it){
   const s = slug(it.author);
   const area = AREA_BY_ID[it.area];
   const areaBadge = area ? `<span class="rq-badge">${area.icon} ${esc(area.name)}</span>` : '';
+  const kind = KIND_BY_ID[it.kind];
+  const kindBadge = kind ? `<span class="rq-badge kind">${kind.icon} ${esc(kind.name)}</span>` : '';
   const stName = (STATUS_BY_ID[st]||{}).name || st;
   const thumb = it.thumb ? `<button class="rq-thumb" data-img="${esc(it.id)}"><img src="${esc(it.thumb)}" alt="Náhled pohledu" loading="lazy"></button>` : '';
   const imgsRow = Array.isArray(it.images) && it.images.length
     ? `<div class="rq-imgs-row">${it.images.map((src, i) =>
         `<button class="rq-thumb mini"><img src="${esc(src)}" alt="Příloha ${i+1}" loading="lazy"></button>`).join('')}</div>`
     : '';
-  const viewBtn = it.view ? `<a class="rq-view" href="model.html#view=${encodeURIComponent(viewToHash(it.view))}" target="_blank" rel="noopener">🎥 Otevřít pohled</a>` : '';
+  // kontext: přesné místo (špendlík) + skryté vrstvy / upravené barvy
+  const pinBadge = it.pin && it.pin.label ? `<span class="rq-badge ctx">📍 ${esc(it.pin.label)}</span>` : '';
+  let sceneBadges = '';
+  if(it.scene){
+    const hid = SCENE_LAYERS.filter(k => it.scene.layers && it.scene.layers[k] === false).map(k => SCENE_LAYER_NAMES[k]);
+    if(hid.length) sceneBadges += `<span class="rq-badge ctx">👁 skryto: ${esc(hid.join(', '))}</span>`;
+    if(it.scene.colorsChanged) sceneBadges += `<span class="rq-badge ctx">🎨 upravené barvy</span>`;
+  }
+  const ctxRow = (pinBadge || sceneBadges) ? `<div class="rq-ctx">${pinBadge}${sceneBadges}</div>` : '';
+  const sceneHash = it.scene ? sceneToHash(it.scene) : '';
+  const viewHref = it.view ? `model.html#view=${encodeURIComponent(viewToHash(it.view))}${sceneHash ? '&scene=' + encodeURIComponent(sceneHash) : ''}` : '';
+  const viewBtn = it.view ? `<a class="rq-view" href="${viewHref}" target="_blank" rel="noopener">🎥 Otevřít pohled</a>` : '';
   const setBtns = STATUSES.map(x =>
     `<button class="rq-sbtn${x.id===st?' on':''}" data-set="${esc(it.id)}" data-status="${x.id}" title="${esc(x.name)}">${x.icon}</button>`).join('');
   return `<article class="rq-card st-${st} border-${s}" data-id="${esc(it.id)}">
@@ -189,10 +227,12 @@ function cardHTML(it){
       <div class="rq-badges">
         <span class="rq-badge st st-${st}">${(STATUS_BY_ID[st]||{}).icon||''} ${esc(stName)}</span>
         ${areaBadge}
+        ${kindBadge}
       </div>
       <button class="rq-del" data-del="${esc(it.id)}" title="Smazat" aria-label="Smazat">🗑</button>
     </div>
     <div class="rq-text">${esc(it.text)}</div>
+    ${ctxRow}
     ${thumb}
     ${imgsRow}
     <div class="rq-meta"><span class="who who-${s}">${esc(it.author||'')}</span> · <span>${esc(fmtDate(it.ts))}</span></div>
@@ -243,8 +283,10 @@ async function addReq(){
   try { localStorage.setItem(AKEY, authorEl.value); } catch(e){}
   addBtn.disabled = true;
   try {
-    await backend.add({ text, author:authorEl.value, area:areaEl.value, status:'novy', ts:Date.now() });
-    textEl.value = '';
+    const item = { text, author:authorEl.value, area:areaEl.value, status:'novy', ts:Date.now() };
+    if(bkind) item.kind = bkind;
+    await backend.add(item);
+    textEl.value = ''; bkind = null; renderBKinds();
   } catch(e){ console.error(e); alert('Požadavek se nepodařilo uložit.'); }
   finally { addBtn.disabled = false; textEl.focus(); }
 }

@@ -24,6 +24,17 @@ export const AREAS = [
 ];
 export const AREA_BY_ID = Object.fromEntries(AREAS.map(a => [a.id, a]));
 
+/* Druh úpravy (rychlé volby – jedno klepnutí místo psaní, zpřesní zadání) */
+export const KINDS = [
+  { id:'barva',    name:'Barva',    icon:'🎨' },
+  { id:'pridat',   name:'Přidat',   icon:'➕' },
+  { id:'odebrat',  name:'Odebrat',  icon:'➖' },
+  { id:'rozmer',   name:'Rozměr',   icon:'📐' },
+  { id:'material', name:'Materiál', icon:'🧱' },
+  { id:'jine',     name:'Jiné',     icon:'💬' },
+];
+export const KIND_BY_ID = Object.fromEntries(KINDS.map(k => [k.id, k]));
+
 /* Stav zpracování požadavku */
 export const STATUSES = [
   { id:'novy',    name:'Nový',         icon:'🆕' },
@@ -55,6 +66,35 @@ export function hashToView(s){
   const a = (s || '').split(',').map(Number);
   if(a.length !== 6 || a.some(n => !isFinite(n))) return null;
   return { p:a.slice(0,3), t:a.slice(3,6) };
+}
+
+/* ---- Kontext scény (barvy konfigurátoru + zapnuté vrstvy) ---- */
+/* pevné pořadí kvůli kompaktnímu (a dekódovatelnému) zápisu do odkazu */
+export const SCENE_COLORS = ['fasada','strecha','okna','vrata','klemp','sokl','obklad','ocel'];
+export const SCENE_LAYERS = ['roof','walls','np2','np1','glass','terrain','labels'];
+export const SCENE_LAYER_NAMES = {
+  roof:'Střecha', walls:'Obvodové stěny', np2:'2. patro', np1:'1. patro',
+  glass:'Okna', terrain:'Terén', labels:'Popisky',
+};
+/* scéna ⇄ řetězec pro URL (#scene=RRGGBB×8 _ 0/1×7). Chybějící barva = 6× „-". */
+export function sceneToHash(sc){
+  if(!sc) return '';
+  const c = SCENE_COLORS.map(id => {
+    const h = (((sc.colors && sc.colors[id]) || '').replace('#','')).toLowerCase();
+    return /^[0-9a-f]{6}$/.test(h) ? h : '------';
+  }).join('');
+  const l = SCENE_LAYERS.map(id => (sc.layers && sc.layers[id] === false) ? '0' : '1').join('');
+  return c + '_' + l;
+}
+export function hashToScene(s){
+  if(!s || s.indexOf('_') < 0) return null;
+  const [c, l] = s.split('_');
+  if(!c || c.length < SCENE_COLORS.length * 6) return null;
+  const colors = {};
+  SCENE_COLORS.forEach((id, i) => { const h = c.substr(i*6, 6); if(/^[0-9a-f]{6}$/i.test(h)) colors[id] = '#' + h.toLowerCase(); });
+  const layers = {};
+  SCENE_LAYERS.forEach((id, i) => { layers[id] = (l || '')[i] !== '0'; });
+  return { colors, layers };
 }
 
 /* ---------- Lokální backend (localStorage) ---------- */
