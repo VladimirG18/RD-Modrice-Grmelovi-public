@@ -37,7 +37,9 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 
 - `index.html` – rozcestník (dlaždice + hero).
 - `model.html` – **interaktivní 3D model** (three.js r0.160 přes importmap z unpkg):
-  otáčení/procházka/vrstvy, **konfigurátor barev**, a **„✏️ Navrhnout úpravu"**
+  otáčení/procházka/vrstvy (vč. sousedních domů), **konfigurátor barev** (fasáda,
+  střecha, okna, dveře, vrata, klempířské, sokl, obklad, ocel, vjezd, interiér, podlahy,
+  sklo) + **sdílení podoby odkazem** a **denní doba** (osvětlení), a **„✏️ Navrhnout úpravu"**
   (nástěnka požadavků – zachytí pohled kamery + screenshot, do kterého jde kreslit;
   dále **📍 špendlík** = klik do náhledu → raycast → přesný bod + název dílu,
   **rychlé volby typu** úpravy, **diktování hlasem** cs-CZ a **kontext scény** = barvy+vrstvy).
@@ -85,13 +87,23 @@ Zásady (osvědčené, nešlapat vedle):
   Tenké profily (lišty/žlaby) **NEbooleanovat** – FLOAT jim „nafoukne" bbox a vzniknou
   kvádry navíc; místo toho je maž celé nebo řež rekonstrukcí z **původního** bboxu
   (viz `notch_trim` v tom skriptu).
-- Klíčové materiály (barví je konfigurátor podle názvu): `A_omitka_svetle_seda`
-  (fasáda), `B_krytina_tmave_seda` (střecha), `sklo_okna` (sklo, průhledné),
-  `D_okna_antracit` / `D_ramy_oken` (rámy oken), `C_lista_tmava_seda` (klempířské),
-  `E_sokl_tmavy`, `F_obklad_tmavy`, `G_ocel`, `H_vrata_tmava`.
+- Klíčové materiály (barví je konfigurátor podle názvu, `CFG_ITEMS` v `model.html`):
+  `A_omitka_svetle_seda` (fasáda), `B_krytina_tmave_seda` (střecha),
+  `D_ramy_oken` (rámy oken – odštěpené z `D_okna_antracit`),
+  `D_okna_antracit` (vstupní/terasové dveře – zbytek po odštěpení rámů),
+  `C_lista_tmava_seda` (klempířské), `E_sokl_tmavy`, `F_obklad_tmavy`, `G_ocel`,
+  `H_vrata_tmava`, `beton_dlazba`+`asfalt`+`kacirek` (zpevněné plochy/vjezd),
+  `interier_bily` (interiér – stěny), `podlaha_drevo`+`podlaha_dlazba` (podlahy),
+  `sklo_okna`+`sklo_zabradli` (sklo/zasklení, průhledné). Prvek může mířit na víc
+  materiálů – původní barvy se ukládají po materiálech (`origColors`) kvůli přesnému
+  resetu. Pořadí barev pro odkaz `#scene=` je `SCENE_COLORS` v `assets/pozadavky.js`
+  (přidání ovladače = doplnit i tam, dekodér je zpětně kompatibilní).
 - Vrstvy v `model.html` se třídí podle názvu objektu: `RD_strecha*`→střecha,
-  `RD_Obvod*`→obvodové stěny, `vypln*`→výplně oken, `txt_*`→popisky, `RD_teren*`→terén.
+  `RD_Obvod*`→obvodové stěny, `vypln*`→výplně oken, `txt_*`→popisky, `RD_teren*`→terén,
+  název s `soused`→sousední domy (`RD_teren_soused_*`, vlastní přepínač, nezávislé na terénu).
   Nové objekty proto pojmenovávej touto konvencí, ať fungují vrstvy i barvení.
+  „Denní doba" (ráno/poledne/večer) jen mění směr/barvu slunce a pozadí (`LIGHT_PRESETS`),
+  nepatří do `#scene=`.
 - Vrstvy patra: objekty s `1NP`/`2NP` (nebo `_1xx_`/`_2xx_`) v názvu spadají do
   přepínačů „1. patro"/„2. patro". Interiérové doplňky proto pojmenovávej s `1NP`.
 - Hotové úpravy modelu (skripty v `tools/model_edits/`, detaily v `README.md`):
