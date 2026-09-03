@@ -38,7 +38,9 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 - `index.html` – rozcestník (dlaždice + hero).
 - `model.html` – **interaktivní 3D model** (three.js r0.160 přes importmap z unpkg):
   otáčení/procházka/vrstvy, **konfigurátor barev**, a **„✏️ Navrhnout úpravu"**
-  (nástěnka požadavků – zachytí pohled kamery + screenshot, do kterého jde kreslit).
+  (nástěnka požadavků – zachytí pohled kamery + screenshot, do kterého jde kreslit;
+  dále **📍 špendlík** = klik do náhledu → raycast → přesný bod + název dílu,
+  **rychlé volby typu** úpravy, **diktování hlasem** cs-CZ a **kontext scény** = barvy+vrstvy).
 - `informace.html`, `material.html`, `dokumentace.html`, `harmonogram.html`,
   `checklist.html` – obsahové stránky.
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
@@ -46,7 +48,8 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 - `poznamky.html` – sdílené poznámky.
 - `pozadavky.html` – **nástěnka požadavků na úpravy modelu** (`assets/pozadavky.js`).
 - `assets/style.css` – design systém (světlý/tmavý režim), `assets/site.js` – přepínač
-  vzhledu + aktivní odkaz v nav. `assets/annotate.js` – kreslení do náhledu požadavku.
+  vzhledu + aktivní odkaz v nav. `assets/annotate.js` – kreslení + zoom/posun + „📍 špendlík"
+  (přes callback `onPick` volá raycast v `model.html`) do náhledu požadavku.
 - `RDModrice.glb` – 3D model (glTF binární), viz §4.
 
 Nav odkazy a dlaždice jsou na všech stránkách stejné – při přidání stránky je doplň
@@ -128,6 +131,16 @@ Rodina zadává požadavky na úpravy modelu na `pozadavky.html` nebo přímo v 
 `view` (pohled kamery `{p:[x,y,z], t:[x,y,z]}`), `thumb` (JPEG data URL – screenshot,
 případně s ruční kresbou; při kreslení jde náhled přiblížit) a volitelně `images`
 (pole JPEG data URL – doplňující obrázky přiložené z PC/internetu, zmenšené).
+Dále volitelně (nová vylepšení navrhovače, zpřesňují zadání):
+- `kind` – druh úpravy (rychlá volba): `barva`/`pridat`/`odebrat`/`rozmer`/`material`/`jine`
+  (definice `KINDS` v `assets/pozadavky.js`).
+- `pin` – **špendlík**: přesné místo úpravy z raycastu v modelu
+  `{ p:[x,y,z] (three.js, Y=výška), obj:"<název meshe z GLB>", label:"<lidský název dílu>" }`.
+  `obj` je přímo název objektu v `.glb` – nejrychlejší způsob, jak najít, čeho se to týká.
+- `scene` – **kontext scény**: `{ colors:{<id konfigurátoru>:hex}, layers:{roof,walls,np2,np1,glass,terrain,labels:bool}, colorsChanged:bool }`.
+  Řekne, jaké barvy a které vrstvy měl uživatel zapnuté, když požadavek psal.
+  Na nástěnce se z něj skládá odkaz `model.html#view=…&scene=…`, který obnoví i barvy/vrstvy
+  (kódování `sceneToHash`/`hashToScene`).
 
 **Přečíst požadavky odsud** (bez appky, veřejné čtení – jako web) přes Firestore REST:
 
@@ -138,6 +151,9 @@ curl -sS "https://firestore.googleapis.com/v1/projects/rd-modrice-e9477/database
 # pole `thumb` je data URL: base64 část ulož jako .jpg a otevři (uvidíš i kresbu uživatele).
 # pole `images` (je-li) = arrayValue data URL příloh – ulož a projdi stejně jako thumb.
 # pole `view` → otevři pohled v modelu jako model.html#view=px,py,pz,tx,ty,tz
+# pole `pin` (je-li) = mapValue: `obj` (stringValue) je název meshe v GLB → přímo víš, čeho se to týká;
+#   `p` (arrayValue 3× doubleValue) je bod ve three.js (Y=výška; do bpy §4 přepočítej Z=výška).
+# pole `kind` (je-li) = stringValue druhu úpravy; `scene` (je-li) = mapValue s `colors`/`layers`/`colorsChanged`.
 ```
 
 **Označit jako hotové** (nepovinné, mění sdílená data – až po nasazení úpravy):
