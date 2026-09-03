@@ -178,6 +178,34 @@
     background:var(--panel); border:1px solid #2b333d; border-radius:10px; padding:10px 16px; font-size:.85rem;
     box-shadow:0 10px 30px rgba(0,0,0,.5); opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; }
   .req-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* Posouvání prvků */
+  #moveHint{ position:fixed; top:60px; left:50%; transform:translateX(-50%); z-index:7; display:none;
+    background:var(--panel); border:1px solid #2b333d; border-radius:10px; padding:8px 14px; max-width:min(92vw,560px);
+    font-size:.8rem; color:var(--text); text-align:center; backdrop-filter:blur(6px); box-shadow:0 8px 24px rgba(0,0,0,.45); line-height:1.45; }
+  #moveHint.show{ display:block; }
+  #moveHint b{ color:var(--accent); }
+  #moveResetAll{ display:inline-block; margin-top:7px; padding:5px 12px; border:1px solid #2b333d; border-radius:8px;
+    background:#1f2630; color:var(--text); font-size:.76rem; cursor:pointer; }
+  #moveResetAll:hover{ border-color:var(--accent); }
+  #movePanel{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%) translateY(16px); z-index:9; display:none;
+    background:var(--panel); border:1px solid #2b333d; border-radius:12px; padding:11px 14px; width:min(94vw,520px);
+    box-shadow:0 12px 40px rgba(0,0,0,.5); backdrop-filter:blur(6px); opacity:0; transition:opacity .2s, transform .2s; }
+  #movePanel.show{ display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  #movePanel .mp-top{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:9px; }
+  #movePanel .mp-name{ font-weight:600; font-size:.92rem; }
+  #movePanel .mp-tag{ font-size:.68rem; text-transform:uppercase; letter-spacing:.4px; padding:2px 7px; border-radius:999px;
+    border:1px solid #2b333d; color:var(--muted); }
+  #movePanel .mp-tag.live{ color:#04121f; background:#5fd08a; border-color:#5fd08a; }
+  #movePanel .mp-tag.ghost{ color:#04121f; background:var(--accent); border-color:var(--accent); }
+  #movePanel .mp-off{ font-size:.78rem; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums; }
+  #movePanel .mp-btns{ display:flex; gap:7px; flex-wrap:wrap; }
+  #movePanel .mp-btns button{ flex:1 1 auto; padding:8px 10px; border:1px solid #2b333d; border-radius:8px;
+    background:#1f2630; color:var(--text); font-size:.82rem; cursor:pointer; white-space:nowrap; }
+  #movePanel .mp-btns button:hover{ border-color:var(--accent); }
+  #movePanel .mp-btns button.primary{ background:var(--accent); border-color:var(--accent); color:#04121f; font-weight:600; }
+  #movePanel .mp-hint{ font-size:.7rem; color:var(--muted); margin:8px 2px 0; line-height:1.4; }
+  #moveBtn.on{ background:var(--accent); border-color:var(--accent); color:#04121f; font-weight:600; }
 </style>
 </head>
 <body>
@@ -229,6 +257,7 @@
     <button class="btn primary" id="walkBtn">🚶 Procházka (WASD)</button>
     <button class="btn" id="dollhouse">🏠 Pohled do místností</button>
     <button class="btn" id="resetBtn">↺ Resetovat pohled</button>
+    <button class="btn" id="moveBtn">🔧 Posunout prvek</button>
 
     <div class="sep"></div>
     <h2>Návrhy úprav</h2>
@@ -248,6 +277,25 @@
     <p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> pohyb · <kbd>Space</kbd> nahoru · <kbd>Shift</kbd> dolů</p>
     <p><kbd>Esc</kbd> ukončí procházku</p>
   </div>
+</div>
+
+<div id="moveHint">
+  🔧 <b>Posun prvku:</b> klepni na <b>nábytek</b>, <b>okno</b> nebo <b>dveře</b> a táhni za barevné šipky.
+  Nábytek se posune naživo; u oken/dveří označíš, kam je chceš (zapracuji přesně). <b>Esc</b> ukončí.
+  <button type="button" id="moveResetAll" hidden>↺ Vrátit vše</button>
+</div>
+<div id="movePanel" role="dialog" aria-label="Posun prvku">
+  <div class="mp-top">
+    <span class="mp-name" id="mpName">Prvek</span>
+    <span class="mp-tag" id="mpTag">—</span>
+    <span class="mp-off" id="mpOff">bez posunu</span>
+  </div>
+  <div class="mp-btns">
+    <button type="button" id="mpReset">↺ Vrátit</button>
+    <button type="button" id="mpDone">Odznačit</button>
+    <button type="button" class="primary" id="mpSave">✏️ Uložit jako požadavek</button>
+  </div>
+  <div class="mp-hint" id="mpHint"></div>
 </div>
 
 <div id="reqModal" aria-hidden="true">
@@ -307,6 +355,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { createStore, AUTHORS, AREAS, KINDS, viewToHash, hashToView, sceneToHash, hashToScene } from './assets/pozadavky.js';
 import { createAnnotator } from './assets/annotate.js';
 
@@ -521,6 +570,7 @@ loader.load('RDModrice.glb', (gltf) => {
   applyPendingView();   // pokud přišel odkaz s uloženým pohledem (#view=…)
   buildConfigurator();
   applyPendingScene();  // …a případně i s uloženými barvami/vrstvami (#scene=…)
+  applyPendingMove();   // …a případně i s posunutým nábytkem (#move=…)
 
   document.getElementById('loader').classList.add('hide');
   animate();
@@ -641,9 +691,11 @@ function fallbackCopy(text){
 function shareLook(){
   const view = { p:[camera.position.x, camera.position.y, camera.position.z].map(n => +n.toFixed(2)),
                  t:[orbit.target.x, orbit.target.y, orbit.target.z].map(n => +n.toFixed(2)) };
+  const mv = (typeof moveHash === 'function') ? moveHash() : '';
   const url = location.origin + location.pathname
     + '#view=' + encodeURIComponent(viewToHash(view))
-    + '&scene=' + encodeURIComponent(sceneToHash(captureScene()));
+    + '&scene=' + encodeURIComponent(sceneToHash(captureScene()))
+    + (mv ? '&move=' + encodeURIComponent(mv) : '');
   const ok = () => toast('🔗 Odkaz na tuto podobu zkopírován do schránky.');
   const fb = () => { if(fallbackCopy(url)) ok(); else prompt('Zkopíruj odkaz na tuto podobu:', url); };
   if(navigator.clipboard && navigator.clipboard.writeText)
@@ -958,6 +1010,7 @@ const annot = createAnnotator(
   { onPick:onPickPreview }
 );
 let capturedView = null, captureOk = false, capturedScene = null;
+let pendingMove = null;   // posun prvku připravený k odeslání jako požadavek (item.move)
 
 // --- Kontext scény: aktuální barvy konfigurátoru + zapnuté vrstvy ---
 function captureScene(){
@@ -1076,6 +1129,8 @@ function captureCurrent(){
   };
   capturedScene = captureScene();
   captureOk = false;
+  const tcv = tcontrols ? tcontrols.visible : null;
+  if(tcontrols) tcontrols.visible = false;          // gizmo posunu ať není na snímku
   try {
     renderer.render(scene, camera);                 // vykreslit aktuální snímek…
     const src = renderer.domElement;
@@ -1087,6 +1142,7 @@ function captureCurrent(){
     annot.setBase(c);
     captureOk = true;
   } catch(e){ console.warn('náhled se nepodařilo zachytit', e); }
+  if(tcontrols && tcv !== null) tcontrols.visible = tcv;
   updatePreview();
 }
 function updatePreview(){
@@ -1096,6 +1152,7 @@ function openReq(){
   captureCurrent();
   extraImages = []; renderImgs();
   selectedKind = null; renderKinds();
+  pendingMove = null;
   reqNote.textContent = ''; reqNote.className = 'req-note';
   reqModal.classList.add('open'); reqModal.setAttribute('aria-hidden', 'false');
   setTimeout(() => reqText.focus(), 30);
@@ -1114,6 +1171,7 @@ async function submitReq(){
   try { localStorage.setItem(REQ_AKEY, reqAuthor.value); } catch(e){}
   const item = { text, author:reqAuthor.value, area:reqArea.value, status:'novy', ts:Date.now() };
   if(selectedKind) item.kind = selectedKind;                   // druh úpravy (rychlá volba)
+  if(pendingMove) item.move = pendingMove;                     // posun prvku (název dílu + odkud/kam)
   if(reqInclude.checked){
     if(capturedScene) item.scene = capturedScene;              // kontext scény (barvy + vrstvy)
     if(captureOk){
@@ -1144,6 +1202,233 @@ document.getElementById('reqSend').addEventListener('click', submitReq);
 reqInclude.addEventListener('change', updatePreview);
 reqModal.addEventListener('click', e => { if(e.target === reqModal) closeReq(); });
 window.addEventListener('keydown', e => { if(e.key === 'Escape' && reqModal.classList.contains('open')) closeReq(); });
+
+// ===================== Posouvání prvků (nábytek živě · okna/dveře jako návrh) =====================
+// Nábytek jsou samostatné objekty → posouvají se naživo. Okna/dveře mají otvor
+// „vyříznutý" napevno do stěny, takže je fyzicky neposouváme – ukážeme průhledného
+// „ducha", kam je chceš, a přesný posun (otvor + rám + sklo) zapracuji do modelu.
+let moveMode = false, moveEls = null, meshKey = new Map(), moveSel = null;
+let tcontrols = null, ghostGroup = null;
+const ghostMat = new THREE.MeshBasicMaterial({ color:0x5b9dff, transparent:true, opacity:0.5, depthWrite:false, depthTest:false });
+const mpName = document.getElementById('mpName'), mpTag = document.getElementById('mpTag');
+const mpOff = document.getElementById('mpOff'), mpHint = document.getElementById('mpHint');
+const movePanel = document.getElementById('movePanel'), moveHint = document.getElementById('moveHint');
+const moveBtn = document.getElementById('moveBtn'), moveResetAll = document.getElementById('moveResetAll');
+
+const FURN_LABELS = { kuch:'Kuchyňská linka', ostruv:'Kuchyňský ostrůvek', tv:'TV stěna', sofa:'Sedačka',
+  konf:'Konferenční stolek', police:'Police / regál', jidel:'Jídelní stůl', lamela:'Dřevěné lamely' };
+const WIN_PATS = [
+  [/terasa_dvere/i,      'terasa_dvere', 'Terasové dveře',          'terasa',    'door'],
+  [/terasa_oknoL/i,      'terasa_oknoL', 'Terasové okno (vlevo)',   'terasa',    'window'],
+  [/hs_portal/i,         'hs_portal',    'Terasový portál',         'terasa',    'door'],
+  [/dvere_vstup/i,       'dvere_vstup',  'Vstupní dveře',           'okna',      'door'],
+  [/vrata_sever/i,       'vrata_sever',  'Garážová vrata (sever)',  'okna',      'door'],
+  [/vrata_jih/i,         'vrata_jih',    'Garážová vrata (jih)',    'okna',      'door'],
+  [/okno_zalV/i,         'okno_zalV',    'Zalomené okno (východ)',  'okna',      'window'],
+  [/okno_zal(?!V)/i,     'okno_zal',     'Zalomené okno (západ)',   'okna',      'window'],
+  [/stresni_okno(?:_sklo)?_([NS]\d+)/i, m => 'stresni_' + m[1], 'Střešní okno', 'strecha', 'window'],
+  [/okno_([NS]\d+_\d+)/i, m => 'okno_' + m[1], 'Okno',            'okna',      'window'],
+  [/(int_[12]NP_[a-z0-9]+?)_dvere/i, m => m[1] + '_dvere', 'Vnitřní dveře',  'dispozice', 'door'],
+];
+function elementInfo(name){
+  const n = name || '';
+  for(const [re, key, label, area, kind] of WIN_PATS){
+    const mm = re.exec(n); if(mm) return { key:(typeof key === 'function' ? key(mm) : key), label, area, kind };
+  }
+  const fm = /^(int_1NP_furn_chair_[^_]+)/.exec(n) || /^(int_1NP_furn_[^_]+)/.exec(n);
+  if(fm){
+    const key = fm[1], short = key.replace('int_1NP_furn_', '');
+    if(short === 'podlaha') return null;                        // podlaha se neposouvá
+    const label = FURN_LABELS[short] || (/^stool/.test(short) ? 'Barová židle' : /^chair/.test(short) ? 'Židle' : 'Nábytek');
+    return { key, label, area:'interier', kind:'furn' };
+  }
+  return null;
+}
+
+function buildMoveEls(){
+  moveEls = new Map(); meshKey = new Map();
+  loadedModel.traverse(o => {
+    if(!o.isMesh) return;
+    const info = elementInfo(o.name || ''); if(!info) return;
+    let el = moveEls.get(info.key);
+    if(!el){ el = { key:info.key, label:info.label, area:info.area, kind:info.kind, meshes:[], wrap:null, origParents:[], origCenter:null }; moveEls.set(info.key, el); }
+    el.meshes.push(o); meshKey.set(o, info.key);
+  });
+  moveEls.forEach(el => {
+    const box = new THREE.Box3();
+    el.meshes.forEach(m => { m.updateWorldMatrix(true, false); box.expandByObject(m); });
+    el.origCenter = box.isEmpty() ? new THREE.Vector3() : box.getCenter(new THREE.Vector3());
+  });
+}
+
+function ensureWrap(el){
+  if(el.wrap) return el.wrap;
+  const w = new THREE.Group(); w.name = '__movewrap_' + el.key; scene.add(w);
+  el.meshes.forEach((m, i) => { el.origParents[i] = m.parent; w.attach(m); });   // attach zachová world pozici
+  el.wrap = w; return w;
+}
+function makeGhost(el){
+  removeGhost();
+  const g = new THREE.Group();
+  el.meshes.forEach(m => {
+    if(m.visible === false) return;
+    m.updateWorldMatrix(true, false);
+    const c = new THREE.Mesh(m.geometry, ghostMat);
+    m.matrixWorld.decompose(c.position, c.quaternion, c.scale);
+    c.renderOrder = 999; g.add(c);
+  });
+  scene.add(g); ghostGroup = g; return g;
+}
+function removeGhost(){ if(ghostGroup){ scene.remove(ghostGroup); ghostGroup = null; } }
+
+function offsetVec(){ return moveSel ? (moveSel.kind === 'furn' ? moveSel.wrap.position : (ghostGroup ? ghostGroup.position : new THREE.Vector3())) : new THREE.Vector3(); }
+function cm(v){ return Math.round(v * 100); }
+function offsetText(v){
+  const parts = [];
+  if(cm(v.x)) parts.push((v.x > 0 ? 'východ +' : 'západ ') + Math.abs(cm(v.x)) + ' cm');
+  if(cm(v.z)) parts.push((v.z > 0 ? 'jih +' : 'sever ') + Math.abs(cm(v.z)) + ' cm');
+  if(cm(v.y)) parts.push((v.y > 0 ? 'výš +' : 'níž ') + Math.abs(cm(v.y)) + ' cm');
+  return parts.length ? parts.join(' · ') : 'bez posunu';
+}
+function updateReadout(){
+  if(!moveSel) return;
+  const v = offsetVec();
+  mpOff.textContent = offsetText(v);
+  moveResetAll.hidden = !anyMoved();
+}
+function anyMoved(){
+  if(!moveEls) return false;
+  for(const el of moveEls.values()) if(el.wrap && el.wrap.position.lengthSq() > 2.5e-5) return true;
+  return false;
+}
+
+function select(el){
+  if(!el) return;
+  if(moveSel && moveSel !== el && moveSel.kind !== 'furn') removeGhost();
+  moveSel = el;
+  const obj = el.kind === 'furn' ? ensureWrap(el) : makeGhost(el);
+  tcontrols.attach(obj);
+  mpName.textContent = el.label;
+  mpTag.textContent = el.kind === 'furn' ? 'nábytek · živě' : 'okno/dveře · návrh';
+  mpTag.className = 'mp-tag ' + (el.kind === 'furn' ? 'live' : 'ghost');
+  mpHint.textContent = el.kind === 'furn'
+    ? 'Táhni za šipky. Posun se rovnou promítne do modelu (a jde nasdílet odkazem).'
+    : 'Označ, kam díl chceš – uloží se jako požadavek a přesně ho přeříznu a posunu v modelu.';
+  movePanel.classList.add('show');
+  updateReadout();
+}
+function deselect(){
+  if(tcontrols) tcontrols.detach();
+  if(moveSel && moveSel.kind !== 'furn') removeGhost();
+  moveSel = null; movePanel.classList.remove('show');
+}
+function resetSel(){ if(!moveSel) return; offsetVec().set(0, 0, 0); updateReadout(); }
+function resetAllMoves(){
+  if(moveEls) moveEls.forEach(el => { if(el.wrap) el.wrap.position.set(0, 0, 0); });
+  removeGhost(); deselect(); moveResetAll.hidden = true;
+}
+
+// výběr prvku klepnutím (jen když to nebylo tažení = orbit, ani klik na gizmo)
+function isHelper(o){ for(let n = o; n; n = n.parent){ if(n === tcontrols || n === ghostGroup) return true; } return false; }
+function selectAtClient(cx, cy){
+  const r = renderer.domElement.getBoundingClientRect();
+  _ndc.set(((cx - r.left) / r.width) * 2 - 1, -(((cy - r.top) / r.height) * 2 - 1));
+  camera.updateMatrixWorld(true); _ray.setFromCamera(_ndc, camera);
+  const hits = _ray.intersectObjects(scene.children, true);
+  const h = hits.find(x => x.object && x.object.isMesh && x.object.visible && !isHelper(x.object) && visibleChain(x.object));
+  if(!h){ deselect(); return; }
+  const key = meshKey.get(h.object) || (elementInfo(h.object.name || '') || {}).key;
+  const el = key && moveEls.get(key);
+  if(!el){ toast('Tento díl posouvat nejde – jde nábytek, okna a dveře.'); return; }
+  select(el);
+}
+let moveDown = null;
+renderer.domElement.addEventListener('pointerdown', e => { if(moveMode) moveDown = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if(!moveMode || !moveDown) return;
+  const moved = Math.hypot(e.clientX - moveDown[0], e.clientY - moveDown[1]); moveDown = null;
+  if(moved > 6) return;                                   // to bylo otáčení/posun kamerou
+  if(tcontrols && (tcontrols.dragging || tcontrols.axis)) return;   // klik na gizmo
+  selectAtClient(e.clientX, e.clientY);
+});
+
+function ensureTC(){
+  if(tcontrols) return;
+  tcontrols = new TransformControls(camera, renderer.domElement);
+  tcontrols.setMode('translate'); tcontrols.setTranslationSnap(0.05); tcontrols.setSize(0.9);
+  tcontrols.addEventListener('dragging-changed', e => { orbit.enabled = !e.value; });
+  tcontrols.addEventListener('objectChange', updateReadout);
+  scene.add(tcontrols);
+}
+function enterMove(){
+  if(walking) return;
+  if(!moveEls) buildMoveEls();
+  ensureTC();
+  moveMode = true; moveBtn.classList.add('on'); moveHint.classList.add('show');
+  moveResetAll.hidden = !anyMoved();
+}
+function exitMove(){
+  deselect(); moveMode = false; moveBtn.classList.remove('on'); moveHint.classList.remove('show');
+}
+
+// posun → text požadavku a otevření nástěnkového modalu s předvyplněním
+function moveSentence(el, v){
+  const seg = [];
+  if(cm(v.x)) seg.push(Math.abs(cm(v.x)) + ' cm na ' + (v.x > 0 ? 'východ' : 'západ'));
+  if(cm(v.z)) seg.push(Math.abs(cm(v.z)) + ' cm na ' + (v.z > 0 ? 'jih' : 'sever'));
+  if(cm(v.y)) seg.push(Math.abs(cm(v.y)) + ' cm ' + (v.y > 0 ? 'výš' : 'níž'));
+  const dir = seg.length ? ' o ' + seg.join(', ') : '';
+  return 'Posunout „' + el.label + '“' + dir + '.';
+}
+function openMoveRequest(){
+  if(!moveSel) return;
+  const el = moveSel, v = offsetVec().clone();
+  if(v.lengthSq() < 2.5e-5){ toast('Nejdřív prvek posuň (táhni za šipky).'); return; }
+  const from = el.origCenter, to = el.origCenter.clone().add(v);
+  const round3 = a => a.map(n => +n.toFixed(3));
+  const moveData = { obj:el.meshes[0] ? el.meshes[0].name : el.key, key:el.key, label:el.label, elkind:el.kind,
+    delta:round3([v.x, v.y, v.z]), from:round3([from.x, from.y, from.z]), to:round3([to.x, to.y, to.z]) };
+  const keep = tcontrols.object; tcontrols.detach();        // gizmo pryč z náhledu
+  openReq();                                                // vyfotí aktuální stav (nábytek posunutý / duch)
+  if(keep) tcontrols.attach(keep);
+  pendingMove = moveData;
+  selectedKind = 'rozmer'; renderKinds();
+  reqArea.value = el.area;
+  reqText.value = moveSentence(el, v) + (el.kind === 'furn' ? '' : ' (otvor ve zdi přesunout také.)');
+}
+
+// sdílení posunu nábytku odkazem (#move=key:dx,dy,dz;…) a jeho obnovení
+function moveHash(){
+  if(!moveEls) return '';
+  const out = [];
+  moveEls.forEach(el => { if(el.wrap && el.wrap.position.lengthSq() > 2.5e-5){
+    const p = el.wrap.position; out.push(el.key + ':' + cm(p.x) + ',' + cm(p.y) + ',' + cm(p.z)); } });
+  return out.join(';');
+}
+function applyPendingMove(){
+  const m = /[#&]move=([^&]+)/.exec(location.hash || ''); if(!m) return;
+  if(!moveEls) buildMoveEls();
+  decodeURIComponent(m[1]).split(';').forEach(part => {
+    const [key, nums] = part.split(':'); if(!key || !nums) return;
+    const el = moveEls.get(key); if(!el || el.kind !== 'furn') return;
+    const a = nums.split(',').map(Number); if(a.length !== 3 || a.some(n => !isFinite(n))) return;
+    ensureWrap(el).position.set(a[0] / 100, a[1] / 100, a[2] / 100);
+  });
+}
+
+moveBtn.addEventListener('click', () => { moveMode ? exitMove() : enterMove(); });
+document.getElementById('mpReset').addEventListener('click', resetSel);
+document.getElementById('mpDone').addEventListener('click', deselect);
+document.getElementById('mpSave').addEventListener('click', openMoveRequest);
+moveResetAll.addEventListener('click', resetAllMoves);
+window.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && moveMode && !reqModal.classList.contains('open')){ moveSel ? deselect() : exitMove(); }
+});
+// testovací háček (neškodný) – ovládání posunu z automatického testu
+window.__move = { enter:enterMove, exit:exitMove, keys:() => moveEls ? [...moveEls.keys()] : [],
+  sel:k => { const el = moveEls && moveEls.get(k); if(el) select(el); return !!el; },
+  off:(x, y, z) => { if(moveSel){ offsetVec().set(x, y, z); updateReadout(); } },
+  save:openMoveRequest, resetAll:resetAllMoves, hash:moveHash };
 
 // otevření uloženého pohledu z odkazu (#view=px,py,pz,tx,ty,tz) – volá se po načtení modelu
 function applyPendingView(){
