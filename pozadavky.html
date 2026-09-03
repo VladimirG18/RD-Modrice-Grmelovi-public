@@ -216,9 +216,20 @@ function cardHTML(it){
     if(hid.length) sceneBadges += `<span class="rq-badge ctx">👁 skryto: ${esc(hid.join(', '))}</span>`;
     if(it.scene.colorsChanged) sceneBadges += `<span class="rq-badge ctx">🎨 upravené barvy</span>`;
   }
-  const ctxRow = (pinBadge || sceneBadges) ? `<div class="rq-ctx">${pinBadge}${sceneBadges}</div>` : '';
+  // posun prvku (nábytek živě / okno-dveře jako návrh)
+  let moveBadge = '', moveHash = '';
+  if(it.move){
+    const d = it.move.delta || [0,0,0], seg = [];
+    const cm = v => Math.round(v * 100);
+    if(cm(d[0])) seg.push(Math.abs(cm(d[0])) + ' cm ' + (d[0] > 0 ? 'V' : 'Z'));
+    if(cm(d[2])) seg.push(Math.abs(cm(d[2])) + ' cm ' + (d[2] > 0 ? 'J' : 'S'));
+    if(cm(d[1])) seg.push(Math.abs(cm(d[1])) + ' cm ' + (d[1] > 0 ? 'výš' : 'níž'));
+    moveBadge = `<span class="rq-badge ctx">↔ posun: ${esc(it.move.label || '')}${seg.length ? ' (' + esc(seg.join(', ')) + ')' : ''}</span>`;
+    if(it.move.elkind === 'furn' && it.move.key) moveHash = it.move.key + ':' + cm(d[0]) + ',' + cm(d[1]) + ',' + cm(d[2]);
+  }
+  const ctxRow = (pinBadge || sceneBadges || moveBadge) ? `<div class="rq-ctx">${pinBadge}${sceneBadges}${moveBadge}</div>` : '';
   const sceneHash = it.scene ? sceneToHash(it.scene) : '';
-  const viewHref = it.view ? `model.html#view=${encodeURIComponent(viewToHash(it.view))}${sceneHash ? '&scene=' + encodeURIComponent(sceneHash) : ''}` : '';
+  const viewHref = it.view ? `model.html#view=${encodeURIComponent(viewToHash(it.view))}${sceneHash ? '&scene=' + encodeURIComponent(sceneHash) : ''}${moveHash ? '&move=' + encodeURIComponent(moveHash) : ''}` : '';
   const viewBtn = it.view ? `<a class="rq-view" href="${viewHref}" target="_blank" rel="noopener">🎥 Otevřít pohled</a>` : '';
   const setBtns = STATUSES.map(x =>
     `<button class="rq-sbtn${x.id===st?' on':''}" data-set="${esc(it.id)}" data-status="${x.id}" title="${esc(x.name)}">${x.icon}</button>`).join('');

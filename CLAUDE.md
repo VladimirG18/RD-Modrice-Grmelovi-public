@@ -42,7 +42,9 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   sklo) + **sdílení podoby odkazem** a **denní doba** (osvětlení), a **„✏️ Navrhnout úpravu"**
   (nástěnka požadavků – zachytí pohled kamery + screenshot, do kterého jde kreslit;
   dále **📍 špendlík** = klik do náhledu → raycast → přesný bod + název dílu,
-  **rychlé volby typu** úpravy, **diktování hlasem** cs-CZ a **kontext scény** = barvy+vrstvy).
+  **rychlé volby typu** úpravy, **diktování hlasem** cs-CZ a **kontext scény** = barvy+vrstvy);
+  **🔧 Posunout prvek** (TransformControls) = táhni nábytek (živě) / okna+dveře (průhledný „duch" = návrh),
+  posun jde uložit jako požadavek (`move`) i nasdílet odkazem (`#move=`, jen nábytek).
 - `informace.html`, `material.html`, `dokumentace.html`, `harmonogram.html`,
   `checklist.html` – obsahové stránky.
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
@@ -153,6 +155,11 @@ Dále volitelně (nová vylepšení navrhovače, zpřesňují zadání):
   Řekne, jaké barvy a které vrstvy měl uživatel zapnuté, když požadavek psal.
   Na nástěnce se z něj skládá odkaz `model.html#view=…&scene=…`, který obnoví i barvy/vrstvy
   (kódování `sceneToHash`/`hashToScene`).
+- `move` – **posun prvku** (nástroj „🔧 Posunout prvek" v modelu):
+  `{ obj:"<mesh z GLB>", key:"<klíč prvku>", label, elkind:"furn"|"window"|"door", delta:[dx,dy,dz], from:[x,y,z], to:[x,y,z] }`
+  – vše ve three.js (Y=výška, do bpy §4 přepočítej Z=výška). `elkind:"furn"` = nábytek (posun živě),
+  `window`/`door` = okno/dveře (otvor je vyříznutý napevno → přesunout musíš i otvor ve zdi + rám + sklo).
+  Posun nábytku se přenáší i odkazem `…&move=<key>:dx,dy,dz` (v cm; jen nábytek).
 
 **Přečíst požadavky odsud** (bez appky, veřejné čtení – jako web) přes Firestore REST:
 
@@ -166,6 +173,8 @@ curl -sS "https://firestore.googleapis.com/v1/projects/rd-modrice-e9477/database
 # pole `pin` (je-li) = mapValue: `obj` (stringValue) je název meshe v GLB → přímo víš, čeho se to týká;
 #   `p` (arrayValue 3× doubleValue) je bod ve three.js (Y=výška; do bpy §4 přepočítej Z=výška).
 # pole `kind` (je-li) = stringValue druhu úpravy; `scene` (je-li) = mapValue s `colors`/`layers`/`colorsChanged`.
+# pole `move` (je-li) = mapValue posunu prvku: `obj`/`key`/`label`/`elkind` (string), `delta`/`from`/`to`
+#   (arrayValue 3× doubleValue, three.js; do bpy §4 přepočítej Z=výška). U elkind window/door posuň i otvor ve zdi.
 ```
 
 **Označit jako hotové** (nepovinné, mění sdílená data – až po nasazení úpravy):
