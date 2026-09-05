@@ -79,11 +79,11 @@
     <tr data-room="101" data-area="7.89"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>101</td><td>Zádveří / vstupní hala</td><td>keramická dlažba</td><td class="num">7,89 m²</td></tr>
     <tr data-room="102" data-area="2.78"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>102</td><td>WC + sprcha</td><td>keramická dlažba</td><td class="num">2,78 m²</td></tr>
     <tr data-room="103" data-area="12.40"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>103</td><td>Pracovna</td><td>dřevo / vinyl</td><td class="num">12,40 m²</td></tr>
-    <tr data-room="104" data-area="30.29"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>104</td><td>Obývací pokoj + kuchyňský kout</td><td>dřevo / vinyl</td><td class="num">30,29 m²</td></tr>
+    <tr data-room="104" data-area="38.29"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>104</td><td>Obývací pokoj + kuchyňský kout</td><td>dřevo / vinyl</td><td class="num">38,29 m²</td></tr>
     <tr data-room="105" data-area="2.10"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>105</td><td>Spíž</td><td>vinyl</td><td class="num">2,10 m²</td></tr>
     <tr data-room="106" data-area="4.20"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>106</td><td>Schodiště</td><td>keramická dlažba</td><td class="num">4,20 m²</td></tr>
     <tr data-room="107" data-area="21.85"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>107</td><td>Garáž</td><td>keramická dlažba</td><td class="num">21,85 m²</td></tr>
-    <tr class="sum"><td></td><td></td><td colspan="2">Celkem 1. NP</td><td class="num" id="sum1np">81,51 m²</td></tr>
+    <tr class="sum"><td></td><td></td><td colspan="2">Celkem 1. NP</td><td class="num" id="sum1np">89,51 m²</td></tr>
   </table>
   </div>
 
@@ -104,15 +104,19 @@
   </div>
 
   <div class="stats" id="roomSummary" style="margin-top:16px">
-    <div class="stat"><b id="sum1npBox">81,51 m²</b><span>1. NP (dle výběru)</span></div>
+    <div class="stat"><b id="sum1npBox">89,51 m²</b><span>1. NP (dle výběru)</span></div>
     <div class="stat"><b id="sum2npBox">80,56 m²</b><span>Podkroví (dle výběru)</span></div>
-    <div class="stat"><b id="sumTotalBox">162,07 m²</b><span>Celkem obě podlaží</span></div>
+    <div class="stat"><b id="sumTotalBox">170,07 m²</b><span>Celkem obě podlaží</span></div>
   </div>
   <p class="note">Výběr místností se ukládá v tomto prohlížeči.
   <button class="toolbtn" id="resetRooms" type="button">Zaškrtnout vše</button></p>
   <p class="note">K celkové ploše ještě venkovní zapuštěná terasa v podkroví (betonová dlažba
   na terčích, šířka 5,2 m) a kryté závětří u vstupu. Plochy jsou převzaté z legend místností
   ve výkresech půdorysů.</p>
+  <p class="note">Součet místností (170,07 m²) je nižší než <b>podlahová plocha 196,6 m²</b>
+  uvedená v úvodních číslech stránky – ta se počítá jinak (hrubá plocha k vnějšímu líci zdiva
+  za obě podlaží, stejně jako zastavěná plocha), takže do ní navíc spadá plocha zdí a příček
+  a kryté závětří, které v číslované legendě místností nejsou.</p>
 
   <h2>Konstrukce <span class="chip ok">z dokumentace</span></h2>
   <div class="tablewrap">
@@ -195,8 +199,8 @@
       zvažovaná varianta, zatím není součástí projektové dokumentace, jde o odhad k diskuzi.</p>
       <ul class="tidy" style="margin:0">
         <li>Odhad tepelné ztráty domu (zdivo U 0,140 W/m²K, střecha s 350 mm vlny, podlaha
-          EPS-S 180 mm, nucené větrání s rekuperací, ~140 m² vytápěné plochy): orientačně
-          <b>4,5–6,5 kW</b> při návrhové venkovní teplotě (Modřice u Brna, cca −12 až −15 °C).</li>
+          EPS-S 180 mm, nucené větrání s rekuperací, ~148 m² vytápěné plochy): orientačně
+          <b>4,5–7 kW</b> při návrhové venkovní teplotě (Modřice u Brna, cca −12 až −15 °C).</li>
         <li>Navrhovaný výkon tepelného čerpadla: <b>cca 6 kW</b> (jmenovitý výkon v bodě A2/W35) –
           takový výkon by měl sám pokrýt většinu topné sezóny včetně mírnějších mrazů.</li>
         <li>Zapojení <b>paralelně bivalentní</b> vedle stávajícího kotle: pod bivalentním bodem
