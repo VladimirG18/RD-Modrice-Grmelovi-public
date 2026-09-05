@@ -154,6 +154,11 @@ td.num,th.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:
 tr.sum td{ font-weight:700; border-top:2px solid var(--border-strong); background:var(--surface-2); }
 td .sub{ display:block; color:var(--muted); font-size:.8rem; }
 
+.chkcol{ width:30px; text-align:center !important; padding-left:10px !important; padding-right:4px !important; }
+.chkcol input, .allchk{ width:16px; height:16px; accent-color:var(--accent); cursor:pointer; vertical-align:middle; }
+tr.roomoff td{ color:var(--muted); text-decoration:line-through; }
+tr.roomoff td.chkcol{ text-decoration:none; }
+
 .swatch{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px;
   margin-right:8px; border:1px solid rgba(0,0,0,.18); }
 

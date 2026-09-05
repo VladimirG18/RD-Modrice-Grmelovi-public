@@ -71,39 +71,48 @@
   </div>
 
   <h2>Místnosti – 1. nadzemní podlaží <span class="chip ok">z dokumentace</span></h2>
+  <p class="note" style="margin-top:0">Zaškrtávátka určují, co se počítá do součtu podlaží
+  i do celkového součtu níže – hodí se třeba na porovnání plochy bez garáže.</p>
   <div class="tablewrap">
-  <table>
-    <tr><th>Č.</th><th>Místnost</th><th>Podlaha</th><th class="num">Plocha</th></tr>
-    <tr><td>101</td><td>Zádveří / vstupní hala</td><td>keramická dlažba</td><td class="num">7,89 m²</td></tr>
-    <tr><td>102</td><td>WC + sprcha</td><td>keramická dlažba</td><td class="num">2,78 m²</td></tr>
-    <tr><td>103</td><td>Pracovna</td><td>dřevo / vinyl</td><td class="num">12,40 m²</td></tr>
-    <tr><td>104</td><td>Obývací pokoj + kuchyňský kout</td><td>dřevo / vinyl</td><td class="num">30,29 m²</td></tr>
-    <tr><td>105</td><td>Spíž</td><td>vinyl</td><td class="num">2,10 m²</td></tr>
-    <tr><td>106</td><td>Schodiště</td><td>keramická dlažba</td><td class="num">4,20 m²</td></tr>
-    <tr><td>107</td><td>Garáž</td><td>keramická dlažba</td><td class="num">21,85 m²</td></tr>
-    <tr class="sum"><td></td><td colspan="2">Celkem 1. NP</td><td class="num">81,51 m²</td></tr>
+  <table id="tbl1np">
+    <tr><th class="chkcol"><input type="checkbox" class="allchk" checked title="Zapnout/vypnout celé podlaží" /></th><th>Č.</th><th>Místnost</th><th>Podlaha</th><th class="num">Plocha</th></tr>
+    <tr data-room="101" data-area="7.89"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>101</td><td>Zádveří / vstupní hala</td><td>keramická dlažba</td><td class="num">7,89 m²</td></tr>
+    <tr data-room="102" data-area="2.78"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>102</td><td>WC + sprcha</td><td>keramická dlažba</td><td class="num">2,78 m²</td></tr>
+    <tr data-room="103" data-area="12.40"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>103</td><td>Pracovna</td><td>dřevo / vinyl</td><td class="num">12,40 m²</td></tr>
+    <tr data-room="104" data-area="30.29"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>104</td><td>Obývací pokoj + kuchyňský kout</td><td>dřevo / vinyl</td><td class="num">30,29 m²</td></tr>
+    <tr data-room="105" data-area="2.10"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>105</td><td>Spíž</td><td>vinyl</td><td class="num">2,10 m²</td></tr>
+    <tr data-room="106" data-area="4.20"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>106</td><td>Schodiště</td><td>keramická dlažba</td><td class="num">4,20 m²</td></tr>
+    <tr data-room="107" data-area="21.85"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>107</td><td>Garáž</td><td>keramická dlažba</td><td class="num">21,85 m²</td></tr>
+    <tr class="sum"><td></td><td></td><td colspan="2">Celkem 1. NP</td><td class="num" id="sum1np">81,51 m²</td></tr>
   </table>
   </div>
 
   <h2>Místnosti – podkroví <span class="chip ok">z dokumentace</span></h2>
   <div class="tablewrap">
-  <table>
-    <tr><th>Č.</th><th>Místnost</th><th>Podlaha</th><th class="num">Plocha</th></tr>
-    <tr><td>201</td><td>Chodba</td><td>dřevo / vinyl</td><td class="num">10,28 m²</td></tr>
-    <tr><td>202</td><td>Technická místnost</td><td>keramická dlažba</td><td class="num">6,73 m²</td></tr>
-    <tr><td>203</td><td>Koupelna</td><td>keramická dlažba</td><td class="num">9,30 m²</td></tr>
-    <tr><td>204</td><td>Dětský pokoj</td><td>dřevo / vinyl</td><td class="num">13,52 m²</td></tr>
-    <tr><td>205</td><td>Dětský pokoj</td><td>dřevo / vinyl</td><td class="num">15,25 m²</td></tr>
-    <tr><td>206</td><td>WC</td><td>keramická dlažba</td><td class="num">1,65 m²</td></tr>
-    <tr><td>207</td><td>Ložnice</td><td>dřevo / vinyl</td><td class="num">18,48 m²</td></tr>
-    <tr><td>208</td><td>Šatna</td><td>dřevo / vinyl</td><td class="num">5,35 m²</td></tr>
-    <tr class="sum"><td></td><td colspan="2">Celkem podkroví</td><td class="num">80,56 m²</td></tr>
+  <table id="tblpodkrovi">
+    <tr><th class="chkcol"><input type="checkbox" class="allchk" checked title="Zapnout/vypnout celé podlaží" /></th><th>Č.</th><th>Místnost</th><th>Podlaha</th><th class="num">Plocha</th></tr>
+    <tr data-room="201" data-area="10.28"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>201</td><td>Chodba</td><td>dřevo / vinyl</td><td class="num">10,28 m²</td></tr>
+    <tr data-room="202" data-area="6.73"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>202</td><td>Technická místnost</td><td>keramická dlažba</td><td class="num">6,73 m²</td></tr>
+    <tr data-room="203" data-area="9.30"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>203</td><td>Koupelna</td><td>keramická dlažba</td><td class="num">9,30 m²</td></tr>
+    <tr data-room="204" data-area="13.52"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>204</td><td>Dětský pokoj</td><td>dřevo / vinyl</td><td class="num">13,52 m²</td></tr>
+    <tr data-room="205" data-area="15.25"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>205</td><td>Dětský pokoj</td><td>dřevo / vinyl</td><td class="num">15,25 m²</td></tr>
+    <tr data-room="206" data-area="1.65"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>206</td><td>WC</td><td>keramická dlažba</td><td class="num">1,65 m²</td></tr>
+    <tr data-room="207" data-area="18.48"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>207</td><td>Ložnice</td><td>dřevo / vinyl</td><td class="num">18,48 m²</td></tr>
+    <tr data-room="208" data-area="5.35"><td class="chkcol"><input type="checkbox" class="roomchk" checked /></td><td>208</td><td>Šatna</td><td>dřevo / vinyl</td><td class="num">5,35 m²</td></tr>
+    <tr class="sum"><td></td><td></td><td colspan="2">Celkem podkroví</td><td class="num" id="sum2np">80,56 m²</td></tr>
   </table>
   </div>
 
-  <p class="note">Součet ploch všech místností je <b>162,07 m²</b>. K tomu venkovní zapuštěná
-  terasa v podkroví (betonová dlažba na terčích, šířka 5,2 m) a kryté závětří u vstupu.
-  Plochy jsou převzaté z legend místností ve výkresech půdorysů.</p>
+  <div class="stats" id="roomSummary" style="margin-top:16px">
+    <div class="stat"><b id="sum1npBox">81,51 m²</b><span>1. NP (dle výběru)</span></div>
+    <div class="stat"><b id="sum2npBox">80,56 m²</b><span>Podkroví (dle výběru)</span></div>
+    <div class="stat"><b id="sumTotalBox">162,07 m²</b><span>Celkem obě podlaží</span></div>
+  </div>
+  <p class="note">Výběr místností se ukládá v tomto prohlížeči.
+  <button class="toolbtn" id="resetRooms" type="button">Zaškrtnout vše</button></p>
+  <p class="note">K celkové ploše ještě venkovní zapuštěná terasa v podkroví (betonová dlažba
+  na terčích, šířka 5,2 m) a kryté závětří u vstupu. Plochy jsou převzaté z legend místností
+  ve výkresech půdorysů.</p>
 
   <h2>Konstrukce <span class="chip ok">z dokumentace</span></h2>
   <div class="tablewrap">
@@ -246,5 +255,82 @@
   RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
 </footer>
 
+<script>
+(function(){
+  const KEY = 'rdmodrice-mistnosti-v1';
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ state = {}; }
+
+  function fmt(n){
+    return n.toLocaleString('cs-CZ', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' m²';
+  }
+
+  function setupTable(tableId){
+    const table = document.getElementById(tableId);
+    if(!table) return [];
+    const rows = Array.from(table.querySelectorAll('tr[data-room]'));
+    rows.forEach(tr => {
+      const room = tr.getAttribute('data-room');
+      const cb = tr.querySelector('.roomchk');
+      cb.checked = state[room] !== false;
+      tr.classList.toggle('roomoff', !cb.checked);
+      cb.addEventListener('change', () => {
+        state[room] = cb.checked;
+        tr.classList.toggle('roomoff', !cb.checked);
+        localStorage.setItem(KEY, JSON.stringify(state));
+        recalc();
+      });
+    });
+    const allChk = table.querySelector('.allchk');
+    allChk.checked = rows.every(tr => tr.querySelector('.roomchk').checked);
+    allChk.addEventListener('change', () => {
+      rows.forEach(tr => {
+        const cb = tr.querySelector('.roomchk');
+        cb.checked = allChk.checked;
+        state[tr.getAttribute('data-room')] = cb.checked;
+        tr.classList.toggle('roomoff', !cb.checked);
+      });
+      localStorage.setItem(KEY, JSON.stringify(state));
+      recalc();
+    });
+    return rows;
+  }
+
+  function sumRows(rows){
+    return rows.reduce((s, tr) => {
+      const cb = tr.querySelector('.roomchk');
+      return cb.checked ? s + parseFloat(tr.getAttribute('data-area')) : s;
+    }, 0);
+  }
+
+  const rows1 = setupTable('tbl1np');
+  const rows2 = setupTable('tblpodkrovi');
+
+  function recalc(){
+    const s1 = sumRows(rows1);
+    const s2 = sumRows(rows2);
+    document.getElementById('sum1np').textContent = fmt(s1);
+    document.getElementById('sum2np').textContent = fmt(s2);
+    document.getElementById('sum1npBox').textContent = fmt(s1);
+    document.getElementById('sum2npBox').textContent = fmt(s2);
+    document.getElementById('sumTotalBox').textContent = fmt(s1 + s2);
+    document.querySelectorAll('.allchk').forEach(chk => {
+      const rows = chk.closest('table').querySelectorAll('tr[data-room]');
+      chk.checked = Array.from(rows).every(tr => tr.querySelector('.roomchk').checked);
+    });
+  }
+  recalc();
+
+  document.getElementById('resetRooms').addEventListener('click', () => {
+    state = {};
+    localStorage.removeItem(KEY);
+    [...rows1, ...rows2].forEach(tr => {
+      tr.querySelector('.roomchk').checked = true;
+      tr.classList.remove('roomoff');
+    });
+    recalc();
+  });
+})();
+</script>
 </body>
 </html>
