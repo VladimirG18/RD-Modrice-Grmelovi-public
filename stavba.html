@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Stavba domu</title>
+<meta name="description" content="Aktuální postup výstavby rodinného domu v Modřicích po jednotlivých fázích – přípojky, základy a další, s časovou osou a checklistem." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="dokumentace.html">Dokumentace</a>
+      <a href="vizualizace.html">Vizualizace</a>
+      <a href="inspirace.html">Inspirace</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="stavba.html">Stavba domu</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+      <a href="pozadavky.html">Požadavky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <span class="eyebrow">Postup výstavby</span>
+  <h1>Stavba domu</h1>
+  <p class="lead">Aktuální stav výstavby po jednotlivých fázích. Klikni na fázi v&nbsp;časové ose
+  pro detail – u&nbsp;přípojek najdeš rozpad na elektřinu, plyn, vodu a&nbsp;kanalizaci
+  s&nbsp;vlastní časovou osou a&nbsp;checklistem úkolů.</p>
+
+  <div class="statusbar">📍 <b>Aktuální fáze: kopání základů</b> – základové rýhy jsou vykopané,
+  připravena armovací kari síť, brzy proběhne vylévání základů betonem.
+  <span style="color:var(--muted)"> · stav k 6.&nbsp;9.&nbsp;2026</span></div>
+
+  <div class="timeline" id="timeline">
+    <div class="phase done clickable" data-phase="dokumentace" tabindex="0" role="button">
+      <h3>1. Projektová dokumentace <span class="statetag done">hotovo</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">07/2023</div>
+      <p>Architektonicko-stavební řešení pro územní souhlas a ohlášení stavby, průzkumy a profese.</p>
+    </div>
+
+    <div class="phase done clickable" data-phase="pruzkumy" tabindex="0" role="button">
+      <h3>2. Průzkumy a profese <span class="statetag done">hotovo</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">10/2024</div>
+      <p>Radonový průzkum, hydrogeologické posouzení vsakování, požárně bezpečnostní řešení,
+      koordinační situace s přípojkami.</p>
+    </div>
+
+    <div class="phase done clickable" data-phase="povoleni" tabindex="0" role="button">
+      <h3>3. Povolení a příprava <span class="statetag done">hotovo</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">do 8/2026</div>
+      <p>Vyjádření správců sítí, územní souhlas / ohlášení stavby, výběr dodavatele, rozpočet,
+      demolice stávající garáže na pozemku.</p>
+    </div>
+
+    <div class="phase active clickable" data-phase="pripojky" tabindex="0" role="button">
+      <h3>4. Přípojky a zemní práce <span class="statetag active">probíhá</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">9/2026 →</div>
+      <p>Elektřina, plyn, voda a kanalizace/jímka – u elektřiny a vody zatím chybí fyzická
+      realizace ze strany provozovatelů, je potřeba urgovat. Zemní práce (výkopy, skrývka)
+      souběžně probíhají se základy.</p>
+    </div>
+
+    <div class="phase active clickable" data-phase="zaklady" tabindex="0" role="button">
+      <h3>5. Základy <span class="statetag active">probíhá</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">9/2026</div>
+      <p>Základové rýhy vykopané, připravena armovací kari síť – čeká se na vylití základů betonem.</p>
+    </div>
+
+    <div class="phase clickable" data-phase="hruba" tabindex="0" role="button">
+      <h3>6. Hrubá stavba <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">—</div>
+      <p>Zdivo 1. NP (bloky 450/250 mm), železobetonový strop s věncem, zdivo podkroví,
+      schodiště, komín.</p>
+    </div>
+
+    <div class="phase clickable" data-phase="zastreseni" tabindex="0" role="button">
+      <h3>7. Zastřešení <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">—</div>
+      <p>Hambálkový krov, krytina Bramac Turmalin, klempířské prvky, střešní okna,
+      hliníková okna a vstupní dveře – uzavření hrubé stavby.</p>
+    </div>
+
+    <div class="phase clickable" data-phase="rozvody" tabindex="0" role="button">
+      <h3>8. Rozvody a instalace <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">—</div>
+      <p>Elektroinstalace, voda a kanalizace, plynový kondenzační kotel, podlahové vytápění,
+      rekuperace, krbová vložka.</p>
+    </div>
+
+    <div class="phase clickable" data-phase="dokoncovani" tabindex="0" role="button">
+      <h3>9. Vnitřní dokončovací práce <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">—</div>
+      <p>Omítky, podlahy, obklady, SDK podhledy, vnitřní dveře, malby, kuchyně a koupelny.</p>
+    </div>
+
+    <div class="phase clickable" data-phase="fasada" tabindex="0" role="button">
+      <h3>10. Fasáda a okolí <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">—</div>
+      <p>Silikátová omítka, tmavý sokl a obklady, terasa, sjezd, zpevněné plochy, zahrada.</p>
+    </div>
+
+    <div class="phase clickable" data-phase="kolaudace" tabindex="0" role="button">
+      <h3>11. Kolaudace a stěhování <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
+      <div class="when">—</div>
+      <p>Závěrečná kontrola, kolaudace, nastěhování. 🎉</p>
+    </div>
+  </div>
+
+  <p class="note">Podrobný obecný plán s termíny všech fází je na stránce
+  <a href="harmonogram.html">Harmonogram stavby</a>. Tady sledujeme skutečný postup a u přípojek
+  konkrétní kroky k vyřízení.</p>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — stav vychází z projektové dokumentace, uzavřených smluv o připojení
+  a fyzické kontroly na místě (9/2026).
+</footer>
+
+<div class="modal" id="modal">
+  <div class="modal-card wide">
+    <button class="modal-close" id="modalClose" title="Zavřít">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div id="phaseDetails" hidden>
+
+  <div class="phase-detail" data-phase="dokumentace">
+    <h2>Projektová dokumentace <span class="statetag done">hotovo</span></h2>
+    <p>Architektonicko-stavební řešení pro územní souhlas a ohlášení stavby
+    (Ing. arch. Bradáč a kol.) – půdorysy, řez, pohledy, situace, technická zpráva.</p>
+    <ul class="subtl">
+      <li><b>07/2023</b> – zpracována kompletní dokumentace pro ohlášení stavby</li>
+    </ul>
+  </div>
+
+  <div class="phase-detail" data-phase="pruzkumy">
+    <h2>Průzkumy a profese <span class="statetag done">hotovo</span></h2>
+    <p>Doplňkové průzkumy a posouzení potřebné k povolení a bezpečnému návrhu stavby.</p>
+    <ul class="subtl">
+      <li><b>10/2024</b> – radonový průzkum (střední index) a hydrogeologické posouzení vsakování</li>
+      <li><b>10/2024</b> – požárně bezpečnostní řešení</li>
+      <li><b>10/2024</b> – koordinační situace s přípojkami vody a plynu</li>
+    </ul>
+  </div>
+
+  <div class="phase-detail" data-phase="povoleni">
+    <h2>Povolení a příprava <span class="statetag done">hotovo</span></h2>
+    <p>Administrativní a smluvní příprava před zahájením zemních prací.</p>
+    <ul class="subtl">
+      <li><b>2024</b> – vyjádření správců sítí (elektřina, plyn, voda)</li>
+      <li><b>2024</b> – uzavřeny smlouvy o připojení k distribučním soustavám (elektřina, plyn)</li>
+      <li>územní souhlas / ohlášení stavby</li>
+      <li>výběr dodavatele stavby, rozpočet</li>
+      <li>demolice stávající garáže na pozemku</li>
+    </ul>
+    <p class="note" style="margin-top:0">Stavba fyzicky probíhá (viz zemní práce a základy), takže
+    tato fáze je uzavřená – přesná data podání/vydání povolení doplníme, pokud budou potřeba.</p>
+  </div>
+
+  <div class="phase-detail" data-phase="pripojky">
+    <h2>Přípojky a zemní práce <span class="statetag active">probíhá</span></h2>
+    <p>Stav ke 4 přípojkám k 9/2026 – u elektřiny a vody chybí fyzická realizace ze strany
+    provozovatelů sítí, u plynu je hotový projekt i smlouva a čeká se na realizaci, kanalizace
+    je řešena vlastní jímkou bez napojení na veřejnou síť.</p>
+
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px">
+      <span class="chip danger">⚡ Elektřina – provozovatel v prodlení, urgovat</span>
+      <span class="chip warn">🔥 Plyn – smlouva podepsaná, čeká na realizaci</span>
+      <span class="chip danger">🚰 Voda – nejméně rozjednáno</span>
+      <span class="chip acc">🚽 Kanalizace – jímka (bez napojení)</span>
+    </div>
+
+    <div class="util-grid">
+
+      <div class="util-card">
+        <h3>⚡ Elektrická přípojka (EG.D) <span class="chip danger">prodlení ~2 roky</span></h3>
+        <p style="margin:0 0 6px">Smlouva o připojení k DS podepsaná (č. 9002317986,
+        EAN 859182400221569367, jistič 3×25&nbsp;A/B). Popisuje místo připojení jako „stávající“
+        skříň SS300 na hranici pozemku – <b>reálně tam ale žádná skříň není</b> a kabel v ulici
+        se dosud nebudoval, přestože smluvní termín byl 1 měsíc od podpisu.</p>
+        <ul class="subtl">
+          <li><b>8/2024</b> – podepsána smlouva o připojení k DS s EG.D</li>
+          <li><b>8/2024 – dosud</b> – EG.D nevybudoval přípojkovou skříň ani kabel (smluvní termín cca 9/2024 překročen)</li>
+          <li><b>9/2026</b> – při kontrole na místě zjištěno, že skříň chybí; zahájena urgence</li>
+          <li><b>další krok</b> – kontakt na EG.D (Ing. Zdeněk Máca – smluvní věci, Ing. René Mikulinec – Správa sítě Morava jih), harmonogram realizace</li>
+          <li>až po vybudování skříně a kabelu má smysl řešit domovní část</li>
+        </ul>
+        <div class="clitem" data-id="pripojky-elektro-1"><input type="checkbox"><span>Kontaktovat EG.D a vyžádat konkrétní termín vybudování přípojky v ulici (smlouva č. 9002317986, čl. III – nedodržený termín)</span></div>
+        <div class="clitem" data-id="pripojky-elektro-2"><input type="checkbox"><span>Ověřit, zda byl uhrazen podíl na oprávněných nákladech (zkontrolovat e-mail / výpis z účtu)</span></div>
+        <div class="clitem" data-id="pripojky-elektro-3"><input type="checkbox"><span>Zjistit, co realizaci brzdí (povolení obce / silničního správce, věcná břemena, kapacita sítě)</span></div>
+        <div class="clitem" data-id="pripojky-elektro-4"><input type="checkbox"><span>Zvážit dočasnou staveništní přípojku, pokud bude na stavbě brzy potřeba elektřina</span></div>
+        <div class="clitem" data-id="pripojky-elektro-5"><input type="checkbox"><span>Pokud bez odezvy → písemná reklamace, případně podnět na Energetický regulační úřad (ERÚ)</span></div>
+        <div class="clitem" data-id="pripojky-elektro-6"><input type="checkbox"><span>Po vybudování skříně: objednat elektrikáře na HDV (hlavní domovní vedení) + elektroměrový rozvaděč</span></div>
+        <div class="clitem" data-id="pripojky-elektro-7"><input type="checkbox"><span>Objednat revizního technika – revizní zpráva elektroinstalace</span></div>
+        <div class="clitem" data-id="pripojky-elektro-8"><input type="checkbox"><span>Vybrat dodavatele elektřiny a podepsat smlouvu o sdružených službách dodávky</span></div>
+        <div class="clitem" data-id="pripojky-elektro-9"><input type="checkbox"><span>Podat žádost o osazení elektroměru (po revizi)</span></div>
+      </div>
+
+      <div class="util-card">
+        <h3>🔥 Plynová přípojka (GasNet) <span class="chip warn">čeká na realizaci</span></h3>
+        <p style="margin:0 0 6px">Smlouva o připojení k DS podepsaná (č. 330091762259), podmínka
+        připojení „nejdříve 30.&nbsp;8.&nbsp;2025“. Kompletní projekt fyzické přípojky hotový
+        (Ing. Jiří Machovec, stupeň POVOLENÍ) – PE100, min. DN40, délka cca 3,5&nbsp;m,
+        napojení na stávající ocelový plynovod DN100.</p>
+        <ul class="subtl">
+          <li><b>2024</b> – zpracován projekt přípojky (Ing. Machovec)</li>
+          <li><b>2024/2025</b> – podepsána smlouva o připojení k DS s GasNet</li>
+          <li><b>9/2026</b> – fyzická přípojka zatím nevybudována (ověřit stejně jako u elektřiny)</li>
+        </ul>
+        <div class="clitem" data-id="pripojky-plyn-1"><input type="checkbox"><span>Ověřit fyzický stav na pozemku (je HUP / přípojka již položená, nebo ne)</span></div>
+        <div class="clitem" data-id="pripojky-plyn-2"><input type="checkbox"><span>Objednat firmu s oprávněním pro plynová zařízení na vybudování přípojky dle hotového projektu</span></div>
+        <div class="clitem" data-id="pripojky-plyn-3"><input type="checkbox"><span>Zajistit povinnou tlakovou zkoušku přípojky před zásypem</span></div>
+        <div class="clitem" data-id="pripojky-plyn-4"><input type="checkbox"><span>Objednat revizi plynového zařízení (revizní zpráva)</span></div>
+        <div class="clitem" data-id="pripojky-plyn-5"><input type="checkbox"><span>Podat u GasNet žádost o uvedení do provozu / zahájení distribuce</span></div>
+        <div class="clitem" data-id="pripojky-plyn-6"><input type="checkbox"><span>Vybrat dodavatele plynu a podepsat samostatnou smlouvu o dodávce plynu</span></div>
+        <div class="clitem" data-id="pripojky-plyn-7"><input type="checkbox"><span>Po zahájení distribuce – osazení plynoměru (provádí GasNet)</span></div>
+      </div>
+
+      <div class="util-card">
+        <h3>🚰 Vodovodní přípojka (BVK) <span class="chip danger">nejméně rozjednáno</span></h3>
+        <p style="margin:0 0 6px">Zatím jen projektová dokumentace (Ing. Jiří Machovec,
+        stupeň POVOLENÍ, 7/2024) – PE&nbsp;40&nbsp;mm, délka 3,5–4,1&nbsp;m, napojení navrtávkou
+        na stávající litinový řad DN100, vodoměrná šachta na pozemku. Na rozdíl od elektřiny
+        a plynu <b>zatím nebyla dohledána podepsaná smlouva ani žádost na BVK</b> – tento krok
+        je teprve potřeba zahájit.</p>
+        <ul class="subtl">
+          <li><b>7/2024</b> – zpracován projekt vodovodní přípojky, stupeň POVOLENÍ</li>
+          <li><b>9/2026</b> – zatím nepodána žádost o vyjádření BVK ani neobjednána realizace (ověřit)</li>
+          <li>BVK v zimě přípojky neprovádí – řešit teď na podzim</li>
+        </ul>
+        <div class="clitem" data-id="pripojky-voda-1"><input type="checkbox"><span>Podat na BVK „Žádost o vyjádření“ (pokud ještě nebylo)</span></div>
+        <div class="clitem" data-id="pripojky-voda-2"><input type="checkbox"><span>Po kladném vyjádření objednat u BVK realizaci (smlouva o dílo, dotazník, plná moc, čestné prohlášení k DPH, PD, výpis z katastru)</span></div>
+        <div class="clitem" data-id="pripojky-voda-3"><input type="checkbox"><span>Uhradit zálohu (BVK běžně požaduje 80 % ceny předem)</span></div>
+        <div class="clitem" data-id="pripojky-voda-4"><input type="checkbox"><span>Objednat vytyčení sítí BVK (min. 3 dny předem), případně povolení zvláštního užívání komunikace</span></div>
+        <div class="clitem" data-id="pripojky-voda-5"><input type="checkbox"><span>Zajistit výkop a vodoměrnou šachtu (dodavatel investora) – navrtávku, odbočku a vodoměr dělá výhradně BVK</span></div>
+        <div class="clitem" data-id="pripojky-voda-6"><input type="checkbox"><span>Povinná tlaková zkouška za přítomnosti BVK</span></div>
+        <div class="clitem" data-id="pripojky-voda-7"><input type="checkbox"><span>Závěrečná technická prohlídka (geodetické zaměření, přípojkový list V1, protokol)</span></div>
+        <div class="clitem" data-id="pripojky-voda-8"><input type="checkbox"><span>Po instalaci vodoměru podepsat smlouvu o dodávce vody s BVK</span></div>
+        <div class="clitem urgent" data-id="pripojky-voda-9"><input type="checkbox"><span>⏰ Termínově urgentní – řešit před zimou (BVK v zimě nepřipojuje)</span></div>
+      </div>
+
+      <div class="util-card">
+        <h3>🚽 Kanalizace <span class="chip acc">jiné řešení</span></h3>
+        <p style="margin:0 0 6px">V okolí pozemku není veřejná kanalizace. Splaškové vody budou
+        řešeny <b>jímkou na vyvážení</b>, dešťová voda retencí a vsakovacím systémem AS-KRECHT.
+        Přípojku k BVK proto řešit není potřeba.</p>
+        <div class="clitem" data-id="pripojky-kanal-1"><input type="checkbox"><span>Ověřit, že je jímka jako vodní dílo řádně povolena (pokud není součástí stavebního povolení domu, doplnit u vodoprávního úřadu)</span></div>
+        <div class="clitem" data-id="pripojky-kanal-2"><input type="checkbox"><span>Zajistit smlouvu s oprávněnou firmou na pravidelný vývoz jímky</span></div>
+        <div class="clitem" data-id="pripojky-kanal-3"><input type="checkbox"><span>Uchovávat doklady o vývozu (pro případnou kontrolu)</span></div>
+      </div>
+
+    </div>
+
+    <div class="callout info">ℹ️ <b>Legislativa (stav 2026):</b> od 1.&nbsp;7.&nbsp;2024 platí nový
+    stavební zákon (283/2021&nbsp;Sb.) – vodovodní a kanalizační přípojky do 25&nbsp;m jsou „drobné
+    stavby“ bez povolení stavebního úřadu (naše vodovodní přípojka 3,5–4,1&nbsp;m do toho spadá),
+    přesto je nutné kladné vyjádření provozovatele (BVK) a schválená PD. Elektro a plyn se řeší
+    přes energetický zákon (458/2000&nbsp;Sb.) a smluvní vztah s EG.D / GasNet, ne přes stavební
+    úřad. Doporučeno ověřit u stavebního úřadu, že jsou všechny přípojky správně podchycené
+    v rámci vydaného stavebního povolení na dům.</div>
+
+    <p class="note">Zdroje: smlouvy a projektová dokumentace ve složce „Přípojky“ ·
+    <a href="https://www.bvk.cz/vyjadrovaci-portal/vyjadrovani-k-projektove-dokumentaci/informace-ke-zrizeni-vodovodni-pripojky" target="_blank" rel="noopener">BVK – zřízení vodovodní přípojky</a> ·
+    <a href="https://www.egd.cz/pripojeni-uplne-noveho-odberneho-mista" target="_blank" rel="noopener">EG.D – připojení nového odběrného místa</a> ·
+    <a href="https://www.gasnet.cz/pripojeni-k-plynu/nove-pripojeni/plynovodni-pripojka" target="_blank" rel="noopener">GasNet – plynovodní přípojka</a></p>
+  </div>
+
+  <div class="phase-detail" data-phase="zaklady">
+    <h2>Základy <span class="statetag active">probíhá</span></h2>
+    <p>Základové pasy a deska (založení −1,25 m), ležaté rozvody, podkladní beton s kari sítí,
+    hydroizolace 2× SBS s protiradonovou funkcí.</p>
+    <ul class="subtl">
+      <li><b>31. 8. – 4. 9. 2026</b> – postupné odkrývání a kopání základových rýh</li>
+      <li><b>6. 9. 2026</b> – rýhy vykopané, hromada suti z bouraček, svazky armovací kari sítě připravené, výstražná páska kolem výkopu</li>
+      <li><b>další krok</b> – vylití základové desky betonem</li>
+      <li>poté ležaté rozvody a hydroizolace 2× SBS</li>
+    </ul>
+  </div>
+
+  <div class="phase-detail" data-phase="hruba">
+    <h2>Hrubá stavba <span class="statetag">plánováno</span></h2>
+    <p>Zdivo 1. NP (bloky 450/250 mm), železobetonový strop s věncem, zdivo podkroví,
+    schodiště, komín.</p>
+    <ul class="subtl">
+      <li>svislé konstrukce 1. NP</li>
+      <li>strop nad 1. NP + věnec</li>
+      <li>svislé konstrukce 2. NP (podkroví)</li>
+      <li>schodiště, komín</li>
+    </ul>
+  </div>
+
+  <div class="phase-detail" data-phase="zastreseni">
+    <h2>Zastřešení <span class="statetag">plánováno</span></h2>
+    <p>Hambálkový krov (krokve 100/180), krytina Bramac Turmalin, klempířské prvky,
+    střešní okna, hliníková okna a vstupní dveře – uzavření hrubé stavby.</p>
+    <ul class="subtl">
+      <li>krov a krytina</li>
+      <li>klempířské prvky, střešní okna</li>
+      <li>okna a vstupní dveře – uzavření hrubé stavby</li>
+    </ul>
+  </div>
+
+  <div class="phase-detail" data-phase="rozvody">
+    <h2>Rozvody a instalace <span class="statetag">plánováno</span></h2>
+    <p>Elektroinstalace, voda a kanalizace, plynový kondenzační kotel 18 kW,
+    podlahové vytápění, rekuperace, krbová vložka.</p>
+    <ul class="subtl">
+      <li>elektroinstalace</li>
+      <li>rozvody vody a odpadů</li>
+      <li>vytápění, rekuperace, krb</li>
+    </ul>
+  </div>
+
+  <div class="phase-detail" data-phase="dokoncovani">
+    <h2>Vnitřní dokončovací práce <span class="statetag">plánováno</span></h2>
+    <p>Omítky, podlahy (dlažba + dřevo/vinyl), obklady, SDK podhledy, vnitřní dveře,
+    malby, kuchyně a koupelny.</p>
+  </div>
+
+  <div class="phase-detail" data-phase="fasada">
+    <h2>Fasáda a okolí <span class="statetag">plánováno</span></h2>
+    <p>Silikátová omítka, tmavý sokl a obklady, terasa s dlažbou na terčích a skleněným
+    zábradlím, sjezd, zpevněné plochy, zahrada.</p>
+  </div>
+
+  <div class="phase-detail" data-phase="kolaudace">
+    <h2>Kolaudace a stěhování <span class="statetag">plánováno</span></h2>
+    <p>Závěrečná kontrola, kolaudace, nastěhování. 🎉</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const KEY = 'rdmodrice-stavba-checklist-v1';
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ state = {}; }
+
+  document.querySelectorAll('.clitem[data-id]').forEach(div=>{
+    const id = div.getAttribute('data-id');
+    const cb = div.querySelector('input[type=checkbox]');
+    cb.checked = !!state[id];
+    if(cb.checked) div.classList.add('done');
+    const toggle = (fromLabel)=>{
+      if(fromLabel) cb.checked = !cb.checked;
+      state[id] = cb.checked;
+      div.classList.toggle('done', cb.checked);
+      try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+    };
+    cb.addEventListener('click', e=>{ e.stopPropagation(); toggle(false); });
+    div.addEventListener('click', ()=> toggle(true));
+  });
+
+  const modal = document.getElementById('modal');
+  const modalBody = document.getElementById('modalBody');
+  const holder = document.getElementById('phaseDetails');
+
+  function openPhase(id){
+    const detail = holder.querySelector('.phase-detail[data-phase="'+id+'"]');
+    if(!detail) return;
+    while(modalBody.firstChild) holder.appendChild(modalBody.firstChild);
+    modalBody.appendChild(detail);
+    modal.classList.add('open');
+  }
+  function closeModal(){
+    while(modalBody.firstChild) holder.appendChild(modalBody.firstChild);
+    modal.classList.remove('open');
+  }
+
+  document.querySelectorAll('.phase.clickable[data-phase]').forEach(el=>{
+    el.addEventListener('click', ()=> openPhase(el.getAttribute('data-phase')));
+    el.addEventListener('keydown', e=>{
+      if(e.code === 'Enter' || e.code === 'Space'){ e.preventDefault(); openPhase(el.getAttribute('data-phase')); }
+    });
+  });
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e)=>{ if(e.code === 'Escape') closeModal(); });
+})();
+</script>
+</body>
+</html>
