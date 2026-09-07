@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Fotky ze stavby</title>
+<meta name="description" content="Fotodokumentace postupu výstavby rodinného domu v Modřicích, seřazená chronologicky s datem a popiskem u každé fotky." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="dokumentace.html">Dokumentace</a>
+      <a href="vizualizace.html">Vizualizace</a>
+      <a href="inspirace.html">Inspirace</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="stavba.html">Stavba domu</a>
+      <a href="fotky-stavby.html">Fotky ze stavby</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+      <a href="pozadavky.html">Požadavky</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <a class="backlink" href="stavba.html">← Zpět na Stavbu domu</a>
+
+  <span class="eyebrow">Stavba domu</span>
+  <h1>Fotky ze stavby</h1>
+  <p class="lead">Fotodokumentace postupu výstavby, seřazená chronologicky. Klikni na fotku pro
+  zvětšení. Postupně budeme doplňovat další.</p>
+
+  <h2>2. 9. 2026</h2>
+  <div class="gallery">
+    <figure>
+      <img src="assets/img/stavba/2026-09-02_02.jpg" alt="Minibagr na pozemku, začátek výkopu základové rýhy" loading="lazy" />
+      <figcaption>Minibagr Bobcat na pozemku – začíná výkop první základové rýhy.</figcaption>
+    </figure>
+  </div>
+
+  <h2>3. 9. 2026</h2>
+  <div class="gallery">
+    <figure>
+      <img src="assets/img/stavba/2026-09-03_01.jpg" alt="Vykopané základové rýhy s výstražnou páskou a armovací kari sítí" loading="lazy" />
+      <figcaption>Vykopané základové rýhy, výstražná páska a připravené svazky armovací kari sítě.</figcaption>
+    </figure>
+  </div>
+
+  <p class="note">Zdroj: fotky ze složky „Fotky stavby" na Google Drive.</p>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — fotodokumentace průběhu výstavby.
+</footer>
+
+<div class="lightbox" id="fsLight" hidden>
+  <button class="lb-close" id="fsClose" aria-label="Zavřít">✕</button>
+  <button class="lb-nav lb-prev" id="fsPrev" aria-label="Předchozí">‹</button>
+  <figure class="lb-fig">
+    <img id="fsImg" alt="" />
+    <figcaption id="fsCap"></figcaption>
+  </figure>
+  <button class="lb-nav lb-next" id="fsNext" aria-label="Další">›</button>
+</div>
+
+<script>
+(function(){
+  const figs = Array.from(document.querySelectorAll('.gallery figure'));
+  const items = figs.map(f => ({
+    src: f.querySelector('img').src,
+    alt: f.querySelector('img').alt,
+    cap: f.querySelector('figcaption').textContent
+  }));
+
+  const light = document.getElementById('fsLight');
+  const imgEl = document.getElementById('fsImg');
+  const capEl = document.getElementById('fsCap');
+  let idx = 0;
+
+  function show(i){
+    idx = (i + items.length) % items.length;
+    const it = items[idx];
+    imgEl.src = it.src;
+    imgEl.alt = it.alt;
+    capEl.textContent = it.cap;
+  }
+  function open(i){ show(i); light.hidden = false; }
+  function close(){ light.hidden = true; }
+
+  figs.forEach((f, i) => {
+    const img = f.querySelector('img');
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', () => open(i));
+  });
+
+  document.getElementById('fsClose').addEventListener('click', close);
+  document.getElementById('fsPrev').addEventListener('click', () => show(idx - 1));
+  document.getElementById('fsNext').addEventListener('click', () => show(idx + 1));
+  light.addEventListener('click', (e) => { if(e.target === light) close(); });
+  document.addEventListener('keydown', (e) => {
+    if(light.hidden) return;
+    if(e.code === 'Escape') close();
+    if(e.code === 'ArrowLeft') show(idx - 1);
+    if(e.code === 'ArrowRight') show(idx + 1);
+  });
+})();
+</script>
+</body>
+</html>
