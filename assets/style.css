@@ -168,6 +168,7 @@ tr.roomoff td.chkcol{ text-decoration:none; }
   background:var(--warn-soft); border-radius:12px; font-size:.9rem; line-height:1.5;
 }
 .callout.info{ border-color:var(--accent); background:var(--accent-soft); }
+.callout.ok{ border-color:var(--ok); background:var(--ok-soft); }
 ul.tidy{ margin:8px 0; padding-left:20px; }
 ul.tidy li{ margin:5px 0; }
 .chip{ display:inline-block; font-size:.72rem; font-weight:600; padding:2px 10px; border-radius:999px;
@@ -219,6 +220,7 @@ ul.tidy li{ margin:5px 0; }
   transition:transform .14s ease, color .14s ease;
 }
 .card:hover .go{ transform:translateX(3px); color:var(--accent-ink); }
+.card .chip{ margin-top:11px; }
 
 /* ---------- Galerie ---------- */
 .gallery{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:6px; }
@@ -266,21 +268,18 @@ ul.tidy li{ margin:5px 0; }
 .statetag.active{ color:var(--accent-ink); border-color:transparent; background:var(--accent-soft); }
 
 /* fáze jako rozklikávací tlačítko (Stavba domu) */
-.phase.clickable{ cursor:pointer; border-radius:10px; margin-left:-10px; padding-left:10px; transition:background .12s; }
-.phase.clickable:hover{ background:var(--surface-2); }
+.phase.clickable{ cursor:pointer; display:block; border-radius:10px; margin-left:-10px; padding-left:10px;
+  color:var(--text); text-decoration:none; transition:background .12s; }
+.phase.clickable:hover{ background:var(--surface-2); text-decoration:none; }
 .phase.clickable:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 .phase.clickable .open-hint{ color:var(--accent-ink); font-size:.78rem; font-weight:600; margin-left:4px; }
 
-/* karty jednotlivých přípojek uvnitř modalu */
-.util-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin:16px 0; }
-.util-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:15px 17px; }
-.util-card h3{ margin:0 0 8px; font-size:.98rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+/* mini časová osa (podstránky přípojek) */
 .subtl{ list-style:none; margin:10px 0 14px; padding:0 0 0 2px; border-left:2px solid var(--border-strong); }
-.subtl li{ position:relative; padding:1px 0 10px 16px; font-size:.84rem; color:var(--muted); line-height:1.5; }
+.subtl li{ position:relative; padding:1px 0 10px 16px; font-size:.9rem; color:var(--muted); line-height:1.55; }
 .subtl li::before{ content:""; position:absolute; left:-5px; top:6px; width:8px; height:8px; border-radius:50%; background:var(--border-strong); }
 .subtl li b{ color:var(--text); }
-.util-card .clitem{ padding:8px 10px; margin:6px 0; font-size:.86rem; }
-.util-card .clitem.urgent{ border-color:var(--warn); }
+.clitem.urgent{ border-color:var(--warn); }
 
 /* ---------- Dlaždice materiálů ---------- */
 .mini{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:13px; margin-top:14px; }
@@ -341,7 +340,6 @@ ul.tidy li{ margin:5px 0; }
 .modal.open{ display:flex; }
 .modal-card{ position:relative; background:var(--surface); border:1px solid var(--border);
   border-radius:var(--radius-lg); max-width:660px; width:100%; padding:26px 28px 30px; box-shadow:var(--shadow-lg); }
-.modal-card.wide{ max-width:980px; }
 .modal-card h2{ margin:0 26px 10px 0; display:block; }
 .modal-card h2::after{ display:none; }
 .modal-card table{ font-size:.88rem; }
