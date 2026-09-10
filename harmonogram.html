@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RD Modřice – Harmonogram stavby</title>
-<meta name="description" content="Harmonogram výstavby rodinného domu v Modřicích – fáze, termíny a stav." />
+<meta name="description" content="Sdílený interaktivní harmonogram výstavby rodinného domu v Modřicích – fáze rozdělené na dílčí kroky, editovatelné a přeuspořádatelné pro celou rodinu." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
 <script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,7 +25,7 @@
       <a href="dokumentace.html">Dokumentace</a>
       <a href="vizualizace.html">Vizualizace</a>
       <a href="inspirace.html">Inspirace</a>
-      <a href="harmonogram.html">Harmonogram</a>
+      <a href="harmonogram.html" aria-current="page">Harmonogram</a>
       <a href="stavba.html">Stavba domu</a>
       <a href="fotky-stavby.html">Fotky ze stavby</a>
       <a href="checklist.html">Checklist</a>
@@ -37,102 +37,306 @@
   </nav>
 </header>
 
-<div class="content">
+<div class="content wide">
   <span class="eyebrow">Plán výstavby</span>
   <h1>Harmonogram stavby</h1>
-  <p class="lead">Fáze výstavby s termíny a aktuálním stavem. Hotové kroky vycházejí
-  z dokumentace, termíny dalších fází doplníme podle skutečnosti.</p>
+  <p class="lead">Sdílený harmonogram v reálném čase – fáze rozdělené na dílčí kroky, u&nbsp;každé fáze
+  volitelně napojené na odpovídající kategorii v&nbsp;<a href="rozpocet.html">rozpočtu</a>. Upravuje
+  a&nbsp;přeuspořádává (přetažením za „⠿" nebo šipkami) celá rodina.</p>
 
-  <div class="timeline">
-    <div class="phase done">
-      <h3>1. Projektová dokumentace <span class="statetag done">hotovo</span></h3>
-      <div class="when">07/2023</div>
-      <p>Architektonicko-stavební řešení pro územní souhlas a ohlášení stavby
-      (Ing. arch. Bradáč a kol.) – půdorysy, řez, pohledy, situace, technická zpráva.</p>
-    </div>
+  <div id="status" class="statusbar"></div>
 
-    <div class="phase done">
-      <h3>2. Průzkumy a profese <span class="statetag done">hotovo</span></h3>
-      <div class="when">10/2024</div>
-      <p>Radonový průzkum (střední index), hydrogeologické posouzení vsakování,
-      požárně bezpečnostní řešení, koordinační situace s přípojkami vody a plynu.</p>
-    </div>
-
-    <div class="phase done">
-      <h3>3. Povolení a příprava <span class="statetag done">hotovo</span></h3>
-      <div class="when">6/2026 – 8/2026</div>
-      <p>Vyjádření správců sítí, stavební povolení na dům (vydáno 6/2026, právní moc 7–8/2026),
-      výběr dodavatele, rozpočet. Stávající garáž na pozemku odstraněna.</p>
-    </div>
-
-    <div class="phase active">
-      <h3>4. Přípojky a zemní práce <span class="statetag active">probíhá</span></h3>
-      <div class="when">9/2026 →</div>
-      <p>Přípojky vody (PE 32×3,0 + vodoměrná šachta), plynu (PE 40×3,7 + HUP) a NN,
-      skrývka, vytyčení stavby, výkopy, jímka a vsakovací systém AS-KRECHT. Papírově nejdál
-      je voda (kladné vyjádření BVK) a elektřina (smlouva, uhrazeno) – zbývá ověřit a
-      objednat fyzickou realizaci. Podrobný stav a checklist viz
-      <a href="stavba.html">Stavba domu</a>.</p>
-    </div>
-
-    <div class="phase active">
-      <h3>5. Základy <span class="statetag active">probíhá</span></h3>
-      <div class="when">9/2026</div>
-      <p>Základové pasy a deska (založení −1,25 m), ležaté rozvody, podkladní beton
-      s kari sítí, hydroizolace 2× SBS s protiradonovou funkcí. Rýhy vykopané, kari síť
-      připravena – čeká se na vylití betonu.</p>
-    </div>
-
-    <div class="phase">
-      <h3>6. Hrubá stavba <span class="statetag">plánováno</span></h3>
-      <div class="when">—</div>
-      <p>Zdivo 1. NP (bloky 450/250 mm), železobetonový strop s věncem, zdivo podkroví,
-      schodiště, komín.</p>
-    </div>
-
-    <div class="phase">
-      <h3>7. Zastřešení <span class="statetag">plánováno</span></h3>
-      <div class="when">—</div>
-      <p>Hambálkový krov (krokve 100/180), krytina Bramac Turmalin, klempířské prvky,
-      střešní okna, hliníková okna a vstupní dveře – uzavření hrubé stavby.</p>
-    </div>
-
-    <div class="phase">
-      <h3>8. Rozvody a instalace <span class="statetag">plánováno</span></h3>
-      <div class="when">—</div>
-      <p>Elektroinstalace, voda a kanalizace, plynový kondenzační kotel 18 kW,
-      podlahové vytápění, rekuperace, krbová vložka.</p>
-    </div>
-
-    <div class="phase">
-      <h3>9. Vnitřní dokončovací práce <span class="statetag">plánováno</span></h3>
-      <div class="when">—</div>
-      <p>Omítky, podlahy (dlažba + dřevo/vinyl), obklady, SDK podhledy, vnitřní dveře,
-      malby, kuchyně a koupelny.</p>
-    </div>
-
-    <div class="phase">
-      <h3>10. Fasáda a okolí <span class="statetag">plánováno</span></h3>
-      <div class="when">—</div>
-      <p>Silikátová omítka, tmavý sokl a obklady, terasa s dlažbou na terčích a skleněným
-      zábradlím, sjezd, zpevněné plochy, zahrada.</p>
-    </div>
-
-    <div class="phase">
-      <h3>11. Kolaudace a stěhování <span class="statetag">plánováno</span></h3>
-      <div class="when">—</div>
-      <p>Závěrečná kontrola, kolaudace, nastěhování. 🎉</p>
-    </div>
+  <div class="progresswrap">
+    <div class="progressbar"><i id="pfill"></i></div>
+    <small id="pcount">0 / 0 dílčích kroků hotovo</small>
   </div>
 
-  <p class="note">Termíny fází 6–11 doplníme, jakmile budou známé – stačí je poslat.
-  Průběžný skutečný stav je na stránce <a href="stavba.html">Stavba domu</a>, fotodokumentace
-  postupu na stránce <a href="fotky-stavby.html">Fotky ze stavby</a>.</p>
+  <div class="callout info">💡 Klikni na název, termín nebo poznámku fáze a přepiš – ukládá se rovnou.
+  Stav fáze i kroku přepneš výběrem/klikem, pořadí změníš tažením za „⠿" nebo šipkami ▲▼. Dílčí krok
+  přidáš na konci seznamu dané fáze, mezi fáze ho přesuneš výběrem vpravo. Novou fázi přidáš úplně dole.</div>
+
+  <div id="root"></div>
+
+  <div class="hg-newphase">
+    <b>+ Nová fáze</b>
+    <input type="text" id="newPhaseName" placeholder="Název fáze…" maxlength="80">
+    <button class="btn primary" id="addPhaseBtn" type="button">Přidat fázi</button>
+  </div>
+
+  <p class="note">Skutečný stav na stavbě a fotodokumentace jsou na stránkách
+  <a href="stavba.html">Stavba domu</a> a <a href="fotky-stavby.html">Fotky ze stavby</a>.</p>
 </div>
 
 <footer class="site-footer">
-  RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
+  RD Modřice · Grmelovi — harmonogram vychází z projektové dokumentace a aktuálního postupu, průběžně
+  ho upravuje celá rodina.
 </footer>
 
+<script type="module">
+import { createTimelineStore, esc, STATUSES, STATUS_BY_ID, BUDGET_CATEGORIES, BUDGET_CAT_BY_ID }
+  from './assets/harmonogram.js';
+
+const $ = id => document.getElementById(id);
+const statusEl = $('status'), rootEl = $('root'), pfill = $('pfill'), pcount = $('pcount');
+
+let phases = [], kroky = [], backend = null;
+let draggingPhaseId = null, draggingKrokId = null, pendingRender = false;
+
+function setStatus(kind, html){ statusEl.className = 'statusbar' + (kind ? ' ' + kind : ''); statusEl.innerHTML = html; }
+function sortByOrder(list){ return list.slice().sort((a, b) => (a.order || 0) - (b.order || 0)); }
+
+function statusOptionsHTML(selected){
+  return STATUSES.map(s => `<option value="${s.id}"${s.id === selected ? ' selected' : ''}>${s.icon} ${esc(s.name)}</option>`).join('');
+}
+function catOptionsHTML(selected){
+  return '<option value="">— bez kategorie —</option>' + BUDGET_CATEGORIES.map(c =>
+    `<option value="${esc(c.id)}"${c.id === selected ? ' selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('');
+}
+function phaseOptionsHTML(selected){
+  return sortByOrder(phases).map(p => `<option value="${esc(p.id)}"${p.id === selected ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+}
+
+function updateProgress(){
+  const total = kroky.length;
+  const done = kroky.filter(k => k.status === 'hotovo').length;
+  pfill.style.width = total ? (done / total * 100) + '%' : '0%';
+  pcount.textContent = done + ' / ' + total + ' dílčích kroků hotovo';
+}
+
+function krokHTML(k, idx, listLen){
+  const st = STATUS_BY_ID[k.status] || STATUSES[0];
+  return `<div class="hg-krok${st.id === 'hotovo' ? ' done' : ''}" data-krok-id="${esc(k.id)}">
+    <span class="hg-draghandle" draggable="true" data-drag-krok="${esc(k.id)}" title="Přetáhnout pro změnu pořadí">⠿</span>
+    <div class="hg-arrows">
+      <button type="button" data-move="up" data-kind="krok" data-id="${esc(k.id)}"${idx === 0 ? ' disabled' : ''} title="Posunout výš" aria-label="Posunout výš">▲</button>
+      <button type="button" data-move="down" data-kind="krok" data-id="${esc(k.id)}"${idx === listLen - 1 ? ' disabled' : ''} title="Posunout níž" aria-label="Posunout níž">▼</button>
+    </div>
+    <button type="button" class="hg-krok-status" data-id="${esc(k.id)}" title="${esc(st.name)} – klikni pro změnu stavu">${st.icon}</button>
+    <input type="text" class="hg-krok-text" data-id="${esc(k.id)}" data-field="text" data-kind="krok" value="${esc(k.text || '')}" placeholder="Dílčí krok…">
+    <input type="text" class="hg-krok-when" data-id="${esc(k.id)}" data-field="when" data-kind="krok" value="${esc(k.when || '')}" placeholder="termín">
+    <select class="hg-krok-phase" data-id="${esc(k.id)}" data-field="phase" data-kind="krok" title="Přesunout do jiné fáze">${phaseOptionsHTML(k.phase)}</select>
+    <button type="button" class="rz-icon-btn danger" data-delkrok="${esc(k.id)}" title="Smazat krok" aria-label="Smazat krok">🗑</button>
+  </div>`;
+}
+
+function phaseHTML(p, idx, total){
+  const st = STATUS_BY_ID[p.status] || STATUSES[0];
+  const cat = p.budgetCat ? BUDGET_CAT_BY_ID[p.budgetCat] : null;
+  const myKroky = sortByOrder(kroky.filter(k => k.phase === p.id));
+  return `<section class="hg-phase" data-phase-id="${esc(p.id)}">
+    <div class="hg-head">
+      <span class="hg-draghandle" draggable="true" data-drag-phase="${esc(p.id)}" title="Přetáhnout pro změnu pořadí">⠿</span>
+      <div class="hg-arrows">
+        <button type="button" data-move="up" data-kind="phase" data-id="${esc(p.id)}"${idx === 0 ? ' disabled' : ''} title="Posunout výš" aria-label="Posunout výš">▲</button>
+        <button type="button" data-move="down" data-kind="phase" data-id="${esc(p.id)}"${idx === total - 1 ? ' disabled' : ''} title="Posunout níž" aria-label="Posunout níž">▼</button>
+      </div>
+      <div class="hg-head-main">
+        <input type="text" class="hg-name" data-id="${esc(p.id)}" data-field="name" data-kind="phase" value="${esc(p.name)}" placeholder="Název fáze">
+        <select class="hg-statesel st-${st.id}" data-id="${esc(p.id)}" data-field="status" data-kind="phase">${statusOptionsHTML(p.status)}</select>
+        <input type="text" class="hg-when" data-id="${esc(p.id)}" data-field="when" data-kind="phase" value="${esc(p.when || '')}" placeholder="termín…">
+        <select class="hg-catsel" data-id="${esc(p.id)}" data-field="budgetCat" data-kind="phase">${catOptionsHTML(p.budgetCat)}</select>
+        ${cat ? `<a class="hg-catlink" href="rozpocet.html#cat-${esc(cat.id)}" target="_blank" rel="noopener">${cat.icon} rozpočet →</a>` : ''}
+      </div>
+      <button type="button" class="rz-icon-btn danger" data-delphase="${esc(p.id)}" title="Smazat fázi" aria-label="Smazat fázi">🗑</button>
+    </div>
+    <textarea class="hg-note" data-id="${esc(p.id)}" data-field="note" data-kind="phase" placeholder="Popis fáze…">${esc(p.note || '')}</textarea>
+    <div class="hg-kroky">${myKroky.map((k, i) => krokHTML(k, i, myKroky.length)).join('')}</div>
+    <div class="hg-addkrok"><input type="text" data-addkrok="${esc(p.id)}" placeholder="+ Přidat dílčí krok… (Enter)"></div>
+  </section>`;
+}
+
+function render(){
+  if(draggingPhaseId || draggingKrokId){ pendingRender = true; return; }
+  updateProgress();
+
+  const active = document.activeElement;
+  let restore = null;
+  if(active && rootEl.contains(active) && (active.matches('[data-id][data-field]') || active.matches('[data-addkrok]'))){
+    restore = {
+      id: active.dataset.id || null, field: active.dataset.field || null, addkrok: active.dataset.addkrok || null,
+      selStart: active.selectionStart, selEnd: active.selectionEnd, val: active.value,
+    };
+  }
+
+  const sorted = sortByOrder(phases);
+  rootEl.innerHTML = sorted.length
+    ? sorted.map((p, i) => phaseHTML(p, i, sorted.length)).join('')
+    : '<div class="empty">Zatím tu nejsou žádné fáze.</div>';
+
+  if(restore){
+    let sel = null;
+    if(restore.id) sel = rootEl.querySelector(`[data-id="${CSS.escape(restore.id)}"][data-field="${CSS.escape(restore.field)}"]`);
+    else if(restore.addkrok) sel = rootEl.querySelector(`[data-addkrok="${CSS.escape(restore.addkrok)}"]`);
+    if(sel){
+      sel.focus();
+      if(restore.addkrok) sel.value = restore.val;
+      try { sel.setSelectionRange(restore.selStart, restore.selEnd); } catch(e){}
+    }
+  }
+}
+
+/* --- backend --- */
+backend = await createTimelineStore({
+  onPhases: (list) => { phases = list; render(); },
+  onKroky:  (list) => { kroky = list; render(); },
+  onStatus: (kind, html) => setStatus(kind, html),
+});
+
+/* --- úprava polí (uloží se při opuštění pole / změně) --- */
+rootEl.addEventListener('change', e => {
+  const el = e.target;
+  if(!el.matches('[data-id][data-field]')) return;
+  const id = el.dataset.id, field = el.dataset.field, kind = el.dataset.kind;
+  let val = el.value.trim();
+  if(field === 'budgetCat' && val === '') val = null;
+  const target = kind === 'krok' ? backend.kroky : backend.phases;
+  target.update(id, { [field]:val }).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+});
+
+rootEl.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const el = e.target;
+  if(el.matches('[data-addkrok]')){
+    e.preventDefault();
+    const text = el.value.trim(); if(!text) return;
+    const phaseId = el.dataset.addkrok;
+    backend.kroky.add({ phase:phaseId, text, status:'planovano', when:'', order:Date.now() })
+      .catch(err => { console.error(err); alert('Přidání kroku se nepodařilo.'); });
+    el.value = '';
+  } else if(el.matches('input[data-id]')){
+    el.blur();
+  }
+});
+
+/* --- klik: cyklení stavu kroku, mazání, šipky pro přeuspořádání --- */
+rootEl.addEventListener('click', e => {
+  const cyc = e.target.closest('.hg-krok-status[data-id]');
+  if(cyc){
+    const k = kroky.find(x => x.id === cyc.dataset.id); if(!k) return;
+    const curIdx = STATUSES.findIndex(s => s.id === (k.status || 'planovano'));
+    const next = STATUSES[(curIdx + 1) % STATUSES.length].id;
+    backend.kroky.update(k.id, { status:next }).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+    return;
+  }
+  const mv = e.target.closest('[data-move]');
+  if(mv){
+    const kind = mv.dataset.kind, id = mv.dataset.id, dir = mv.dataset.move;
+    if(kind === 'phase'){
+      const list = sortByOrder(phases).map(p => p.id);
+      const i = list.indexOf(id), j = dir === 'up' ? i - 1 : i + 1;
+      if(i < 0 || j < 0 || j >= list.length) return;
+      [list[i], list[j]] = [list[j], list[i]];
+      backend.phases.reorder(list).catch(err => { console.error(err); alert('Přeuspořádání se nepodařilo.'); });
+    } else {
+      const k = kroky.find(x => x.id === id); if(!k) return;
+      const list = sortByOrder(kroky.filter(x => x.phase === k.phase)).map(x => x.id);
+      const i = list.indexOf(id), j = dir === 'up' ? i - 1 : i + 1;
+      if(i < 0 || j < 0 || j >= list.length) return;
+      [list[i], list[j]] = [list[j], list[i]];
+      backend.kroky.reorder(list).catch(err => { console.error(err); alert('Přeuspořádání se nepodařilo.'); });
+    }
+    return;
+  }
+  const delp = e.target.closest('[data-delphase]');
+  if(delp){
+    const p = phases.find(x => x.id === delp.dataset.delphase); if(!p) return;
+    const mine = kroky.filter(k => k.phase === p.id);
+    if(!confirm('Smazat fázi „' + p.name + '"' + (mine.length ? ' a jejích ' + mine.length + ' dílčích kroků' : '') + '?')) return;
+    Promise.all(mine.map(k => backend.kroky.remove(k.id)))
+      .then(() => backend.phases.remove(p.id))
+      .catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+    return;
+  }
+  const delk = e.target.closest('[data-delkrok]');
+  if(delk){
+    const k = kroky.find(x => x.id === delk.dataset.delkrok); if(!k) return;
+    if(confirm('Smazat krok „' + k.text + '"?')){
+      backend.kroky.remove(k.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+    }
+  }
+});
+
+/* --- drag & drop (fáze i kroky uvnitř fáze) --- */
+rootEl.addEventListener('dragstart', e => {
+  const ph = e.target.closest('[data-drag-phase]');
+  if(ph){
+    draggingPhaseId = ph.dataset.dragPhase;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggingPhaseId);
+    ph.closest('.hg-phase').classList.add('hg-dragging');
+    return;
+  }
+  const kh = e.target.closest('[data-drag-krok]');
+  if(kh){
+    draggingKrokId = kh.dataset.dragKrok;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggingKrokId);
+    kh.closest('.hg-krok').classList.add('hg-dragging');
+  }
+});
+
+rootEl.addEventListener('dragover', e => {
+  if(draggingPhaseId){
+    const over = e.target.closest('.hg-phase[data-phase-id]');
+    if(!over || over.dataset.phaseId === draggingPhaseId) return;
+    const dragEl = rootEl.querySelector(`.hg-phase[data-phase-id="${CSS.escape(draggingPhaseId)}"]`);
+    if(!dragEl) return;
+    e.preventDefault();
+    const rect = over.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+    over.parentNode.insertBefore(dragEl, before ? over : over.nextSibling);
+    return;
+  }
+  if(draggingKrokId){
+    const over = e.target.closest('.hg-krok[data-krok-id]');
+    if(!over || over.dataset.krokId === draggingKrokId) return;
+    const dragEl = rootEl.querySelector(`.hg-krok[data-krok-id="${CSS.escape(draggingKrokId)}"]`);
+    if(!dragEl || dragEl.closest('.hg-kroky') !== over.closest('.hg-kroky')) return;
+    e.preventDefault();
+    const rect = over.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+    over.parentNode.insertBefore(dragEl, before ? over : over.nextSibling);
+  }
+});
+
+rootEl.addEventListener('drop', e => { e.preventDefault(); });
+
+rootEl.addEventListener('dragend', () => {
+  if(draggingPhaseId){
+    rootEl.querySelectorAll('.hg-phase.hg-dragging').forEach(el => el.classList.remove('hg-dragging'));
+    const ids = [...rootEl.querySelectorAll('.hg-phase[data-phase-id]')].map(el => el.dataset.phaseId);
+    draggingPhaseId = null;
+    backend.phases.reorder(ids).catch(err => { console.error(err); alert('Přeuspořádání se nepodařilo.'); })
+      .finally(() => { if(pendingRender){ pendingRender = false; render(); } });
+    return;
+  }
+  if(draggingKrokId){
+    const dragEl = rootEl.querySelector(`.hg-krok[data-krok-id="${CSS.escape(draggingKrokId)}"]`);
+    draggingKrokId = null;
+    if(dragEl){
+      dragEl.classList.remove('hg-dragging');
+      const container = dragEl.closest('.hg-kroky');
+      if(container){
+        const ids = [...container.querySelectorAll('.hg-krok[data-krok-id]')].map(el => el.dataset.krokId);
+        backend.kroky.reorder(ids).catch(err => { console.error(err); alert('Přeuspořádání se nepodařilo.'); })
+          .finally(() => { if(pendingRender){ pendingRender = false; render(); } });
+        return;
+      }
+    }
+    if(pendingRender){ pendingRender = false; render(); }
+  }
+});
+
+/* --- nová fáze --- */
+function addPhase(){
+  const input = $('newPhaseName');
+  const name = input.value.trim(); if(!name) return;
+  backend.phases.add({ name, when:'', status:'planovano', note:'', budgetCat:null, order:Date.now() })
+    .catch(err => { console.error(err); alert('Přidání fáze se nepodařilo.'); });
+  input.value = '';
+}
+$('addPhaseBtn').addEventListener('click', addPhase);
+$('newPhaseName').addEventListener('keydown', e => { if(e.key === 'Enter') addPhase(); });
+</script>
 </body>
 </html>

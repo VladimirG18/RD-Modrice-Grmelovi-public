@@ -152,7 +152,7 @@ function catSectionHTML(cat){
   let sumOff = 0, sumEst = 0;
   catItems.forEach(it => { sumOff += itemOfficialTotal(it) || 0; sumEst += itemEstimateTotal(it) || 0; });
   const diffCls = sumEst > sumOff ? 'rz-over' : (sumEst < sumOff ? 'rz-under' : '');
-  return `<section class="rz-cat" data-cat="${esc(cat.id)}">
+  return `<section class="rz-cat" id="cat-${esc(cat.id)}" data-cat="${esc(cat.id)}">
     <div class="rz-cat-head">
       <h2>${cat.icon} ${esc(cat.name)} <span class="rz-cat-n">${catItems.length}</span></h2>
       <div class="rz-cat-sums">
