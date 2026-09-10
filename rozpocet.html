@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Rozpočet</title>
+<meta name="description" content="Sdílený interaktivní rozpočet stavby rodinného domu v Modřicích – položky po kategoriích, cena oficiální i neoficiální, součty v reálném čase." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks">
+      <a href="model.html">3D model</a>
+      <a href="informace.html">Informace</a>
+      <a href="material.html">Materiály</a>
+      <a href="dokumentace.html">Dokumentace</a>
+      <a href="vizualizace.html">Vizualizace</a>
+      <a href="inspirace.html">Inspirace</a>
+      <a href="harmonogram.html">Harmonogram</a>
+      <a href="stavba.html">Stavba domu</a>
+      <a href="fotky-stavby.html">Fotky ze stavby</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="poznamky.html">Poznámky</a>
+      <a href="pozadavky.html">Požadavky</a>
+      <a href="rozpocet.html" aria-current="page">Rozpočet</a>
+    </div>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <span class="eyebrow">Náklady stavby</span>
+  <h1>Rozpočet</h1>
+  <p class="lead">Sdílený rozpočet v reálném čase – položky rozdělené do kategorií, u&nbsp;každé cena
+  <b>oficiální</b> (dle rozpočtu/smlouvy) a <b>neoficiální</b> (aktuální odhad či nabídka). Součty se
+  počítají automaticky po kategoriích i&nbsp;celkem. Základ tvoří položky z&nbsp;rozpočtu k&nbsp;hypotéce,
+  doplněné o&nbsp;kategorie a&nbsp;položky, na které se v&nbsp;něm ještě nemyslelo – u&nbsp;těch je cena
+  zatím prázdná.</p>
+
+  <div id="status" class="statusbar"></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="callout info" style="margin-top:18px">💡 Cenu jde vždy dopsat ručně. U&nbsp;položky s&nbsp;odkazem na e-shop/produkt lze zkusit tlačítkem
+  <b>„↻ cena"</b> natáhnout aktuální cenu automaticky do pole neoficiální – je to experimentální (statický
+  web bez vlastního serveru čte stránku přes veřejnou proxy) a&nbsp;funguje jen u&nbsp;části obchodů;
+  když se nepovede, doplň cenu ručně. Položku přidáš na konci tabulky dané kategorie, kategorii přesuneš
+  výběrem v&nbsp;posledním sloupci, novou kategorii přidáš úplně dole.</div>
+
+  <div id="root"></div>
+
+  <div class="rz-newcat">
+    <b>+ Nová kategorie</b>
+    <input type="text" id="newCatName" placeholder="Název kategorie…" maxlength="60">
+    <button class="btn primary" id="addCatBtn" type="button">Přidat kategorii</button>
+  </div>
+
+  <p class="note" id="footnote"></p>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — rozpočet vychází z&nbsp;podkladů k&nbsp;hypotéce, doplněný o&nbsp;další kategorie
+  a&nbsp;položky dle znalosti projektu. Ceny se průběžně upřesňují.
+</footer>
+
+<script type="module">
+import { createBudgetStore, esc, fmtMoney, itemOfficialTotal, itemEstimateTotal, fetchPriceFromLink }
+  from './assets/rozpocet.js';
+
+const $ = id => document.getElementById(id);
+const statusEl = $('status'), footEl = $('footnote'), statsEl = $('stats'), rootEl = $('root');
+
+let items = [], categories = [], backend = null;
+
+function setStatus(kind, html){ statusEl.className = 'statusbar' + (kind ? ' ' + kind : ''); statusEl.innerHTML = html; }
+
+function grandTotals(){
+  let off = 0, est = 0;
+  items.forEach(it => { off += itemOfficialTotal(it) || 0; est += itemEstimateTotal(it) || 0; });
+  return { off, est };
+}
+
+function renderStats(){
+  const { off, est } = grandTotals();
+  const diff = est - off;
+  const diffCls = diff > 0 ? 'rz-over' : (diff < 0 ? 'rz-under' : '');
+  const diffTxt = (diff > 0 ? '+' : '') + fmtMoney(diff);
+  statsEl.innerHTML = `
+    <div class="stat"><b>${fmtMoney(off)}</b><span>Oficiální rozpočet celkem</span></div>
+    <div class="stat"><b>${fmtMoney(est)}</b><span>Aktuální odhad celkem</span></div>
+    <div class="stat"><b class="${diffCls}">${diffTxt}</b><span>Rozdíl odhad − oficiální</span></div>
+    <div class="stat"><b>${items.length}</b><span>položek v ${categories.length} kategoriích</span></div>`;
+}
+
+function catOptionsHTML(selectedId){
+  return categories.map(c => `<option value="${esc(c.id)}"${c.id===selectedId?' selected':''}>${c.icon} ${esc(c.name)}</option>`).join('');
+}
+
+function rowHTML(it){
+  const off = itemOfficialTotal(it), est = itemEstimateTotal(it);
+  let totalHtml;
+  if(off == null && est == null){
+    totalHtml = '<span class="sub">–</span>';
+  } else {
+    totalHtml = `<b>${fmtMoney(off)}</b>`;
+    if(est != null && est !== off){
+      totalHtml += `<span class="sub ${est > (off||0) ? 'rz-over' : 'rz-under'}">odhad ${fmtMoney(est)}</span>`;
+    }
+  }
+  const link = it.link || '';
+  return `<tr data-item="${esc(it.id)}">
+    <td>
+      <input type="text" class="rz-name" data-id="${esc(it.id)}" data-field="name" value="${esc(it.name)}" title="${esc(it.name)}" placeholder="Název položky">
+      <input type="text" class="rz-note-input" data-id="${esc(it.id)}" data-field="note" value="${esc(it.note||'')}" placeholder="poznámka…">
+    </td>
+    <td class="num">
+      <div class="rz-qtycell">
+        <input type="number" step="any" class="qty" data-id="${esc(it.id)}" data-field="qty" value="${it.qty==null?'':it.qty}">
+        <input type="text" class="unit" data-id="${esc(it.id)}" data-field="unit" value="${esc(it.unit||'')}" placeholder="j.">
+      </div>
+    </td>
+    <td class="num"><input type="number" step="1" min="0" data-id="${esc(it.id)}" data-field="priceOff" value="${it.priceOff==null?'':it.priceOff}" placeholder="–"></td>
+    <td class="num"><input type="number" step="1" min="0" data-id="${esc(it.id)}" data-field="priceUnoff" value="${it.priceUnoff==null?'':it.priceUnoff}" placeholder="–"></td>
+    <td class="num rz-total">${totalHtml}</td>
+    <td>
+      <div class="rz-linkcell">
+        <input type="url" data-id="${esc(it.id)}" data-field="link" value="${esc(link)}" placeholder="odkaz na produkt…">
+        <div class="rz-linkbtns">
+          ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener" title="Otevřít odkaz">🔗</a>` : ''}
+          ${link ? `<button type="button" data-fetch="${esc(it.id)}" title="Zkusit načíst cenu z odkazu (experimentální)">↻ cena</button>` : ''}
+        </div>
+      </div>
+    </td>
+    <td>
+      <select class="rz-catsel" data-id="${esc(it.id)}" data-field="category" title="Přesunout do jiné kategorie">${catOptionsHTML(it.category)}</select>
+      <button type="button" class="rz-icon-btn danger" data-delitem="${esc(it.id)}" title="Smazat položku" aria-label="Smazat položku" style="width:100%;text-align:center;margin-top:4px">🗑</button>
+    </td>
+  </tr>`;
+}
+
+function catSectionHTML(cat){
+  const catItems = items.filter(i => i.category === cat.id);
+  let sumOff = 0, sumEst = 0;
+  catItems.forEach(it => { sumOff += itemOfficialTotal(it) || 0; sumEst += itemEstimateTotal(it) || 0; });
+  const diffCls = sumEst > sumOff ? 'rz-over' : (sumEst < sumOff ? 'rz-under' : '');
+  return `<section class="rz-cat" data-cat="${esc(cat.id)}">
+    <div class="rz-cat-head">
+      <h2>${cat.icon} ${esc(cat.name)} <span class="rz-cat-n">${catItems.length}</span></h2>
+      <div class="rz-cat-sums">
+        <span>Oficiálně <b>${fmtMoney(sumOff)}</b></span>
+        <span>Odhad <b class="${diffCls}">${fmtMoney(sumEst)}</b></span>
+      </div>
+      <div class="rz-cat-actions">
+        <button type="button" class="rz-icon-btn" data-rencat="${esc(cat.id)}" title="Přejmenovat kategorii" aria-label="Přejmenovat kategorii">✎</button>
+        <button type="button" class="rz-icon-btn danger" data-delcat="${esc(cat.id)}" title="Smazat kategorii" aria-label="Smazat kategorii">🗑</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table class="rz-tbl">
+        <colgroup>
+          <col><col style="width:96px"><col style="width:104px"><col style="width:104px">
+          <col style="width:112px"><col style="width:150px"><col style="width:150px">
+        </colgroup>
+        <tr><th>Položka</th><th class="num">Množství</th><th class="num">Kč/j. oficiální</th><th class="num">Kč/j. odhad</th><th class="num">Celkem</th><th>Odkaz</th><th>Kategorie</th></tr>
+        ${catItems.map(rowHTML).join('')}
+        <tr class="rz-addrow"><td colspan="7"><input type="text" data-addcat="${esc(cat.id)}" placeholder="+ Přidat položku do „${esc(cat.name)}“… (Enter)"></td></tr>
+      </table>
+    </div>
+  </section>`;
+}
+
+function render(){
+  renderStats();
+
+  const active = document.activeElement;
+  let restore = null;
+  if(active && rootEl.contains(active) && active.matches('[data-id][data-field], [data-addcat]')){
+    restore = {
+      id: active.dataset.id || null, field: active.dataset.field || null, addcat: active.dataset.addcat || null,
+      selStart: active.selectionStart, selEnd: active.selectionEnd, val: active.value,
+    };
+  }
+
+  if(!categories.length){
+    rootEl.innerHTML = '<div class="empty">Zatím tu nejsou žádné kategorie.</div>';
+  } else {
+    rootEl.innerHTML = categories.map(catSectionHTML).join('');
+  }
+
+  if(restore){
+    let sel = null;
+    if(restore.id) sel = rootEl.querySelector(`[data-id="${CSS.escape(restore.id)}"][data-field="${CSS.escape(restore.field)}"]`);
+    else if(restore.addcat) sel = rootEl.querySelector(`[data-addcat="${CSS.escape(restore.addcat)}"]`);
+    if(sel){
+      sel.focus();
+      if(restore.addcat) sel.value = restore.val;
+      try { sel.setSelectionRange(restore.selStart, restore.selEnd); } catch(e){}
+    }
+  }
+}
+
+/* --- backend --- */
+backend = await createBudgetStore({
+  onItems: (list, shared) => { items = list; render(); },
+  onCategories: (list, shared) => { categories = list; render(); },
+  onStatus: (kind, html) => {
+    setStatus(kind, html);
+    footEl.textContent = kind === 'ok'
+      ? 'Rozpočet se ukládá do sdílené online databáze (Firebase) a aktualizuje se všem v reálném čase.'
+      : 'Rozpočet se zatím ukládá jen v tomto prohlížeči.';
+  }
+});
+
+/* --- úprava polí (uloží se při opuštění pole / Enter) --- */
+rootEl.addEventListener('change', e => {
+  const el = e.target;
+  if(!el.matches('input[data-id][data-field], select[data-id][data-field]')) return;
+  const id = el.dataset.id, field = el.dataset.field;
+  let val = el.value;
+  if(field === 'qty'){ val = val === '' ? 1 : Number(val); if(!isFinite(val)) val = 1; }
+  else if(field === 'priceOff' || field === 'priceUnoff'){ val = val === '' ? null : Number(val); if(val != null && !isFinite(val)) val = null; }
+  else { val = val.trim(); }
+  backend.updateItem(id, { [field]: val }).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+});
+
+rootEl.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const el = e.target;
+  if(el.matches('input[data-addcat]')){
+    e.preventDefault();
+    const name = el.value.trim(); if(!name) return;
+    const catId = el.dataset.addcat;
+    backend.addItem({ category:catId, name, qty:1, unit:'', priceOff:null, priceUnoff:null, note:'', link:null, ts:Date.now() })
+      .catch(err => { console.error(err); alert('Přidání položky se nepodařilo.'); });
+    el.value = '';
+  } else if(el.matches('input[data-id]')){
+    el.blur();
+  }
+});
+
+/* --- kliknutí: smazat položku, přejmenovat/smazat kategorii, natáhnout cenu --- */
+rootEl.addEventListener('click', async e => {
+  const del = e.target.closest('[data-delitem]');
+  if(del){
+    const it = items.find(i => i.id === del.dataset.delitem);
+    if(it && confirm('Smazat položku „' + it.name + '“?')){
+      backend.removeItem(it.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+    }
+    return;
+  }
+  const ren = e.target.closest('[data-rencat]');
+  if(ren){
+    const cat = categories.find(c => c.id === ren.dataset.rencat); if(!cat) return;
+    const name = prompt('Nový název kategorie:', cat.name);
+    if(name && name.trim() && name.trim() !== cat.name){
+      const list = categories.map(c => c.id === cat.id ? { ...c, name:name.trim() } : c);
+      backend.saveCategories(list).catch(err => { console.error(err); alert('Přejmenování se nepodařilo.'); });
+    }
+    return;
+  }
+  const del2 = e.target.closest('[data-delcat]');
+  if(del2){
+    const catId = del2.dataset.delcat;
+    if(items.some(i => i.category === catId)){
+      alert('Nejdřív přesuň nebo smaž všechny položky v této kategorii (přesuneš je výběrem jiné kategorie u položky).');
+      return;
+    }
+    if(!confirm('Smazat prázdnou kategorii?')) return;
+    backend.saveCategories(categories.filter(c => c.id !== catId)).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+    return;
+  }
+  const fb = e.target.closest('[data-fetch]');
+  if(fb){
+    const it = items.find(i => i.id === fb.dataset.fetch); if(!it || !it.link) return;
+    const orig = fb.textContent;
+    fb.disabled = true; fb.textContent = '…';
+    try {
+      const price = await fetchPriceFromLink(it.link);
+      await backend.updateItem(it.id, { priceUnoff:price });
+    } catch(err){
+      alert('Cenu se nepodařilo načíst automaticky (' + (err && err.message ? err.message : 'chyba') + '). Zadej ji prosím ručně.');
+    } finally {
+      fb.disabled = false; fb.textContent = orig;
+    }
+  }
+});
+
+/* --- nová kategorie --- */
+function addCategory(){
+  const input = $('newCatName');
+  const name = input.value.trim(); if(!name) return;
+  const id = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  backend.saveCategories([...categories, { id, name, icon:'📦' }])
+    .catch(err => { console.error(err); alert('Přidání kategorie se nepodařilo.'); });
+  input.value = '';
+}
+$('addCatBtn').addEventListener('click', addCategory);
+$('newCatName').addEventListener('keydown', e => { if(e.key === 'Enter') addCategory(); });
+</script>
+</body>
+</html>
