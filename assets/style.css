@@ -469,6 +469,62 @@ a.rz-icon-btn:hover{ text-decoration:none; }
   .hg-krok[data-krok-id] > [data-delkrok]{ order:5; margin-left:auto; }
 }
 
+/* přepínač zobrazení (seznam / Gantt) */
+.hg-viewtabs{ display:flex; gap:4px; margin:0 0 14px; }
+.hg-viewtab{ font:inherit; font-size:.86rem; font-weight:650; padding:8px 16px; border-radius:10px;
+  border:1px solid var(--border); background:var(--surface); color:var(--muted); cursor:pointer; }
+.hg-viewtab:hover{ color:var(--text); border-color:var(--border-strong); }
+.hg-viewtab[aria-selected="true"]{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); }
+
+/* Od/Do (termín pro Gantt) v seznamu fází */
+.hg-daterange{ display:flex; gap:3px; align-items:center; flex:0 0 auto; }
+.hg-daterange input[type="month"]{ width:120px; font:inherit; font-size:.78rem; color:var(--muted);
+  background:transparent; border:1px solid transparent; border-radius:8px; padding:5px 6px; }
+.hg-daterange input[type="month"]:hover{ border-color:var(--border); }
+.hg-daterange input[type="month"]:focus{ border-color:var(--accent); outline:none; background:var(--bg); color:var(--text); }
+.hg-daterange span{ color:var(--muted); font-size:.78rem; }
+
+@keyframes hgFlash{ 0%,100%{ box-shadow:var(--shadow-sm); } 30%{ box-shadow:0 0 0 4px var(--accent-soft); } }
+.hg-flash{ animation:hgFlash 1.4s ease; }
+
+/* ---------- Harmonogram – Gantt ---------- */
+.hg-gantt{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm); padding:16px 0 4px; margin-bottom:20px; }
+.hg-gantt-scroll{ overflow-x:auto; }
+.hg-gantt-inner{ position:relative; width:max-content; min-width:100%; }
+.hg-gantt-row{ display:flex; align-items:stretch; }
+.hg-gantt-row:not(.hg-gantt-head-row) + .hg-gantt-row{ border-top:1px solid var(--border); }
+.hg-gantt-head-row{ border-bottom:1px solid var(--border-strong); }
+.hg-gantt-label{ flex:0 0 230px; position:sticky; left:0; z-index:2; background:var(--surface);
+  padding:0 14px 0 18px; font-size:.84rem; font-weight:600; display:flex; align-items:center; gap:7px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-right:1px solid var(--border); }
+.hg-gantt-label .ic{ flex:0 0 auto; font-size:.9rem; }
+.hg-gantt-corner{ flex:0 0 230px; position:sticky; left:0; z-index:3; background:var(--surface);
+  border-right:1px solid var(--border); }
+.hg-gantt-track{ position:relative; flex:0 0 auto; height:40px; }
+.hg-gantt-head-row .hg-gantt-track{ height:30px; }
+.hg-gantt-col{ position:absolute; top:0; bottom:0; display:flex; align-items:center; justify-content:center;
+  font-size:.66rem; color:var(--muted); font-variant-numeric:tabular-nums; border-right:1px dashed var(--border); }
+.hg-gantt-col.gap{ color:var(--muted); font-style:italic; border-right-style:solid; background:var(--surface-2); }
+.hg-gantt-bar{ position:absolute; top:7px; bottom:7px; border-radius:7px; display:flex; align-items:center;
+  padding:0 8px; font-size:.72rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; box-shadow:var(--shadow-sm); min-width:14px; border:none; cursor:pointer; font:inherit; }
+.hg-gantt-bar.st-hotovo{ background:var(--ok); }
+.hg-gantt-bar.st-probiha{ background-image:linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 45%, transparent)); }
+.hg-gantt-bar.st-planovano{ background:var(--surface-2); color:var(--muted); border:1.5px dashed var(--border-strong); }
+.hg-gantt-today{ position:absolute; top:0; bottom:0; width:0; border-left:2px dashed var(--danger); z-index:1; pointer-events:none; }
+.hg-gantt-today span{ position:absolute; top:-1px; left:4px; font-size:.64rem; font-weight:700; color:var(--danger);
+  white-space:nowrap; }
+
+.hg-gantt-undated{ margin:14px 18px 4px; padding-top:14px; border-top:1px solid var(--border); }
+.hg-gantt-undated-head{ font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+  margin:0 0 8px; }
+.hg-gantt-chips{ display:flex; flex-wrap:wrap; gap:7px; }
+.hg-chip{ font:inherit; font-size:.82rem; padding:6px 12px; border-radius:999px; border:1px dashed var(--border-strong);
+  background:var(--bg); color:var(--text); cursor:pointer; }
+.hg-chip:hover{ border-color:var(--accent); color:var(--accent-ink); }
+.hg-gantt-empty{ padding:30px 18px; color:var(--muted); text-align:center; }
+
 /* ---------- Modal ---------- */
 .modal{ position:fixed; inset:0; z-index:50; display:none; align-items:flex-start; justify-content:center;
   background:rgba(9,13,20,.55); backdrop-filter:blur(3px); padding:5vh 16px; overflow:auto; }
