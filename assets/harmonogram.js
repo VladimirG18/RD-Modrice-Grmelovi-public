@@ -27,13 +27,13 @@ export const BUDGET_CAT_BY_ID = Object.fromEntries(BUDGET_CATEGORIES.map(c => [c
    na víc a jemnějších fází tak, aby šly co nejlíp napárovat na kategorie
    rozpočtu (budgetCat = id kategorie z assets/rozpocet.js). */
 export const DEFAULT_PHASES = [
-  { name:'Projektová dokumentace', when:'07/2023', status:'hotovo', budgetCat:'priprava',
+  { name:'Projektová dokumentace', when:'07/2023', start:'2023-07', end:'2023-07', status:'hotovo', budgetCat:'priprava',
     note:'Architektonicko-stavební řešení pro územní souhlas a ohlášení stavby (Ing. arch. Bradáč a kol.).',
     kroky:[
       { text:'Půdorysy, řez, pohledy, situace', status:'hotovo', when:'07/2023' },
       { text:'Technická zpráva', status:'hotovo', when:'07/2023' },
     ]},
-  { name:'Průzkumy a profese', when:'10/2024', status:'hotovo', budgetCat:'priprava',
+  { name:'Průzkumy a profese', when:'10/2024', start:'2024-10', end:'2024-10', status:'hotovo', budgetCat:'priprava',
     note:'Doplňkové průzkumy a posouzení potřebné k povolení a bezpečnému návrhu stavby.',
     kroky:[
       { text:'Radonový průzkum (střední index)', status:'hotovo', when:'10/2024' },
@@ -41,7 +41,7 @@ export const DEFAULT_PHASES = [
       { text:'Požárně bezpečnostní řešení', status:'hotovo', when:'10/2024' },
       { text:'Koordinační situace s přípojkami', status:'hotovo', when:'10/2024' },
     ]},
-  { name:'Povolení a příprava', when:'6/2026 – 8/2026', status:'hotovo', budgetCat:'priprava',
+  { name:'Povolení a příprava', when:'6/2026 – 8/2026', start:'2026-06', end:'2026-08', status:'hotovo', budgetCat:'priprava',
     note:'Administrativní a smluvní příprava před zahájením zemních prací.',
     kroky:[
       { text:'Vyjádření správců sítí', status:'hotovo', when:'' },
@@ -50,7 +50,7 @@ export const DEFAULT_PHASES = [
       { text:'Výběr dodavatele a rozpočet', status:'hotovo', when:'' },
       { text:'Demolice staré garáže na pozemku', status:'hotovo', when:'' },
     ]},
-  { name:'Přípojky inženýrských sítí', when:'9/2026 →', status:'probiha', budgetCat:'pripojky',
+  { name:'Přípojky inženýrských sítí', when:'9/2026 →', start:'2026-09', end:null, status:'probiha', budgetCat:'pripojky',
     note:'Elektřina, plyn, voda a kanalizace/jímka – podrobný stav viz stránka Přípojky.',
     kroky:[
       { text:'Elektro – EG.D: smlouva a úhrada', status:'hotovo', when:'8/2024' },
@@ -61,7 +61,7 @@ export const DEFAULT_PHASES = [
       { text:'Voda – objednat realizaci', status:'probiha', when:'' },
       { text:'Kanalizace – jímka a vsak AS-KRECHT', status:'probiha', when:'' },
     ]},
-  { name:'Zemní práce a základy', when:'9/2026', status:'probiha', budgetCat:'hruba',
+  { name:'Zemní práce a základy', when:'9/2026', start:'2026-09', end:null, status:'probiha', budgetCat:'hruba',
     note:'Založení −1,25 m, ležaté rozvody, podkladní beton s kari sítí, hydroizolace 2× SBS s protiradonovou funkcí.',
     kroky:[
       { text:'Skrývka a vytyčení stavby', status:'hotovo', when:'' },
@@ -211,7 +211,8 @@ async function firebaseBackend(){
       defaultPhases.forEach((phase, i) => {
         const pRef = doc(fazeCol);
         batch.set(pRef, { name:phase.name, when:phase.when || '', status:phase.status || 'planovano',
-          note:phase.note || '', budgetCat:phase.budgetCat || null, order:(i + 1) * 10 });
+          note:phase.note || '', budgetCat:phase.budgetCat || null, start:phase.start || null, end:phase.end || null,
+          order:(i + 1) * 10 });
         (phase.kroky || []).forEach((krok, j) => {
           const kRef = doc(krokyCol);
           batch.set(kRef, { phase:pRef.id, text:krok.text, status:krok.status || phase.status || 'planovano',
@@ -258,7 +259,8 @@ export async function createTimelineStore(opts = {}){
       DEFAULT_PHASES.forEach((phase, i) => {
         const pid = 'l' + Date.now() + '_p' + i;
         phases.push({ id:pid, name:phase.name, when:phase.when || '', status:phase.status || 'planovano',
-          note:phase.note || '', budgetCat:phase.budgetCat || null, order:(i + 1) * 10 });
+          note:phase.note || '', budgetCat:phase.budgetCat || null, start:phase.start || null, end:phase.end || null,
+          order:(i + 1) * 10 });
         (phase.kroky || []).forEach((krok, j) => {
           kroky.push({ id:'l' + Date.now() + '_k' + i + '_' + j, phase:pid, text:krok.text,
             status:krok.status || phase.status || 'planovano', when:krok.when || '', order:(j + 1) * 10 });

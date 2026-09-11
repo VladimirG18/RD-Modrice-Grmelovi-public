@@ -51,11 +51,23 @@
     <small id="pcount">0 / 0 dílčích kroků hotovo</small>
   </div>
 
-  <div class="callout info">💡 Klikni na název, termín nebo poznámku fáze a přepiš – ukládá se rovnou.
+  <div class="hg-viewtabs" role="tablist">
+    <button type="button" class="hg-viewtab" data-view="list" role="tab">📋 Seznam</button>
+    <button type="button" class="hg-viewtab" data-view="gantt" role="tab">📊 Gantt</button>
+  </div>
+
+  <div class="callout info" id="listHelp">💡 Klikni na název, termín nebo poznámku fáze a přepiš – ukládá se rovnou.
   Stav fáze i kroku přepneš výběrem/klikem, pořadí změníš tažením za „⠿" nebo šipkami ▲▼. Dílčí krok
-  přidáš na konci seznamu dané fáze, mezi fáze ho přesuneš výběrem vpravo. Novou fázi přidáš úplně dole.</div>
+  přidáš na konci seznamu dané fáze, mezi fáze ho přesuneš výběrem vpravo. Novou fázi přidáš úplně dole.
+  Polím „Od“/„Do“ u&nbsp;fáze nastavíš termín pro zobrazení v&nbsp;Gantt grafu (u&nbsp;probíhající fáze
+  klidně nech „Do“ prázdné – v grafu poroste do dneška sama).</div>
+
+  <div class="callout info" id="ganttHelp" hidden>💡 Gantt zobrazuje jen fáze s&nbsp;vyplněným termínem
+  „Od“ (nastavíš v&nbsp;seznamu). Dlouhé mezery bez plánované aktivity jsou zkrácené (⋯ Xm). Fáze bez
+  termínu jsou jako čipy pod grafem – klikni na ni pro rychlý přechod do seznamu, kde jí termín doplníš.</div>
 
   <div id="root"></div>
+  <div id="ganttRoot" class="hg-gantt" hidden></div>
 
   <div class="hg-newphase">
     <b>+ Nová fáze</b>
@@ -78,6 +90,7 @@ import { createTimelineStore, esc, STATUSES, STATUS_BY_ID, BUDGET_CATEGORIES, BU
 
 const $ = id => document.getElementById(id);
 const statusEl = $('status'), rootEl = $('root'), pfill = $('pfill'), pcount = $('pcount');
+const ganttRoot = $('ganttRoot');
 
 let phases = [], kroky = [], backend = null;
 let draggingPhaseId = null, draggingKrokId = null, pendingRender = false;
@@ -134,6 +147,11 @@ function phaseHTML(p, idx, total){
         <input type="text" class="hg-name" data-id="${esc(p.id)}" data-field="name" data-kind="phase" value="${esc(p.name)}" placeholder="Název fáze">
         <select class="hg-statesel st-${st.id}" data-id="${esc(p.id)}" data-field="status" data-kind="phase">${statusOptionsHTML(p.status)}</select>
         <input type="text" class="hg-when" data-id="${esc(p.id)}" data-field="when" data-kind="phase" value="${esc(p.when || '')}" placeholder="termín…">
+        <div class="hg-daterange" title="Termín pro Gantt graf (nepovinné)">
+          <input type="month" data-id="${esc(p.id)}" data-field="start" data-kind="phase" value="${esc(p.start || '')}" title="Od">
+          <span>–</span>
+          <input type="month" data-id="${esc(p.id)}" data-field="end" data-kind="phase" value="${esc(p.end || '')}" title="Do (u probíhající fáze klidně prázdné)">
+        </div>
         <select class="hg-catsel" data-id="${esc(p.id)}" data-field="budgetCat" data-kind="phase">${catOptionsHTML(p.budgetCat)}</select>
         ${cat ? `<a class="hg-catlink" href="rozpocet.html#cat-${esc(cat.id)}" target="_blank" rel="noopener">${cat.icon} rozpočet →</a>` : ''}
       </div>
@@ -175,12 +193,140 @@ function render(){
   }
 }
 
+/* --- přepínač zobrazení (seznam / Gantt) --- */
+const VIEW_KEY = 'rdmodrice-harmonogram-view';
+let currentView = 'list';
+try { const v = localStorage.getItem(VIEW_KEY); if(v === 'gantt' || v === 'list') currentView = v; } catch(e){}
+
+function setView(v){
+  currentView = v;
+  try { localStorage.setItem(VIEW_KEY, v); } catch(e){}
+  rootEl.hidden = v !== 'list';
+  ganttRoot.hidden = v !== 'gantt';
+  $('listHelp').hidden = v !== 'list';
+  $('ganttHelp').hidden = v !== 'gantt';
+  document.querySelectorAll('.hg-viewtab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+}
+document.querySelectorAll('.hg-viewtab').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+/* --- Gantt: pomocné funkce s měsíční granularitou (YYYY-MM) --- */
+const MONTH_PX = 34, GAP_PX = 46, LABEL_PX = 230;
+function toIdx(s){
+  const m = /^(\d{4})-(\d{2})$/.exec(s || ''); if(!m) return null;
+  return Number(m[1]) * 12 + (Number(m[2]) - 1);
+}
+function idxToYM(idx){ const y = Math.floor(idx / 12); return { y, m:idx - y * 12 + 1 }; }
+function monthLabel(idx){ const { y, m } = idxToYM(idx); return m + '/' + String(y).slice(2); }
+function nowIdx(){ const d = new Date(); return d.getFullYear() * 12 + d.getMonth(); }
+function daysInMonth(y, m){ return new Date(y, m, 0).getDate(); }
+function phaseEndIdx(p, s, todayI){
+  let e = toIdx(p.end);
+  if(e == null) e = (p.status === 'probiha') ? Math.max(s, todayI) : s;
+  return e < s ? s : e;
+}
+
+function buildColumns(datedPhases){
+  const todayI = nowIdx();
+  const ranges = datedPhases.map(p => { const s = toIdx(p.start); return [s, phaseEndIdx(p, s, todayI)]; });
+  if(!ranges.length) return null;
+
+  const included = new Set();
+  ranges.forEach(([s, e]) => { for(let i = s; i <= e; i++) included.add(i); });
+  included.add(Math.min(...ranges.map(r => r[0])) - 1);
+  const lastEnd = Math.max(...ranges.map(r => r[1]));
+  for(let i = todayI; i <= Math.max(todayI, lastEnd) + 2; i++) included.add(i);
+
+  const sortedIdx = [...included].sort((a, b) => a - b);
+  const cols = [], colX = {};
+  let x = 0;
+  sortedIdx.forEach((idx, i) => {
+    if(i > 0 && idx - sortedIdx[i - 1] > 1){
+      const count = idx - sortedIdx[i - 1] - 1;
+      cols.push({ type:'gap', count, x, w:GAP_PX });
+      x += GAP_PX;
+    }
+    cols.push({ type:'month', idx, x, w:MONTH_PX });
+    colX[idx] = { x, w:MONTH_PX };
+    x += MONTH_PX;
+  });
+  return { cols, colX, totalW:x, todayIdx:todayI };
+}
+
+function renderGantt(){
+  const sorted = sortByOrder(phases);
+  const dated = sorted.filter(p => toIdx(p.start) != null);
+  const undated = sorted.filter(p => toIdx(p.start) == null);
+  const undatedHTML = undated.length ? `<div class="hg-gantt-undated">
+      <div class="hg-gantt-undated-head">Další plánované fáze (zatím bez termínu) – klikni pro doplnění</div>
+      <div class="hg-gantt-chips">${undated.map(p => `<button type="button" class="hg-chip" data-jump="${esc(p.id)}">${(STATUS_BY_ID[p.status] || STATUSES[0]).icon} ${esc(p.name)}</button>`).join('')}</div>
+    </div>` : '';
+
+  const g = buildColumns(dated);
+  if(!g){
+    ganttRoot.innerHTML = '<div class="hg-gantt-empty">Zatím nejsou u žádné fáze vyplněné termíny „Od“ – doplň je v seznamu a Gantt se vykreslí.</div>' + undatedHTML;
+    return;
+  }
+
+  const headCells = g.cols.map(c => c.type === 'gap'
+    ? `<div class="hg-gantt-col gap" style="left:${c.x}px;width:${c.w}px" title="${c.count} měsíc(ů) bez naplánované aktivity">⋯${c.count}m</div>`
+    : `<div class="hg-gantt-col" style="left:${c.x}px;width:${c.w}px">${monthLabel(c.idx)}</div>`
+  ).join('');
+
+  const rows = dated.map(p => {
+    const st = STATUS_BY_ID[p.status] || STATUSES[0];
+    const s = toIdx(p.start), e = phaseEndIdx(p, s, g.todayIdx);
+    const left = g.colX[s].x;
+    const rightCol = g.colX[e] || g.colX[s];
+    const barW = Math.max(rightCol.x + rightCol.w - left, 14);
+    const cat = p.budgetCat ? BUDGET_CAT_BY_ID[p.budgetCat] : null;
+    const tip = esc(p.name) + (cat ? ' · ' + esc(cat.name) : '') + (p.when ? ' · ' + esc(p.when) : '');
+    const barLabel = barW >= 64 ? esc(p.name) : '';
+    return `<div class="hg-gantt-row" data-phase-id="${esc(p.id)}">
+      <div class="hg-gantt-label" title="${esc(p.name)}"><span class="ic">${st.icon}</span>${esc(p.name)}</div>
+      <div class="hg-gantt-track" style="width:${g.totalW}px">
+        <button type="button" class="hg-gantt-bar st-${st.id}" style="left:${left}px;width:${barW}px" data-jump="${esc(p.id)}" title="${tip}">${barLabel}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  let todayHTML = '';
+  const cx = g.colX[g.todayIdx];
+  if(cx){
+    const d = new Date();
+    const frac = (d.getDate() - 1) / daysInMonth(d.getFullYear(), d.getMonth() + 1);
+    todayHTML = `<div class="hg-gantt-today" style="left:${LABEL_PX + cx.x + cx.w * frac}px"><span>dnes</span></div>`;
+  }
+
+  ganttRoot.innerHTML = `<div class="hg-gantt-scroll"><div class="hg-gantt-inner">
+    <div class="hg-gantt-row hg-gantt-head-row">
+      <div class="hg-gantt-corner"></div>
+      <div class="hg-gantt-track" style="width:${g.totalW}px">${headCells}</div>
+    </div>
+    ${rows}
+    ${todayHTML}
+  </div></div>${undatedHTML}`;
+}
+
+ganttRoot.addEventListener('click', e => {
+  const jump = e.target.closest('[data-jump]'); if(!jump) return;
+  setView('list');
+  requestAnimationFrame(() => {
+    const el = rootEl.querySelector(`.hg-phase[data-phase-id="${CSS.escape(jump.dataset.jump)}"]`);
+    if(el){
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+      el.classList.add('hg-flash');
+      setTimeout(() => el.classList.remove('hg-flash'), 1400);
+    }
+  });
+});
+
 /* --- backend --- */
 backend = await createTimelineStore({
-  onPhases: (list) => { phases = list; render(); },
+  onPhases: (list) => { phases = list; render(); renderGantt(); },
   onKroky:  (list) => { kroky = list; render(); },
   onStatus: (kind, html) => setStatus(kind, html),
 });
+setView(currentView);
 
 /* --- úprava polí (uloží se při opuštění pole / změně) --- */
 rootEl.addEventListener('change', e => {
@@ -188,7 +334,7 @@ rootEl.addEventListener('change', e => {
   if(!el.matches('[data-id][data-field]')) return;
   const id = el.dataset.id, field = el.dataset.field, kind = el.dataset.kind;
   let val = el.value.trim();
-  if(field === 'budgetCat' && val === '') val = null;
+  if((field === 'budgetCat' || field === 'start' || field === 'end') && val === '') val = null;
   const target = kind === 'krok' ? backend.kroky : backend.phases;
   target.update(id, { [field]:val }).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
 });
@@ -331,7 +477,7 @@ rootEl.addEventListener('dragend', () => {
 function addPhase(){
   const input = $('newPhaseName');
   const name = input.value.trim(); if(!name) return;
-  backend.phases.add({ name, when:'', status:'planovano', note:'', budgetCat:null, order:Date.now() })
+  backend.phases.add({ name, when:'', status:'planovano', note:'', budgetCat:null, start:null, end:null, order:Date.now() })
     .catch(err => { console.error(err); alert('Přidání fáze se nepodařilo.'); });
   input.value = '';
 }
