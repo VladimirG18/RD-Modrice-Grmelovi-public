@@ -29,6 +29,7 @@
   .navbtn:hover{ border-color:var(--accent); text-decoration:none; }
   #backBtn{ left:12px; }
   #infoBtn{ right:12px; }
+  #searchBtn{ right:12px; top:56px; }
 
   /* ovládací panel */
   #panel{ position:fixed; top:60px; left:12px; z-index:6; width:230px;
@@ -213,6 +214,7 @@
 
 <a id="backBtn" class="navbtn" href="index.html">← Rozcestník</a>
 <a id="infoBtn" class="navbtn" href="informace.html">ℹ️ Informace o domě</a>
+<button id="searchBtn" class="navbtn" type="button" data-search-open title="Hledat na webu (Ctrl+K)">🔍 Hledat</button>
 
 <div id="titlebar">
   <h1>Rodinný dům Modřice – Grmelovi</h1>
@@ -1465,5 +1467,7 @@ function applyPendingScene(){
   }
 }
 </script>
+
+<script type="module" src="assets/search.js"></script>
 </body>
 </html>

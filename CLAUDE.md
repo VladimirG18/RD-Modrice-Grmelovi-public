@@ -52,12 +52,24 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 - `poznamky.html` – sdílené poznámky.
 - `pozadavky.html` – **nástěnka požadavků na úpravy modelu** (`assets/pozadavky.js`).
 - `assets/style.css` – design systém (světlý/tmavý režim), `assets/site.js` – přepínač
-  vzhledu + aktivní odkaz v nav. `assets/annotate.js` – kreslení + zoom/posun + „📍 špendlík"
+  vzhledu + aktivní odkaz v nav.
+- `assets/search.js` – **fulltextové vyhledávání** (lupa v liště, `Ctrl/⌘+K`, `/`). Index
+  se staví v prohlížeči: stáhne HTML stránek ze seznamu `PAGES` (+ odkazy z `.navlinks`),
+  rozdělí je podle nadpisů, přidá text schovaný v inline `<script>` (tak má obsah třeba
+  `material.html`) a sdílená data z Firestore přes REST (`SOURCES`; `mask.fieldPaths`,
+  ať se netahají náhledy obrázků; fallback na `localStorage`). Popisky kategorií/stavů
+  si bere dynamickým `import()` z `pozadavky.js`/`board.js`/`rozpocet.js`/`harmonogram.js`.
+  Proklik vede na `stranka.html?q=…`, kde se výskyty zvýrazní (i obsah dorenderovaný
+  z databáze – hlídá `MutationObserver`). Styl okna je uvnitř `search.js`, aby fungoval
+  i na `model.html` (nemá `style.css`); v `style.css` je jen tlačítko `.search-btn`. `assets/annotate.js` – kreslení + zoom/posun + „📍 špendlík"
   (přes callback `onPick` volá raycast v `model.html`) do náhledu požadavku.
 - `RDModrice.glb` – 3D model (glTF binární), viz §4.
 
 Nav odkazy a dlaždice jsou na všech stránkách stejné – při přidání stránky je doplň
-všude (nav blok `.navlinks`, dlaždice `.card` v `index.html`).
+všude (nav blok `.navlinks`, dlaždice `.card` v `index.html`) a přidej i tlačítko lupy
+(`.search-btn` před `.theme-btn`) plus `<script type="module" src="assets/search.js">`.
+Stránka v navigaci se do vyhledávání přidá sama; podstránky mimo nav (např. `pripojky-*.html`)
+dopiš do `PAGES` v `assets/search.js`.
 
 ---
 

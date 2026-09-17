@@ -99,6 +99,16 @@ a:hover{ text-decoration:underline; }
   display:grid; place-items:center; font-size:16px;
 }
 .theme-btn:hover{ border-color:var(--border-strong); }
+.search-btn{
+  flex:0 0 auto; display:flex; align-items:center; gap:7px; height:36px; padding:0 11px;
+  border:1px solid var(--border); border-radius:10px; background:var(--surface);
+  color:var(--muted); font:inherit; font-size:.84rem; cursor:pointer; white-space:nowrap;
+}
+.search-btn:hover{ border-color:var(--border-strong); color:var(--text); }
+@media (max-width:860px){
+  .search-btn{ width:36px; padding:0; justify-content:center; }
+  .search-btn .search-lbl{ display:none; }
+}
 
 /* ---------- Layout ---------- */
 .content{ max-width:880px; margin:0 auto; padding:36px 20px 90px; }

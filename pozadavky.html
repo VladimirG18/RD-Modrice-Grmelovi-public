@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/style.css" />
 <script src="assets/site.js"></script>
+<script type="module" src="assets/search.js"></script>
 <style>
   .req-intro{ display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--border);
     border-radius:var(--radius); padding:14px 16px; margin:14px 0 18px; box-shadow:var(--shadow-sm); }
@@ -108,6 +109,7 @@
       <a href="pozadavky.html" aria-current="page">Požadavky</a>
       <a href="rozpocet.html">Rozpočet</a>
     </div>
+    <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
     <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
   </nav>
 </header>
