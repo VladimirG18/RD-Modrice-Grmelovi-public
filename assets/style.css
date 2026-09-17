@@ -574,6 +574,9 @@ a.rz-icon-btn:hover{ text-decoration:none; }
 .ba-field select{ background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:10px;
   padding:9px 12px; font:inherit; font-weight:500; min-width:150px; }
 .ba-field select:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.ba-field input{ background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:10px;
+  padding:9px 11px; font:inherit; font-size:.9rem; font-weight:500; min-width:0; }
+.ba-field input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
 
 .ba-drop{ display:flex; align-items:center; gap:14px; padding:16px; border:1.5px dashed var(--border-strong);
   border-radius:var(--radius); background:var(--bg); cursor:pointer; transition:border-color .13s, background .13s; }
@@ -653,6 +656,45 @@ a.rz-icon-btn:hover{ text-decoration:none; }
 .bcard-linktext{ display:flex; flex-direction:column; gap:3px; min-width:0; }
 .bcard-url{ color:var(--muted); font-size:.78rem; word-break:break-all; }
 .bcard-link .bcard-meta{ padding:0 14px 12px; }
+
+/* --- fotky ze stavby (časová osa po dnech) --- */
+.fot-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 18px; }
+.fot-count{ color:var(--muted); font-size:.84rem; }
+.fot-bar .btn{ margin-left:auto; }
+.fot-day{ margin:0 0 26px; }
+.fot-day h2{ display:flex; align-items:center; gap:10px; margin:0 0 12px; font-size:1.1rem; letter-spacing:-.01em; }
+/* auto-fill (ne auto-fit): jedna fotka za den zůstane velká jako ostatní,
+   neroztáhne se přes celou šířku */
+.fot-day .gallery{ grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); }
+.fot-n{ font-size:.78rem; font-weight:700; color:var(--muted); background:var(--surface-2);
+  border-radius:999px; padding:1px 9px; }
+
+.fot-card{ position:relative; margin:0; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm);
+  transition:border-color .13s, box-shadow .13s; }
+.fot-card:hover{ border-color:var(--border-strong); box-shadow:var(--shadow-md); }
+.fot-card img{ display:block; width:100%; aspect-ratio:16/10; object-fit:cover; background:var(--surface-2); }
+.fot-thumb{ display:block; width:100%; padding:0; border:0; background:none; cursor:zoom-in; }
+.fot-tools{ position:absolute; top:8px; right:8px; z-index:2; display:flex; gap:6px;
+  opacity:0; transition:opacity .13s; }
+.fot-card:hover .fot-tools, .fot-card:focus-within .fot-tools{ opacity:1; }
+@media (hover:none){ .fot-tools{ opacity:1; } }
+.fot-tools button{ width:30px; height:30px; border-radius:9px; border:none; cursor:pointer;
+  background:rgba(9,13,20,.55); color:#fff; font-size:.9rem; line-height:1; display:grid; place-items:center; }
+.fot-tools button:hover{ background:var(--accent); }
+.fot-tools button[data-del]:hover{ background:var(--danger); }
+.fot-card figcaption{ display:flex; flex-direction:column; gap:3px; padding:10px 12px 11px; }
+.fot-cap{ font-size:.86rem; line-height:1.4; word-break:break-word; }
+.fot-cap-empty{ color:var(--muted); font-style:italic; }
+.fot-meta{ color:var(--muted); font-size:.75rem; margin-top:2px; }
+.fot-meta .who{ font-weight:700; }
+.fot-card.editing{ border-color:var(--accent); }
+.fot-edit{ gap:8px !important; }
+.fot-edit input{ background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:9px;
+  padding:7px 10px; font:inherit; font-size:.85rem; width:100%; }
+.fot-edit input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.fot-edit-btns{ display:flex; gap:8px; }
+.fot-edit-btns .btn{ flex:1 1 auto; justify-content:center; padding:7px 10px; font-size:.82rem; }
 
 /* prázdný stav */
 .board-empty{ text-align:center; color:var(--muted); padding:44px 20px; background:var(--surface);

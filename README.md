@@ -17,6 +17,8 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
   z počítače (i přetažením / vložením ze schránky) nebo přes odkaz na obrázek.
 - `inspirace.html` – **sdílená nástěnka inspirace**: odkazy na obrázky a stránky, ze kterých
   se inspirujeme. Obě nástěnky jsou rozčleněné podle exteriéru a jednotlivých místností.
+- `fotky-stavby.html` – **fotky ze stavby**: sdílená fotodokumentace po dnech, kam fotky
+  přidává rodina přímo na stránce (z mobilu i z počítače).
 - `checklist.html` – **checklist** úkolů a rozhodnutí (ukládá se v prohlížeči).
 - `harmonogram.html` – **harmonogram stavby** (fáze a termíny).
 - `poznamky.html` – **sdílené poznámky** (Firebase Firestore, realtime).
@@ -35,6 +37,9 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
 - `assets/pozadavky.js` – backend nástěnky **Požadavky na úpravy modelu** (Firestore kolekce
   `pozadavky` s fallbackem na `localStorage`, realtime) + pomůcky (oblasti, stavy, kódování
   pohledu kamery do odkazu `model.html#view=…`).
+- `assets/fotky.js` – **fotogalerie stavby**: přidávání fotek (i hromadně), datum z EXIF,
+  úprava popisku a data, mazání, lightbox; náhledy v kolekci `fotky`, plné fotky zvlášť
+  v `fotky_plne` (stahují se až po kliknutí).
 - `assets/annotate.js` – jednoduchý **malovací nástroj** do náhledu (šipka, obdélník, kolečko,
   čára od ruky, výběr barvy, krok zpět, smazání); kresba se složí nad screenshot pohledu, takže
   jde v požadavku přesně označit, čeho se úprava týká.
@@ -96,6 +101,22 @@ automaticky zmenší pro rychlé načítání; pokud Storage není povolené, ul
 obrázek přímo do Firestore. Když je Firebase nedostupný, nástěnka spadne na lokální úložiště
 prohlížeče. Pro sdílení napříč zařízeními musí pravidla Firestore (a případně Storage) povolit
 zápis do kolekcí `vizualizace` a `inspirace` – stejně jako u kolekce `poznamky`.
+
+## Fotky ze stavby
+
+Stránka `fotky-stavby.html` je společná fotodokumentace postupu výstavby, seřazená
+**chronologicky po dnech**. Fotky přidá kdokoli z rodiny přímo na stránce – tlačítkem,
+přetažením souborů, vložením ze schránky (`Ctrl+V`) nebo rovnou vyfocením na mobilu
+(i více fotek najednou).
+
+- **Datum focení** se u každé fotky přečte z jejích údajů v souboru (EXIF `DateTimeOriginal`),
+  takže se při hromadném přidávání nemusí nic vyplňovat; když ho fotka nemá, použije se datum
+  z formuláře. Popisek i datum jdou u každé fotky kdykoli upravit (✎), fotku jde smazat (🗑).
+- **Rychlost:** do výpisu se ukládá jen zmenšený náhled (~50 kB) v kolekci `fotky`; fotka
+  v plné velikosti leží zvlášť v kolekci `fotky_plne` a stahuje se až po kliknutí. Stránka
+  tak zůstane svižná i po stovkách fotek.
+- Data se **sdílejí v reálném čase** přes Firebase (Firestore); když je databáze nedostupná,
+  ukládá se jen do prohlížeče, jako na zbytku webu. Popisky fotek najde i vyhledávání v liště.
 
 ## Vyhledávání na webu
 

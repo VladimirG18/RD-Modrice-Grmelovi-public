@@ -44,83 +44,20 @@
 
   <span class="eyebrow">Stavba domu</span>
   <h1>Fotky ze stavby</h1>
-  <p class="lead">Fotodokumentace postupu výstavby, seřazená chronologicky. Klikni na fotku pro
-  zvětšení. Postupně budeme doplňovat další.</p>
+  <p class="lead">Fotodokumentace postupu výstavby, seřazená chronologicky po dnech.
+  Fotku přidá kdokoli z&nbsp;rodiny rovnou tady – z&nbsp;mobilu i&nbsp;z&nbsp;počítače –
+  a&nbsp;hned ji vidí ostatní. Klikni na fotku pro zvětšení.</p>
 
-  <h2>2. 9. 2026</h2>
-  <div class="gallery">
-    <figure>
-      <img src="assets/img/stavba/2026-09-02_02.jpg" alt="Minibagr na pozemku, začátek výkopu základové rýhy" loading="lazy" />
-      <figcaption>Minibagr Bobcat na pozemku – začíná výkop první základové rýhy.</figcaption>
-    </figure>
-  </div>
-
-  <h2>3. 9. 2026</h2>
-  <div class="gallery">
-    <figure>
-      <img src="assets/img/stavba/2026-09-03_01.jpg" alt="Vykopané základové rýhy s výstražnou páskou a armovací kari sítí" loading="lazy" />
-      <figcaption>Vykopané základové rýhy, výstražná páska a připravené svazky armovací kari sítě.</figcaption>
-    </figure>
-  </div>
-
-  <p class="note">Zdroj: fotky ze složky „Fotky stavby" na Google Drive.</p>
+  <div id="fotky"></div>
 </div>
 
 <footer class="site-footer">
   RD Modřice · Grmelovi — fotodokumentace průběhu výstavby.
 </footer>
 
-<div class="lightbox" id="fsLight" hidden>
-  <button class="lb-close" id="fsClose" aria-label="Zavřít">✕</button>
-  <button class="lb-nav lb-prev" id="fsPrev" aria-label="Předchozí">‹</button>
-  <figure class="lb-fig">
-    <img id="fsImg" alt="" />
-    <figcaption id="fsCap"></figcaption>
-  </figure>
-  <button class="lb-nav lb-next" id="fsNext" aria-label="Další">›</button>
-</div>
-
-<script>
-(function(){
-  const figs = Array.from(document.querySelectorAll('.gallery figure'));
-  const items = figs.map(f => ({
-    src: f.querySelector('img').src,
-    alt: f.querySelector('img').alt,
-    cap: f.querySelector('figcaption').textContent
-  }));
-
-  const light = document.getElementById('fsLight');
-  const imgEl = document.getElementById('fsImg');
-  const capEl = document.getElementById('fsCap');
-  let idx = 0;
-
-  function show(i){
-    idx = (i + items.length) % items.length;
-    const it = items[idx];
-    imgEl.src = it.src;
-    imgEl.alt = it.alt;
-    capEl.textContent = it.cap;
-  }
-  function open(i){ show(i); light.hidden = false; }
-  function close(){ light.hidden = true; }
-
-  figs.forEach((f, i) => {
-    const img = f.querySelector('img');
-    img.style.cursor = 'zoom-in';
-    img.addEventListener('click', () => open(i));
-  });
-
-  document.getElementById('fsClose').addEventListener('click', close);
-  document.getElementById('fsPrev').addEventListener('click', () => show(idx - 1));
-  document.getElementById('fsNext').addEventListener('click', () => show(idx + 1));
-  light.addEventListener('click', (e) => { if(e.target === light) close(); });
-  document.addEventListener('keydown', (e) => {
-    if(light.hidden) return;
-    if(e.code === 'Escape') close();
-    if(e.code === 'ArrowLeft') show(idx - 1);
-    if(e.code === 'ArrowRight') show(idx + 1);
-  });
-})();
+<script type="module">
+  import { initFotky } from './assets/fotky.js';
+  initFotky({ mount: '#fotky' });
 </script>
 </body>
 </html>

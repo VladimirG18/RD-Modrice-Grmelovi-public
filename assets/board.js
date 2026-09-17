@@ -58,8 +58,9 @@ function fmtDate(ts){
   return d.toLocaleDateString('cs-CZ') + ' ' + d.toLocaleTimeString('cs-CZ', { hour:'2-digit', minute:'2-digit' });
 }
 
-/* ---------- Zpracování / komprese obrázku ---------- */
-async function fileToBitmap(file){
+/* ---------- Zpracování / komprese obrázku ----------
+   Exportované – používá je i fotogalerie stavby (assets/fotky.js). */
+export async function fileToBitmap(file){
   if('createImageBitmap' in window){
     try { return await createImageBitmap(file, { imageOrientation:'from-image' }); } catch(e){ /* fallback */ }
   }
@@ -70,7 +71,7 @@ async function fileToBitmap(file){
     img.src = URL.createObjectURL(file);
   });
 }
-async function compressFile(file, maxDim, quality){
+export async function compressFile(file, maxDim, quality){
   const bmp = await fileToBitmap(file);
   const iw = bmp.width, ih = bmp.height;
   const scale = Math.min(1, maxDim / Math.max(iw, ih));
@@ -84,7 +85,7 @@ async function compressFile(file, maxDim, quality){
   return blob || file;
 }
 // Zmenší obrázek tak, aby se vešel do databáze jako data URL (fallback bez Storage)
-async function compressForInline(file){
+export async function compressForInline(file){
   const steps = [[1600,.8],[1280,.78],[1024,.74],[820,.7],[640,.66]];
   let best = null;
   for(const [d, q] of steps){
@@ -94,7 +95,7 @@ async function compressForInline(file){
   }
   return best;
 }
-const blobToDataURL = blob => new Promise((res, rej) => {
+export const blobToDataURL = blob => new Promise((res, rej) => {
   const r = new FileReader();
   r.onload = () => res(r.result);
   r.onerror = rej;
