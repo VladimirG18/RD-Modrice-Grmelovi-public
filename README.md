@@ -26,6 +26,9 @@ Web projektu rodinného domu v Modřicích – rozcestník s 3D modelem a dalš�
   tlačítkem „✏️ Navrhnout úpravu" – přiloží se aktuální pohled kamery a náhled.
 - `assets/style.css` – sdílený design systém (světlý + tmavý režim).
 - `assets/site.js` – přepínání vzhledu a zvýraznění navigace.
+- `assets/search.js` – **fulltextové vyhledávání** v horní liště (lupa, `Ctrl/⌘+K`, `/`):
+  prohledá všechny stránky i sdílená data (poznámky, požadavky, nástěnky, rozpočet,
+  harmonogram) a po prokliku výskyty na stránce zvýrazní.
 - `assets/board.js` – sdílený modul nástěnek (Vizualizace i Inspirace): kategorie, nahrávání
   a komprese obrázků, ukládání do Firebase (Firestore + Storage) s fallbackem na `localStorage`,
   filtrování a lightbox.
@@ -93,6 +96,25 @@ automaticky zmenší pro rychlé načítání; pokud Storage není povolené, ul
 obrázek přímo do Firestore. Když je Firebase nedostupný, nástěnka spadne na lokální úložiště
 prohlížeče. Pro sdílení napříč zařízeními musí pravidla Firestore (a případně Storage) povolit
 zápis do kolekcí `vizualizace` a `inspirace` – stejně jako u kolekce `poznamky`.
+
+## Vyhledávání na webu
+
+V horní liště je **lupa „🔍 Hledat"** (klávesou `Ctrl/⌘+K` nebo `/`, ve 3D modelu tlačítko
+vpravo nahoře). Hledá se **fulltextově napříč celým webem** – bez ohledu na diakritiku
+a velikost písmen, po slovech (všechna zadaná slova musí sedět).
+
+- **Co se prohledává** – text všech stránek (rozdělený podle nadpisů na úseky) **a sdílená
+  data v reálném čase**: poznámky, požadavky na úpravy modelu, nástěnky vizualizací
+  a inspirace, položky rozpočtu a fáze i kroky harmonogramu. Když je databáze nedostupná,
+  použije se lokální záloha v prohlížeči – stejně jako na zbytku webu.
+- **Jak vzniká index** – staví se až v prohlížeči (web je statický, žádný build): stránky
+  se stáhnou a rozeberou, sdílená data se načtou z Firestore. Výsledky ze stránek se ukážou
+  hned, data z databáze se doplní, jakmile dojdou; index se drží v `sessionStorage`,
+  takže další hledání v téže záložce je okamžité.
+- **Po prokliku** – stránka se otevře s dotazem v odkazu (`?q=…`), výskyty se **zvýrazní**,
+  stránka odroluje na první z nich a dole se ukáže lišta pro přeskakování mezi výskyty
+  (zvýrazní se i obsah, který se dokresluje z databáze). Tlačítkem **✕ Zrušit** se
+  zvýraznění zase odstraní.
 
 ## Požadavky na úpravy modelu
 
