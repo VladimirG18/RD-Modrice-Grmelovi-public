@@ -254,9 +254,9 @@ const SOURCES = [
           shortUrl(d.link)].filter(Boolean).join(' · ') }) },
 
   { coll:'fotky', page:'fotky-stavby.html', icon:'📷', label:'Fotky ze stavby',
-    fields:['caption','date','author','ts'], local:'rdmodrice-fotky-v1',   // `thumb` ne – to je náhled fotky
-    row: (d, L) => ({ h: [L.day(d.date), d.author].filter(Boolean).join(' · '),
-      t: [d.caption, L.day(d.date), d.date, d.author].filter(Boolean).join(' · ') }) },
+    fields:['caption','date','author','ts','phaseName'], local:'rdmodrice-fotky-v1',   // `thumb` ne – to je náhled fotky
+    row: (d, L) => ({ h: [L.day(d.date), d.phaseName, d.author].filter(Boolean).join(' · '),
+      t: [d.caption, d.phaseName, L.day(d.date), d.date, d.author].filter(Boolean).join(' · ') }) },
 
   { coll:'harmonogram_faze', page:'harmonogram.html', icon:'📅', label:'Harmonogram',
     fields:['name','note','when','status','budgetCat'], local:'rdmodrice-harmonogram-faze-v1',

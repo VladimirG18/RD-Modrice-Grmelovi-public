@@ -57,6 +57,13 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   se u fotky; ruční úprava data ho přepíše na `rucne`. Popisek i datum jdou upravit, fotka smazat.
   Do výpisu se ukládá jen zmenšený náhled (`thumb`, ~50 kB, kolekce `fotky`), plná velikost
   je zvlášť v `fotky_plne` a stahuje se až po kliknutí – proto stránka nebobtná s počtem fotek.
+  **Štítek fáze stavby**: fotka má pole `phase` (id fáze) + `phaseName` (název pro jistotu, kdyby
+  se fáze přejmenovala/smazala). Fáze se **jen čtou** z kolekce `harmonogram_faze` (`watchPhases`,
+  realtime; fallback na lokální zálohu harmonogramu) – upravují se pořád jen na stránce Harmonogram.
+  Ve výchozím nastavení se fáze doplní automaticky podle data fotky (`phaseForDate`: vyhrává fáze,
+  která začala nejpozději před datem a ještě neskončila – fáze se překrývají), jde ji ale vybrat
+  ručně i změnit v úpravách. Nad výpisem jsou filtry podle fáze (odkaz `fotky-stavby.html?faze=<id>`
+  otevře rovnou konkrétní fázi) a u starších fotek bez fáze tlačítko na hromadné doplnění podle data.
   Zmenšování obrázků je sdílené s nástěnkami (`compressFile`/`compressForInline` z `board.js`).
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
   (`assets/board.js`).

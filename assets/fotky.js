@@ -29,9 +29,16 @@ const AUTHOR_KEY  = 'rdmodrice-board-author';   // stejný autor jako na nástě
 
 const THUMB_DIM = 560, THUMB_Q = 0.7;           // náhled do výpisu (~40 kB)
 
+/* české skloňování počtů */
+const pluralCz = (n, a, b, c) => n === 1 ? a : (n < 5 ? b : c);
+
 /* odkud se vzalo datum focení (ukazuje se u fotky) */
 const SRC_TEXT = { fotka:'z fotky', nazev:'z názvu souboru',
                    soubor:'z data souboru', formular:'z formuláře' };
+
+const FAZE_COLL  = 'harmonogram_faze';            // fáze se čtou z harmonogramu (jen pro čtení)
+const FAZE_LOCAL = 'rdmodrice-harmonogram-faze-v1';
+const PHASE_ICON = { hotovo:'✅', probiha:'🛠️', planovano:'📋' };
 
 /* Fotky, které na stránce byly už předtím (soubory ve složce assets/img/stavba).
    Při prvním spuštění se založí do databáze, ať jsou všechny na jednom místě
@@ -240,14 +247,52 @@ function localBackend(){
   };
 }
 
+/* ---------- Fáze stavby (čtou se z harmonogramu) ---------- */
+const useFirebase = () => !!(firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey.length > 10);
+
+/* jedna Firebase aplikace pro fotky i pro čtení fází */
+async function fbApp(){
+  const { initializeApp, getApps } = await import(`${FB_VER}/firebase-app.js`);
+  return getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+}
+
+function localPhases(){
+  const a = loadJson(FAZE_LOCAL, []);
+  return Array.isArray(a) ? [...a].sort((x, y) => (x.order || 0) - (y.order || 0)) : [];
+}
+
+/* Fáze jen čteme – upravují se na stránce Harmonogram. */
+export async function watchPhases(cb){
+  if(useFirebase()){
+    try {
+      const { getFirestore, collection, onSnapshot, query, orderBy } = await import(`${FB_VER}/firebase-firestore.js`);
+      const db = getFirestore(await fbApp());
+      onSnapshot(query(collection(db, FAZE_COLL), orderBy('order', 'asc')),
+        snap => cb(snap.docs.map(d => ({ id:d.id, ...d.data() }))),
+        err  => { console.warn('Fáze harmonogramu:', err); cb(localPhases()); });
+      return;
+    } catch(e){ console.warn('Fáze harmonogramu:', e); }
+  }
+  cb(localPhases());
+}
+
+/* Do které fáze fotka podle data spadá – vyhrává fáze, která začala
+   nejpozději před datem fotky a ještě neskončila (fáze se překrývají). */
+export function phaseForDate(phases, iso){
+  if(!isISO(iso) || !Array.isArray(phases)) return null;
+  const month = iso.slice(0, 7);
+  const hit = phases.filter(f => f.start && month >= f.start && (!f.end || month <= f.end));
+  if(!hit.length) return null;
+  hit.sort((a, b) => String(a.start).localeCompare(String(b.start)) || (a.order || 0) - (b.order || 0));
+  return hit[hit.length - 1];
+}
+
 /* ---------- Firebase (Firestore, realtime) ---------- */
 async function firebaseBackend(){
-  const { initializeApp } = await import(`${FB_VER}/firebase-app.js`);
   const { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, onSnapshot, writeBatch }
     = await import(`${FB_VER}/firebase-firestore.js`);
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+  const db  = getFirestore(await fbApp());
   const col     = collection(db, 'fotky');
   const fullCol = collection(db, 'fotky_plne');
   const seedRef = doc(db, 'fotky_meta', 'seed');
@@ -310,6 +355,9 @@ export async function initFotky(opts){
         <label class="ba-field">Datum focení
           <input type="date" id="fDate" />
         </label>
+        <label class="ba-field">Fáze stavby
+          <select id="fPhase"><option value="auto">⏱️ Podle data fotky</option></select>
+        </label>
         <label class="ba-field ba-grow">Popisek (nepovinné)
           <input type="text" id="fCaption" placeholder="Co je na fotce – např. „Betonáž základové desky“" />
         </label>
@@ -327,16 +375,20 @@ export async function initFotky(opts){
       <div class="ba-hint">Datum focení si aplikace u každé fotky vezme sama – z údajů ve fotce,
         případně z názvu souboru (fotky přeposlané přes WhatsApp o své údaje přijdou, datum jim ale
         zůstane v názvu). Teprve když se nedá zjistit, použije se datum nastavené výše. Fotky se před
-        uložením zmenší, ať se stránka rychle načítá – popisek i datum jde kdykoli upravit.</div>
+        uložením zmenší, ať se stránka rychle načítá – popisek, datum i fáze jdou kdykoli upravit.
+        Fáze se nabízejí z <a href="harmonogram.html">harmonogramu</a>; ve výchozím nastavení
+        se ke každé fotce doplní ta, do které podle data spadá.</div>
 
       <div class="ba-progress" id="fProg" hidden></div>
     </div>
 
     <div class="fot-bar">
       <span class="fot-count" id="fCount"></span>
+      <button class="btn" id="fFill" type="button" hidden></button>
       <button class="btn" id="fOrder" type="button"></button>
     </div>
 
+    <div class="board-filter" id="fFilter"></div>
     <div id="fBody"></div>
 
     <div class="lightbox" id="fLight" hidden>
@@ -352,7 +404,8 @@ export async function initFotky(opts){
   const $ = id => mount.querySelector('#' + id);
   const statusEl = $('fStatus'), authorEl = $('fAuthor'), dateEl = $('fDate'),
         capEl = $('fCaption'), bodyEl = $('fBody'), progEl = $('fProg'),
-        countEl = $('fCount'), orderBtn = $('fOrder');
+        countEl = $('fCount'), orderBtn = $('fOrder'), phaseEl = $('fPhase'),
+        filterEl = $('fFilter'), fillBtn = $('fFill');
 
   dateEl.value = todayISO();
   try {
@@ -372,6 +425,33 @@ export async function initFotky(opts){
     render(items);
   });
 
+  /* --- fáze stavby (jen se čtou z harmonogramu) --- */
+  let phases = [], activePhase = null;      // activePhase: null = vše, '' = bez fáze, jinak id fáze
+  try {
+    const f = new URLSearchParams(location.search).get('faze');
+    if(f !== null) activePhase = f;         // odkaz z harmonogramu: ?faze=<id>
+  } catch(e){}
+
+  const phaseById = id => phases.find(f => f.id === id) || null;
+  const phaseLabel = it => {
+    const f = phaseById(it.phase);
+    return f ? f.name : (it.phaseName || '');
+  };
+  const phaseIcon = it => {
+    const f = phaseById(it.phase);
+    return PHASE_ICON[f ? f.status : ''] || '🏗️';
+  };
+
+  function fillPhaseSelect(){
+    const cur = phaseEl.value;
+    phaseEl.innerHTML = `<option value="auto">⏱️ Podle data fotky</option>` +
+      `<option value="">— bez fáze —</option>` +
+      phases.map(f => `<option value="${esc(f.id)}">${PHASE_ICON[f.status] || '🏗️'} ${esc(f.name)}${
+        f.when ? ` (${esc(f.when)})` : ''}</option>`).join('');
+    if(cur && [...phaseEl.options].some(o => o.value === cur)) phaseEl.value = cur;
+  }
+  fillPhaseSelect();
+
   /* --- backend s fallbackem --- */
   let backend = null, items = [], editing = null;
 
@@ -386,7 +466,7 @@ export async function initFotky(opts){
     backend.subscribe(render);
   }
 
-  const useFb = firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey.length > 10;
+  const useFb = useFirebase();
   if(useFb){
     try {
       backend = await firebaseBackend();
@@ -420,6 +500,7 @@ export async function initFotky(opts){
     const author = authorEl.value;
     const caption = (capEl.value || '').trim();
     const formDate = isISO(dateEl.value) ? dateEl.value : todayISO();
+    const phaseChoice = phaseEl.value;          // 'auto' | '' | id fáze
 
     busy(true, `Zpracovávám ${files.length === 1 ? 'fotku' : 'fotky'}…`);
     let ok = 0, fail = 0, heic = 0;
@@ -429,7 +510,9 @@ export async function initFotky(opts){
         const { date, src } = await detectDate(f, formDate);
         const thumb = await blobToDataURL(await compressFile(f, THUMB_DIM, THUMB_Q));
         const full  = await blobToDataURL(await compressForInline(f));
-        await backend.add({ date, dateSrc: src, caption, author, thumb, ts: Date.now() }, full);
+        const faze = phaseChoice === 'auto' ? phaseForDate(phases, date) : phaseById(phaseChoice);
+        await backend.add({ date, dateSrc: src, caption, author, thumb, ts: Date.now(),
+          phase: faze ? faze.id : null, phaseName: faze ? faze.name : null }, full);
         zdroje[src] = (zdroje[src] || 0) + 1;
         ok++;
       } catch(e){
@@ -507,6 +590,11 @@ export async function initFotky(opts){
         <figcaption class="fot-edit">
           <input type="text" class="fot-in-cap" value="${esc(it.caption || '')}" placeholder="Popisek fotky" />
           <input type="date" class="fot-in-date" value="${esc(it.date || '')}" />
+          <select class="fot-in-phase">
+            <option value=""${it.phase ? '' : ' selected'}>— bez fáze —</option>
+            ${phases.map(f => `<option value="${esc(f.id)}"${f.id === it.phase ? ' selected' : ''}>${
+              PHASE_ICON[f.status] || '🏗️'} ${esc(f.name)}</option>`).join('')}
+          </select>
           <div class="fot-edit-btns">
             <button class="btn primary" data-save="${esc(it.id)}" type="button">Uložit</button>
             <button class="btn" data-cancel="1" type="button">Zrušit</button>
@@ -523,6 +611,8 @@ export async function initFotky(opts){
         <img src="${esc(src)}" alt="${esc(it.caption || 'Fotka ze stavby')}" loading="lazy" />
       </button>
       <figcaption>
+        ${phaseLabel(it) ? `<button class="fot-phase" type="button" data-phase="${esc(it.phase || '')}"
+            title="Zobrazit jen fotky z této fáze">${phaseIcon(it)} <span>${esc(phaseLabel(it))}</span></button>` : ''}
         ${it.caption ? `<span class="fot-cap">${esc(it.caption)}</span>` : '<span class="fot-cap fot-cap-empty">Bez popisku</span>'}
         <span class="fot-meta">${who}${it.ts ? ` · přidáno ${esc(fmtAdded(it.ts))}` : ''}${
           it.dateSrc && it.dateSrc !== 'formular' && SRC_TEXT[it.dateSrc]
@@ -533,14 +623,37 @@ export async function initFotky(opts){
     </figure>`;
   }
 
+  function renderFilter(){
+    if(!items.length || (!phases.length && !items.some(i => i.phase))){ filterEl.innerHTML = ''; return; }
+    const pocty = {};
+    items.forEach(i => { const k = i.phase || ''; pocty[k] = (pocty[k] || 0) + 1; });
+    const chip = (val, label, n) =>                       // val === null → „Vše"
+      `<button class="fchip${activePhase === val ? ' on' : ''}" ${
+        val === null ? 'data-vse="1"' : `data-faze="${esc(val)}"`}>${label} <b>${n}</b></button>`;
+    let html = chip(null, 'Vše', items.length);
+    phases.forEach(f => { if(pocty[f.id]) html += chip(f.id, `${PHASE_ICON[f.status] || '🏗️'} ${esc(f.name)}`, pocty[f.id]); });
+    // fotky s fází, která už v harmonogramu není
+    const zname = new Set(phases.map(f => f.id));
+    const cizi = items.filter(i => i.phase && !zname.has(i.phase));
+    if(cizi.length) html += chip(cizi[0].phase, `🏗️ ${esc(cizi[0].phaseName || 'Jiná fáze')}`, cizi.length);
+    if(pocty['']) html += chip('', 'Bez fáze', pocty['']);
+    filterEl.innerHTML = html;
+  }
+
+  const vFiltru = () => activePhase === null ? items : items.filter(i => (i.phase || '') === activePhase);
+
   function render(list){
     items = Array.isArray(list) ? list : [];
-    const dnu = groups(items).length;
-    const plural = (n, a, b, c) => n === 1 ? a : (n < 5 ? b : c);
-    countEl.textContent = items.length
-      ? `${items.length} ${plural(items.length, 'fotka', 'fotky', 'fotek')} · ${dnu} ${plural(dnu, 'den', 'dny', 'dní')}`
+    const dnu = groups(vFiltru()).length;
+    const plural = pluralCz;
+    const kolik = vFiltru().length;
+    countEl.textContent = kolik
+      ? `${kolik} ${plural(kolik, 'fotka', 'fotky', 'fotek')} · ${dnu} ${plural(dnu, 'den', 'dny', 'dní')}`
       : '';
     orderBtn.hidden = items.length < 2;
+
+    renderFilter();
+    updateFillBtn();
 
     if(!items.length){
       bodyEl.innerHTML = `<div class="board-empty">
@@ -549,15 +662,69 @@ export async function initFotky(opts){
       </div>`;
       return;
     }
-    bodyEl.innerHTML = groups(items).map(g => `
+    const vybrane = vFiltru();
+    if(!vybrane.length){
+      bodyEl.innerHTML = `<div class="board-empty"><p>V této fázi zatím žádné fotky nejsou.</p></div>`;
+      return;
+    }
+    bodyEl.innerHTML = groups(vybrane).map(g => `
       <section class="fot-day">
         <h2>${esc(fmtDay(g.date))} <span class="fot-n">${g.items.length}</span></h2>
         <div class="gallery">${g.items.map(cardHTML).join('')}</div>
       </section>`).join('');
   }
 
+  /* --- hromadné doplnění fází u fotek, které ji ještě nemají --- */
+  const bezFaze = () => items.filter(i => !i.phase && phaseForDate(phases, i.date));
+
+  function updateFillBtn(){
+    const n = bezFaze().length;
+    fillBtn.hidden = !n;
+    if(n) fillBtn.textContent = `🏗️ Doplnit fáze podle data (${n})`;
+  }
+
+  fillBtn.addEventListener('click', async () => {
+    const list = bezFaze();
+    if(!list.length) return;
+    if(!confirm(`Doplnit fázi u ${list.length} ${pluralCz(list.length, 'fotky', 'fotek', 'fotek')} bez fáze?\n\n` +
+      'U každé se použije fáze z harmonogramu, do které fotka podle data spadá. ' +
+      'Fotky, které fázi už mají, se nemění.')) return;
+    fillBtn.disabled = true;
+    let ok = 0;
+    for(const it of list){
+      const f = phaseForDate(phases, it.date);
+      if(!f) continue;
+      try { await backend.update(it.id, { phase:f.id, phaseName:f.name }); ok++; }
+      catch(e){ console.error(e); }
+      busy(true, `Doplňuji fáze… (${ok}/${list.length})`);
+    }
+    fillBtn.disabled = false;
+    busy(true, `✅ Fáze doplněna u ${ok} ${pluralCz(ok, 'fotky', 'fotek', 'fotek')}.`);
+    clearTimeout(busyTimer);
+    busyTimer = setTimeout(() => busy(false), 7000);
+  });
+
+  /* --- filtr podle fáze --- */
+  function setPhaseFilter(val){          // null = vše
+    activePhase = val;
+    try {
+      const url = new URL(location.href);
+      if(val === null) url.searchParams.delete('faze'); else url.searchParams.set('faze', val);
+      history.replaceState(null, '', url.pathname + url.search + url.hash);
+    } catch(e){}
+    render(items);
+  }
+  filterEl.addEventListener('click', e => {
+    const b = e.target.closest('.fchip');
+    if(!b) return;
+    setPhaseFilter(b.dataset.vse ? null : (b.dataset.faze || ''));
+  });
+
   /* --- úpravy a mazání --- */
   bodyEl.addEventListener('click', e => {
+    const chip = e.target.closest('.fot-phase');
+    if(chip){ setPhaseFilter(chip.dataset.phase || ''); return; }
+
     const del = e.target.closest('[data-del]');
     if(del){
       const it = items.find(i => i.id === del.dataset.del);
@@ -576,10 +743,13 @@ export async function initFotky(opts){
       const card = save.closest('.fot-card');
       const caption = card.querySelector('.fot-in-cap').value.trim();
       const date = card.querySelector('.fot-in-date').value;
+      const phaseSel = card.querySelector('.fot-in-phase');
+      const faze = phaseSel ? phaseById(phaseSel.value) : null;
       editing = null;
       const orig = items.find(i => i.id === save.dataset.save);
       const novy = isISO(date) ? date : todayISO();
-      const patch = { caption, date: novy };
+      const patch = { caption, date: novy,
+        phase: faze ? faze.id : null, phaseName: faze ? faze.name : null };
       if(orig && orig.date !== novy) patch.dateSrc = 'rucne';     // datum zadané ručně
       backend.update(save.dataset.save, patch)
         .catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
@@ -608,7 +778,9 @@ export async function initFotky(opts){
     lbImg.src = it.thumb || it.src || '';
     lbImg.alt = it.caption || '';
     const who = esc(it.author || '');
-    const sub = `<span class="lb-sub">${esc(fmtDay(it.date))}${who ? ' · ' + who : ''} · ${lbIdx + 1}/${lbList.length}</span>`;
+    const faze = phaseLabel(it);
+    const sub = `<span class="lb-sub">${esc(fmtDay(it.date))}${who ? ' · ' + who : ''}${
+      faze ? ` · ${phaseIcon(it)} ${esc(faze)}` : ''} · ${lbIdx + 1}/${lbList.length}</span>`;
     lbCap.innerHTML = `<b>${esc(it.caption || '')}</b> ${sub}`;
 
     if(!it.fullId) return;                              // fotka ze složky v repu – už je v plné velikosti
@@ -627,7 +799,7 @@ export async function initFotky(opts){
     }
   }
   function openLb(id){
-    lbList = sorted(items);
+    lbList = sorted(vFiltru());
     lbIdx = Math.max(0, lbList.findIndex(i => i.id === id));
     light.hidden = false;
     document.body.style.overflow = 'hidden';
@@ -653,6 +825,15 @@ export async function initFotky(opts){
     else if(e.key === 'ArrowRight') step(1);
   });
 
+  // fáze z harmonogramu (živě – když se harmonogram změní, štítky se přizpůsobí)
+  watchPhases(list => {
+    phases = Array.isArray(list) ? list : [];
+    fillPhaseSelect();
+    render(items);
+  });
+
   // testovací háček (neškodný) – ať jde přidávání ověřit z automatického testu
-  window.__fotky = { add: addFiles, items: () => items, exifDate, detectDate, dateFromName };
+  window.__fotky = { add: addFiles, items: () => items, exifDate, detectDate, dateFromName,
+                     phases: () => phases, phaseForDate, filter: setPhaseFilter,
+                     fill: () => fillBtn.click() };
 }
