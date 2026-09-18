@@ -48,8 +48,13 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 - `informace.html`, `material.html`, `dokumentace.html`, `harmonogram.html`,
   `checklist.html` – obsahové stránky.
 - `fotky-stavby.html` – **sdílená fotodokumentace stavby** (`assets/fotky.js`): fotky přidává
-  rodina přímo na stránce (mobil i počítač), řadí se po dnech. Datum se čte z EXIF fotky
-  (`DateTimeOriginal`), jinak z formuláře; popisek i datum jdou upravit, fotka smazat.
+  rodina přímo na stránce (mobil i počítač), řadí se po dnech. Datum focení se zjišťuje samo
+  (`detectDate`) v pořadí: **EXIF** (průchod JPEG segmenty, u ostatních formátů sken značky
+  `Exif\0\0` – zabere i na HEIC) → **datum v názvu souboru** (`IMG-20260902-WA0007` apod.,
+  fotky přeposlané přes WhatsApp o EXIF přijdou) → **datum souboru** (jen když je ve formuláři
+  necháno dnešní datum) → **formulář**. Výsledky filtruje `plausible()` (nic z budoucnosti,
+  nic před 2015, reálné datum). Odkud se datum vzalo, se ukládá do pole `dateSrc` a ukazuje
+  se u fotky; ruční úprava data ho přepíše na `rucne`. Popisek i datum jdou upravit, fotka smazat.
   Do výpisu se ukládá jen zmenšený náhled (`thumb`, ~50 kB, kolekce `fotky`), plná velikost
   je zvlášť v `fotky_plne` a stahuje se až po kliknutí – proto stránka nebobtná s počtem fotek.
   Zmenšování obrázků je sdílené s nástěnkami (`compressFile`/`compressForInline` z `board.js`).

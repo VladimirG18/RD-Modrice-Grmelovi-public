@@ -29,6 +29,10 @@ const AUTHOR_KEY  = 'rdmodrice-board-author';   // stejný autor jako na nástě
 
 const THUMB_DIM = 560, THUMB_Q = 0.7;           // náhled do výpisu (~40 kB)
 
+/* odkud se vzalo datum focení (ukazuje se u fotky) */
+const SRC_TEXT = { fotka:'z fotky', nazev:'z názvu souboru',
+                   soubor:'z data souboru', formular:'z formuláře' };
+
 /* Fotky, které na stránce byly už předtím (soubory ve složce assets/img/stavba).
    Při prvním spuštění se založí do databáze, ať jsou všechny na jednom místě
    a jdou stejně upravovat i mazat. */
@@ -58,9 +62,38 @@ function fmtAdded(ts){
   try { return new Date(ts).toLocaleDateString('cs-CZ'); } catch(e){ return ''; }
 }
 
-/* ---------- Datum pořízení z EXIF ----------
-   U fotek z mobilu je v souboru datum, kdy vznikly – přečti ho, ať se
-   nemusí u každé fotky vyplňovat ručně (jde přepsat). */
+/* ---------- Datum pořízení fotky ----------
+   Zkouší se popořadě: EXIF ve fotce → datum v názvu souboru (fotky
+   přeposlané přes WhatsApp apod. o EXIF přijdou, ale datum jim zůstane
+   v názvu) → datum souboru → datum z formuláře. Jde vždycky přepsat. */
+
+/* Vypadá to datum rozumně? (chrání před nesmysly typu 1980 u foťáku
+   s vybitou baterií nebo číslem v názvu, které datum jen připomíná) */
+function plausible(iso){
+  if(!isISO(iso)) return false;
+  const d = new Date(iso + 'T12:00:00');
+  if(isNaN(d) || d.toLocaleDateString('sv-SE') !== iso) return false;   // třeba 31. 2. neexistuje
+  if(Number(iso.slice(0, 4)) < 2015) return false;
+  const zitra = new Date(Date.now() + 864e5).toLocaleDateString('sv-SE');
+  return iso <= zitra;                                                  // ne z budoucnosti
+}
+
+/* Datum v názvu souboru: IMG-20260902-WA0001, IMG_20260902_101530,
+   PXL_20260902_..., 20260902_101530, 2026-09-02 10.15.30, Screenshot_2026-09-02… */
+export function dateFromName(name){
+  const m = /(20\d{2})[-_.]?(0[1-9]|1[0-2])[-_.]?(0[1-9]|[12]\d|3[01])/.exec(String(name || ''));
+  if(!m) return null;
+  const iso = `${m[1]}-${m[2]}-${m[3]}`;
+  return plausible(iso) ? iso : null;
+}
+
+function fileDate(file){
+  const t = Number(file && file.lastModified);
+  if(!t) return null;
+  const iso = new Date(t).toLocaleDateString('sv-SE');
+  return plausible(iso) ? iso : null;
+}
+
 function readTiff(v, base){
   const le = v.getUint16(base) === 0x4949;              // "II" = little endian
   const u16 = o => v.getUint16(o, le);
@@ -99,11 +132,10 @@ function readTiff(v, base){
   return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
 }
 
-export async function exifDate(file){
+/* JPEG: projdi segmenty a najdi APP1 s EXIF (nejspolehlivější cesta) */
+function jpegExifDate(v){
   try {
-    if(!/^image\/jpe?g$/i.test(file.type || '')) return null;
-    const v = new DataView(await file.slice(0, 256 * 1024).arrayBuffer());
-    if(v.getUint16(0) !== 0xFFD8) return null;
+    if(v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
     let off = 2;
     while(off + 4 <= v.byteLength){
       if(v.getUint8(off) !== 0xFF) return null;
@@ -117,8 +149,47 @@ export async function exifDate(file){
       if(size < 2) return null;
       off += 2 + size;
     }
-  } catch(e){ /* nevadí – použije se datum z formuláře */ }
+  } catch(e){ /* nevadí – zkusí se ostatní způsoby */ }
   return null;
+}
+
+/* Ostatní formáty (HEIC z iPhonu, WebP…): najdi v souboru značku
+   „Exif\0\0" a přečti TIFF hned za ní. */
+function scanExifDate(v){
+  const limit = Math.min(v.byteLength - 8, 512 * 1024);
+  for(let i = 0; i < limit; i++){
+    if(v.getUint8(i) !== 0x45) continue;                  // 'E' – rychlé přeskočení
+    if(v.getUint32(i) === 0x45786966 && v.getUint16(i + 4) === 0){
+      const d = readTiff(v, i + 6);
+      if(d) return d;
+    }
+  }
+  return null;
+}
+
+export async function exifDate(file){
+  try {
+    const v = new DataView(await file.slice(0, 512 * 1024).arrayBuffer());
+    const d = jpegExifDate(v) || scanExifDate(v);
+    return plausible(d) ? d : null;
+  } catch(e){ return null; }
+}
+
+/* Výsledné datum fotky + odkud se vzalo (kvůli popisku u fotky). */
+export async function detectDate(file, formDate){
+  const fromExif = await exifDate(file);
+  if(fromExif) return { date: fromExif, src:'fotka' };
+
+  const fromName = dateFromName(file.name);
+  if(fromName) return { date: fromName, src:'nazev' };
+
+  // datum souboru použij, jen když uživatel ve formuláři nechal dnešek
+  const fromFile = fileDate(file);
+  const today = todayISO();
+  if(fromFile && fromFile < today && (!isISO(formDate) || formDate === today)){
+    return { date: fromFile, src:'soubor' };
+  }
+  return { date: isISO(formDate) ? formDate : today, src:'formular' };
 }
 
 /* ---------- Lokální záloha (localStorage) ---------- */
@@ -253,9 +324,10 @@ export async function initFotky(opts){
             nebo <span class="linklike" id="fPick">vyber fotky</span></span>
         </div>
       </div>
-      <div class="ba-hint">U každé fotky se datum vezme z jejích údajů (kdy byla vyfocená);
-        když ho fotka nemá, použije se datum nastavené výše. Fotky se před uložením zmenší,
-        ať se stránka rychle načítá – popisek i datum jde kdykoli upravit.</div>
+      <div class="ba-hint">Datum focení si aplikace u každé fotky vezme sama – z údajů ve fotce,
+        případně z názvu souboru (fotky přeposlané přes WhatsApp o své údaje přijdou, datum jim ale
+        zůstane v názvu). Teprve když se nedá zjistit, použije se datum nastavené výše. Fotky se před
+        uložením zmenší, ať se stránka rychle načítá – popisek i datum jde kdykoli upravit.</div>
 
       <div class="ba-progress" id="fProg" hidden></div>
     </div>
@@ -335,33 +407,55 @@ export async function initFotky(opts){
   }
 
   /* --- přidávání fotek --- */
+  let busyTimer = null;
   function busy(on, txt){
+    clearTimeout(busyTimer);
     progEl.hidden = !on;
     if(on) progEl.textContent = txt;
   }
 
   async function addFiles(fileList){
-    const files = [...fileList].filter(f => /^image\//.test(f.type));
+    const files = [...fileList].filter(f => /^image\//.test(f.type) || /\.(hei[cf]|jpe?g|png|webp)$/i.test(f.name || ''));
     if(!files.length) return;
     const author = authorEl.value;
     const caption = (capEl.value || '').trim();
-    const fallbackDate = isISO(dateEl.value) ? dateEl.value : todayISO();
+    const formDate = isISO(dateEl.value) ? dateEl.value : todayISO();
 
     busy(true, `Zpracovávám ${files.length === 1 ? 'fotku' : 'fotky'}…`);
-    let ok = 0, fail = 0;
+    let ok = 0, fail = 0, heic = 0;
+    const zdroje = {};
     for(const f of files){
       try {
-        const date = (await exifDate(f)) || fallbackDate;
+        const { date, src } = await detectDate(f, formDate);
         const thumb = await blobToDataURL(await compressFile(f, THUMB_DIM, THUMB_Q));
         const full  = await blobToDataURL(await compressForInline(f));
-        await backend.add({ date, caption, author, thumb, ts: Date.now() }, full);
+        await backend.add({ date, dateSrc: src, caption, author, thumb, ts: Date.now() }, full);
+        zdroje[src] = (zdroje[src] || 0) + 1;
         ok++;
-      } catch(e){ console.error(e); fail++; }
+      } catch(e){
+        console.error(e);
+        fail++;
+        if(/hei[cf]/i.test(f.type || '') || /\.hei[cf]$/i.test(f.name || '')) heic++;
+      }
       busy(true, `Ukládám… (${ok + fail}/${files.length})`);
     }
-    busy(false);
+
     capEl.value = '';
-    if(fail) alert(fail === files.length ? 'Fotky se nepodařilo přidat.' : `${fail} z ${files.length} fotek se nepodařilo přidat.`);
+    // shrnutí – ať je vidět, odkud se u fotek vzalo datum
+    if(ok){
+      const kde = Object.keys(zdroje).map(k => `${zdroje[k]}× ${SRC_TEXT[k]}`).join(', ');
+      const kolik = ok === 1 ? 'Přidána 1 fotka' : (ok < 5 ? `Přidány ${ok} fotky` : `Přidáno ${ok} fotek`);
+      busy(true, `✅ ${kolik} · datum: ${kde}.`);
+      clearTimeout(busyTimer);
+      busyTimer = setTimeout(() => busy(false), 9000);
+    } else {
+      busy(false);
+    }
+    if(fail){
+      alert((fail === files.length ? 'Fotky se nepodařilo přidat.' : `${fail} z ${files.length} fotek se nepodařilo přidat.`) +
+        (heic ? '\n\nFotky ve formátu HEIC (z iPhonu) prohlížeč neumí zpracovat – ulož je prosím jako JPEG, ' +
+                'nebo si v iPhonu přepni Nastavení → Fotoaparát → Formáty na „Nejkompatibilnější".' : ''));
+    }
   }
 
   const fileEl = $('fFile'), drop = $('fDrop');
@@ -430,7 +524,11 @@ export async function initFotky(opts){
       </button>
       <figcaption>
         ${it.caption ? `<span class="fot-cap">${esc(it.caption)}</span>` : '<span class="fot-cap fot-cap-empty">Bez popisku</span>'}
-        <span class="fot-meta">${who}${it.ts ? ` · přidáno ${esc(fmtAdded(it.ts))}` : ''}</span>
+        <span class="fot-meta">${who}${it.ts ? ` · přidáno ${esc(fmtAdded(it.ts))}` : ''}${
+          it.dateSrc && it.dateSrc !== 'formular' && SRC_TEXT[it.dateSrc]
+            ? ` · <span class="fot-src" title="Datum focení ${esc(SRC_TEXT[it.dateSrc])}">${
+                it.dateSrc === 'fotka' ? '📷 z fotky' : it.dateSrc === 'nazev' ? '🏷️ z názvu' : '🗂️ ze souboru'}</span>`
+            : ''}</span>
       </figcaption>
     </figure>`;
   }
@@ -479,7 +577,11 @@ export async function initFotky(opts){
       const caption = card.querySelector('.fot-in-cap').value.trim();
       const date = card.querySelector('.fot-in-date').value;
       editing = null;
-      backend.update(save.dataset.save, { caption, date: isISO(date) ? date : todayISO() })
+      const orig = items.find(i => i.id === save.dataset.save);
+      const novy = isISO(date) ? date : todayISO();
+      const patch = { caption, date: novy };
+      if(orig && orig.date !== novy) patch.dateSrc = 'rucne';     // datum zadané ručně
+      backend.update(save.dataset.save, patch)
         .catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
       return;
     }
@@ -552,5 +654,5 @@ export async function initFotky(opts){
   });
 
   // testovací háček (neškodný) – ať jde přidávání ověřit z automatického testu
-  window.__fotky = { add: addFiles, items: () => items, exifDate };
+  window.__fotky = { add: addFiles, items: () => items, exifDate, detectDate, dateFromName };
 }
