@@ -660,7 +660,9 @@ a.rz-icon-btn:hover{ text-decoration:none; }
 /* --- fotky ze stavby (časová osa po dnech) --- */
 .fot-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 18px; }
 .fot-count{ color:var(--muted); font-size:.84rem; }
-.fot-bar .btn{ margin-left:auto; }
+.fot-bar #fFill{ margin-left:auto; }
+.fot-bar #fOrder{ margin-left:auto; }
+.fot-bar #fFill:not([hidden]) ~ #fOrder{ margin-left:0; }
 .fot-day{ margin:0 0 26px; }
 .fot-day h2{ display:flex; align-items:center; gap:10px; margin:0 0 12px; font-size:1.1rem; letter-spacing:-.01em; }
 /* auto-fill (ne auto-fit): jedna fotka za den zůstane velká jako ostatní,
@@ -684,6 +686,11 @@ a.rz-icon-btn:hover{ text-decoration:none; }
 .fot-tools button:hover{ background:var(--accent); }
 .fot-tools button[data-del]:hover{ background:var(--danger); }
 .fot-card figcaption{ display:flex; flex-direction:column; gap:3px; padding:10px 12px 11px; }
+.fot-phase{ align-self:flex-start; max-width:100%; display:inline-flex; align-items:center; gap:5px;
+  margin-bottom:2px; padding:2px 9px; border-radius:999px; font:inherit; font-size:.72rem; font-weight:600;
+  background:var(--surface-2); border:1px solid var(--border); color:var(--muted); cursor:pointer; }
+.fot-phase:hover{ border-color:var(--accent); color:var(--accent-ink); }
+.fot-phase span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .fot-cap{ font-size:.86rem; line-height:1.4; word-break:break-word; }
 .fot-cap-empty{ color:var(--muted); font-style:italic; }
 .fot-meta{ color:var(--muted); font-size:.75rem; margin-top:2px; }
@@ -693,7 +700,9 @@ a.rz-icon-btn:hover{ text-decoration:none; }
 .fot-edit{ gap:8px !important; }
 .fot-edit input{ background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:9px;
   padding:7px 10px; font:inherit; font-size:.85rem; width:100%; }
-.fot-edit input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.fot-edit select{ background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:9px;
+  padding:7px 10px; font:inherit; font-size:.85rem; width:100%; }
+.fot-edit input:focus, .fot-edit select:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
 .fot-edit-btns{ display:flex; gap:8px; }
 .fot-edit-btns .btn{ flex:1 1 auto; justify-content:center; padding:7px 10px; font-size:.82rem; }
 

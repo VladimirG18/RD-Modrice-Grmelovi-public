@@ -114,6 +114,11 @@ přetažením souborů, vložením ze schránky (`Ctrl+V`) nebo rovnou vyfocení
   WhatsApp o své údaje přijdou, datum jim ale zůstane v názvu), z data souboru a teprve nakonec
   z formuláře. U fotky je pak vidět, odkud se datum vzalo (📷 z fotky / 🏷️ z názvu / 🗂️ ze souboru)
   a po nahrání se ukáže shrnutí. Popisek i datum jdou kdykoli upravit (✎), fotku jde smazat (🗑).
+- **Štítek fáze stavby** – u fotky se dá označit, které fáze z [harmonogramu](harmonogram.html)
+  se týká. Ve výchozím nastavení se doplní sama podle data focení (do které fáze datum spadá),
+  jde ji ale vybrat i ručně a kdykoli změnit. Nad výpisem jsou filtry podle fáze, takže si jde
+  zobrazit třeba jen fotky ze základů; u starších fotek bez štítku je tlačítko na hromadné
+  doplnění podle data. Fáze se z harmonogramu jen čtou – mění se pořád jen tam.
 - **Rychlost:** do výpisu se ukládá jen zmenšený náhled (~50 kB) v kolekci `fotky`; fotka
   v plné velikosti leží zvlášť v kolekci `fotky_plne` a stahuje se až po kliknutí. Stránka
   tak zůstane svižná i po stovkách fotek.
