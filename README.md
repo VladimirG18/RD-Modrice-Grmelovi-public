@@ -109,9 +109,11 @@ Stránka `fotky-stavby.html` je společná fotodokumentace postupu výstavby, se
 přetažením souborů, vložením ze schránky (`Ctrl+V`) nebo rovnou vyfocením na mobilu
 (i více fotek najednou).
 
-- **Datum focení** se u každé fotky přečte z jejích údajů v souboru (EXIF `DateTimeOriginal`),
-  takže se při hromadném přidávání nemusí nic vyplňovat; když ho fotka nemá, použije se datum
-  z formuláře. Popisek i datum jdou u každé fotky kdykoli upravit (✎), fotku jde smazat (🗑).
+- **Datum focení si aplikace zjistí sama** – v pořadí: z údajů ve fotce (EXIF `DateTimeOriginal`,
+  funguje i u HEIC z iPhonu), z názvu souboru (`IMG-20260902-WA0007.jpg` – fotky přeposlané přes
+  WhatsApp o své údaje přijdou, datum jim ale zůstane v názvu), z data souboru a teprve nakonec
+  z formuláře. U fotky je pak vidět, odkud se datum vzalo (📷 z fotky / 🏷️ z názvu / 🗂️ ze souboru)
+  a po nahrání se ukáže shrnutí. Popisek i datum jdou kdykoli upravit (✎), fotku jde smazat (🗑).
 - **Rychlost:** do výpisu se ukládá jen zmenšený náhled (~50 kB) v kolekci `fotky`; fotka
   v plné velikosti leží zvlášť v kolekci `fotky_plne` a stahuje se až po kliknutí. Stránka
   tak zůstane svižná i po stovkách fotek.

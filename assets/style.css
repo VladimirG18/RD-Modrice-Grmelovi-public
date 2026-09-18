@@ -688,6 +688,7 @@ a.rz-icon-btn:hover{ text-decoration:none; }
 .fot-cap-empty{ color:var(--muted); font-style:italic; }
 .fot-meta{ color:var(--muted); font-size:.75rem; margin-top:2px; }
 .fot-meta .who{ font-weight:700; }
+.fot-src{ white-space:nowrap; cursor:help; border-bottom:1px dotted var(--border-strong); }
 .fot-card.editing{ border-color:var(--accent); }
 .fot-edit{ gap:8px !important; }
 .fot-edit input{ background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:9px;
