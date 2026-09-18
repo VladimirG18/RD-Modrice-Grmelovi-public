@@ -47,6 +47,12 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   posun jde uložit jako požadavek (`move`) i nasdílet odkazem (`#move=`, jen nábytek).
 - `informace.html`, `material.html`, `dokumentace.html`, `harmonogram.html`,
   `checklist.html` – obsahové stránky.
+- `fotky-stavby.html` – **sdílená fotodokumentace stavby** (`assets/fotky.js`): fotky přidává
+  rodina přímo na stránce (mobil i počítač), řadí se po dnech. Datum se čte z EXIF fotky
+  (`DateTimeOriginal`), jinak z formuláře; popisek i datum jdou upravit, fotka smazat.
+  Do výpisu se ukládá jen zmenšený náhled (`thumb`, ~50 kB, kolekce `fotky`), plná velikost
+  je zvlášť v `fotky_plne` a stahuje se až po kliknutí – proto stránka nebobtná s počtem fotek.
+  Zmenšování obrázků je sdílené s nástěnkami (`compressFile`/`compressForInline` z `board.js`).
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
   (`assets/board.js`).
 - `poznamky.html` – sdílené poznámky.
@@ -77,7 +83,11 @@ dopiš do `PAGES` v `assets/search.js`.
 
 - Config: `assets/firebase-config.js` (projekt `rd-modrice-e9477`). apiKey je
   **veřejný** (běžné pro web SDK; bezpečnost řeší pravidla Firestore, ne skrývání).
-- Kolekce Firestore: `poznamky`, `vizualizace`, `inspirace`, **`pozadavky`**.
+- Kolekce Firestore: `poznamky`, `vizualizace`, `inspirace`, **`pozadavky`**, `rozpocet`,
+  `harmonogram_faze`, `harmonogram_kroky`, **`fotky`** (+ `fotky_plne` s plnými fotkami
+  a `fotky_meta/seed` jako značka, že se úvodní fotky ze složky v repu už založily).
+  Pozor při čtení přes REST: pole `thumb`/`img`/`images` jsou obrázky – vybírej pole
+  přes `mask.fieldPaths`, ať se netahají megabajty.
 - Pravidla musí povolit čtení i zápis těchto kolekcí (funguje bez přihlášení – jako
   test mode). Když je DB nedostupná, stránky spadnou na `localStorage`.
 

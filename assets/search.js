@@ -253,6 +253,11 @@ const SOURCES = [
           d.priceUnoff != null ? `neoficiální ${d.priceUnoff} Kč` : '',
           shortUrl(d.link)].filter(Boolean).join(' · ') }) },
 
+  { coll:'fotky', page:'fotky-stavby.html', icon:'📷', label:'Fotky ze stavby',
+    fields:['caption','date','author','ts'], local:'rdmodrice-fotky-v1',   // `thumb` ne – to je náhled fotky
+    row: (d, L) => ({ h: [L.day(d.date), d.author].filter(Boolean).join(' · '),
+      t: [d.caption, L.day(d.date), d.date, d.author].filter(Boolean).join(' · ') }) },
+
   { coll:'harmonogram_faze', page:'harmonogram.html', icon:'📅', label:'Harmonogram',
     fields:['name','note','when','status','budgetCat'], local:'rdmodrice-harmonogram-faze-v1',
     row: (d, L) => ({ h: [clean(d.name), d.when].filter(Boolean).join(' · '),
@@ -273,11 +278,12 @@ function shortUrl(u){
 /* Popisky kategorií/stavů si půjč z modulů, které je už definují –
    ať se nemusí udržovat na dvou místech. Načítají se až při hledání. */
 async function labels(){
-  const [poz, brd, roz, hg] = await Promise.all([
+  const [poz, brd, roz, hg, fot] = await Promise.all([
     import('./pozadavky.js').catch(() => null),
     import('./board.js').catch(() => null),
     import('./rozpocet.js').catch(() => null),
     import('./harmonogram.js').catch(() => null),
+    import('./fotky.js').catch(() => null),
   ]);
   const byId = (arr, id) => {
     if(!id || !Array.isArray(arr)) return id ? String(id) : '';
@@ -291,6 +297,7 @@ async function labels(){
     cat:       id => byId(brd && brd.CATS, id),
     budget:    id => byId(roz && roz.DEFAULT_CATEGORIES, id),
     hgStatus:  id => byId(hg && hg.STATUSES, id),
+    day:       iso => (fot && fot.fmtDay ? fot.fmtDay(iso) : (iso || '')),
   };
 }
 
