@@ -29,3 +29,18 @@ python add_gable_window.py            # upraví ../../RDModrice.glb na místě
 Pojmenování nových objektů drží konvence modelu (`vypln_*` = výplně oken,
 `RD_Obvod_*` / `RD_strecha_*` = vrstvy stěny / střechy), takže vrstvy i
 konfigurátor barev na webu fungují automaticky.
+
+## `blend_to_web_glb.py`
+Převede detailní Blender model (`RD_Modrice_model.blend`, výstup privátního generátoru)
+na webový `RDModrice.glb`: zruší natočení pozemku, odstraní kamery/světla/stromy,
+rozdělí objekty po materiálech, pojmenuje je podle konvence vrstev (`RD_Obvod_*`,
+`RD_strecha_*`, `RD_teren_*`, `RD_teren_soused_*`, `vypln_*`, `int_1NP_*`, `int_2NP_*`),
+přemapuje materiály na názvy z konfigurátoru a exportuje bez Draco.
+**Textury se nepřenášejí** (v .blend jsou jen odkazy `//textures/…`) – barva materiálu
+= odstín × odhad průměru textury (`TEX_AVG`), takže barvy jsou přibližné.
+
+```bash
+pip install bpy
+python blend_to_web_glb.py RD_Modrice_model.blend ../../RDModrice.glb
+```
+Sestava modelu už nevychází z `add_gable_window.py` + `furnish_interior.py`, ale z .blend.
