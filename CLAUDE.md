@@ -11,6 +11,10 @@ např. Sonnet) navázat bez ztráty dosud zjištěných informací.
 
 ## 1) Jak se nasazuje na produkci (DŮLEŽITÉ)
 
+**Pravidlo: každá hotová a ověřená úprava se rovnou nasazuje na `main`** – bez ptaní
+„mám to nasadit?". Po dokončení práce proto vždy proveď kroky níže (PR + merge do `main`
++ ověření deploye) a na konci napiš, že je to na produkci.
+
 Web je **statický** a běží na **GitHub Pages**. Nasazení = **merge do větve `main`**:
 
 1. Pracuj na své feature větvi (název dostaneš v zadání session, typicky
