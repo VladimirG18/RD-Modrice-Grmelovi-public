@@ -124,6 +124,7 @@ dialog.ed-dlg::backdrop{ background:rgba(8,12,18,.55); }
     <span class="sep"></span>
     <button class="ed-b" id="bUndo" title="Zpět (Ctrl+Z)">↶</button>
     <button class="ed-b" id="bRedo" title="Znovu (Ctrl+Y)">↷</button>
+    <button class="ed-b" id="bDup" title="Duplikovat vybraný prvek (Ctrl/⌘+D). Rychleji: drž ⌘ (nebo Alt) a prvek táhni – originál zůstane, odtáhne se kopie.">⧉ Duplikovat</button>
     <button class="ed-b" id="bRot" title="Otočit vybranou značku (R)">⟳ Otočit</button>
     <button class="ed-b danger" id="bDel" title="Smazat vybrané (Del)">🗑 Smazat</button>
     <span class="sep"></span>
@@ -466,7 +467,7 @@ function updateUi(){
   $('bUndo').disabled = !doc || (hi <= 0 && !cur);
   $('bRedo').disabled = !doc || hi >= hist.length - 1;
   const o = doc && doc.objs[sel];
-  $('bDel').disabled = !o; $('bRot').disabled = !(o && o.t==='sym');
+  $('bDel').disabled = !o; $('bRot').disabled = !(o && o.t==='sym'); $('bDup').disabled = !(o && o.t!=='blob');
   ['bPng','bJson','bSaveAs','bShare'].forEach(i=>$(i).disabled = !doc);
   document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('on', b.dataset.tool===tool));
   document.querySelectorAll('.ed-cat').forEach(b=>b.classList.toggle('on', b.dataset.cat===cat));
@@ -487,7 +488,7 @@ function renderHint(){
   const h = $('hint'); h.innerHTML = '';
   if(!doc) return;
   const T = {
-    select:'Klikni na prvek pro výběr a tažením ho přesuň. Tažením prázdného místa posouváš výkres, kolečkem přibližuješ.',
+    select:'Klikni na prvek pro výběr a tažením ho přesuň. Duplikovat: ⌘/Alt + tažení nebo Ctrl/⌘+D. Tažením prázdného místa posouváš výkres, kolečkem přibližuješ.',
     cover:'Tažením vytvoř obdélník, který zakryje kótu nebo prvek (bílá výplň). Zpět ho vrátí.',
     smart:'Najeď na čáru nebo číslo kóty – oranžově se ukáže, co se smaže. Kliknutím to smažeš. Prvek je moc velký nebo se maže i zeď? Zmenši „Dosah propojení“.',
     erase:'Tažením „smazuješ“ bílou barvou – vhodné pro čáry, texty a kóty.',
@@ -564,7 +565,7 @@ cv.addEventListener('pointerdown', e=>{
     const o = doc.objs[sel];
     if(o && o.t==='cover' && Math.hypot(p.x-(o.x+o.w), p.y-(o.y+o.h)) < 16/view.z){ gesture = {type:'resize', o}; return; }
     const i = hit(p);
-    if(i >= 0){ sel = i; gesture = {type:'move', last:p, did:false}; updateUi(); redraw(); return; }
+    if(i >= 0){ sel = i; gesture = {type:'move', last:p, did:false, dup:(e.metaKey||e.ctrlKey||e.altKey) && doc.objs[i].t!=='blob'}; updateUi(); redraw(); return; }
     sel = -1; gesture = {type:'pan', v0:{...view}, s0:s}; updateUi(); redraw(); return;
   }
   if(tool==='cover'){ gesture = {type:'draw', p0:p}; cur = {t:'cover', x:p.x, y:p.y, w:0, h:0}; return; }
@@ -586,7 +587,9 @@ cv.addEventListener('pointermove', e=>{
   }
   if(gesture && pr){
     if(gesture.type==='pan'){ view = {z:gesture.v0.z, x:gesture.v0.x + s.x - gesture.s0.x, y:gesture.v0.y + s.y - gesture.s0.y}; }
-    else if(gesture.type==='move' && pr.moved){ const o=doc.objs[sel]; if(o.t!=='blob'){ moveObj(o, hover.x-gesture.last.x, hover.y-gesture.last.y); gesture.did=true; } gesture.last=hover; }
+    else if(gesture.type==='move' && pr.moved){
+      if(gesture.dup && !gesture.cloned){ const c = cloneObj(doc.objs[sel]); doc.objs.push(c); sel = doc.objs.length-1; gesture.cloned = true; }
+      const o=doc.objs[sel]; if(o.t!=='blob'){ moveObj(o, hover.x-gesture.last.x, hover.y-gesture.last.y); gesture.did=true; } gesture.last=hover; }
     else if(gesture.type==='resize'){ const o=gesture.o; o.w=Math.max(4,hover.x-o.x); o.h=Math.max(4,hover.y-o.y); gesture.did=true; }
     else if(gesture.type==='draw' && cur){
       if(cur.t==='cover'){ cur.x=Math.min(gesture.p0.x,hover.x); cur.y=Math.min(gesture.p0.y,hover.y); cur.w=Math.abs(hover.x-gesture.p0.x); cur.h=Math.abs(hover.y-gesture.p0.y); }
@@ -663,7 +666,13 @@ new ResizeObserver(()=>{ sizeCanvas(); }).observe(stage);
 /* ---------- akce ---------- */
 $('bUndo').onclick = undo; $('bRedo').onclick = redo;
 $('bDel').onclick = delSel;
-$('bRot').onclick = rotSel;
+$('bRot').onclick = rotSel; $('bDup').onclick = dupSel;
+function cloneObj(o){ return JSON.parse(JSON.stringify(o)); }
+function dupSel(){
+  const o = doc && doc.objs[sel]; if(!o || o.t==='blob') return;
+  const c = cloneObj(o), d = 12 * u();            // kopie se stejným otočením, kousek vedle originálu
+  moveObj(c, d, d); doc.objs.push(c); sel = doc.objs.length-1; commit();
+}
 function delSel(){ if(doc && sel>=0){ doc.objs.splice(sel,1); sel=-1; commit(); } }
 function rotSel(){ const o=doc&&doc.objs[sel]; if(o&&o.t==='sym'){ o.rot=((o.rot||0)+1)%4; commit(); } }
 ['showCov','showEl'].forEach(i=>$(i).onchange=redraw);
@@ -678,6 +687,7 @@ window.addEventListener('keydown', e=>{
   const k = e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey) && k==='z'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
   if((e.ctrlKey||e.metaKey) && k==='y'){ e.preventDefault(); redo(); return; }
+  if((e.ctrlKey||e.metaKey) && k==='d'){ e.preventDefault(); dupSel(); return; }
   if(e.ctrlKey||e.metaKey||e.altKey) return;
   if(k==='delete'||k==='backspace'){ if(sel>=0){ e.preventDefault(); delSel(); } }
   else if(k==='escape'){ cur=null; sel=-1; updateUi(); redraw(); }

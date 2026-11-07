@@ -76,7 +76,7 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 - `vykresy.html` – **editor výkresů** (samostatná stránka, vše v inline skriptu, bez Firebase):
   otevře PDF z `dokumentace/` (pdf.js z cdnjs → PNG ~4000 px) nebo vlastní PDF/obrázek/zálohu `.json`.
   Nedestruktivní objekty (`cover` zakrytí kót, `erase` guma, `line` vedení po kategoriích, `sym` značky
-  elektro (světla: stropní, bodovka, nástěnné, venkovní, LED pásek, ambientní = nepřímé, orientační = noční; `SYMS` v `vykresy.html`; výchozí velikost podle druhu = `SYMZ`, stropní světlo = 1), `text`, `blob` = „🎯 Smazat prvek“: klik → souvislá oblast pixelů stejné třídy barvy (šedá kóta × černá zeď), RLE v `runs`), výběr/posun, undo/redo, měřítko (kalibrace → délky vedení v m), soupis, export PNG
+  elektro (světla: stropní, bodovka, nástěnné, venkovní, LED pásek, ambientní = nepřímé, orientační = noční; `SYMS` v `vykresy.html`; výchozí velikost podle druhu = `SYMZ`, stropní světlo = 1), `text`, `blob` = „🎯 Smazat prvek“: klik → souvislá oblast pixelů stejné třídy barvy (šedá kóta × černá zeď), RLE v `runs`), výběr/posun, duplikace (⧉ tlačítko / Ctrl+⌘+D / ⌘ nebo Alt + tažení – kopie zachová otočení; `cloneObj`/`dupSel`), undo/redo, měřítko (kalibrace → délky vedení v m), soupis, export PNG
   s legendou, záloha `.json`, „📑 Uložit jako…“ (nová kopie, originál se nepřepisuje). Lokálně se ukládá do
   IndexedDB (`rdmodrice-vykresy`). „🌐 Sdílet do Dokumentace“ zapíše do Firestore: `vykresy/<id>` (name, ts, w, h, mm,
   symScale, `src` = slug PDF z `dokumentace/` nebo '', `objs` = JSON string, `thumb`), `vykresy_plne/<id>` (`img` = hotový
