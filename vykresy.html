@@ -116,6 +116,7 @@ dialog.ed-dlg::backdrop{ background:rgba(8,12,18,.55); }
     <button class="ed-b on" data-tool="select" title="Výběr a posun (V)">↖ Výběr</button>
     <button class="ed-b" data-tool="cover" title="Zakrýt obdélníkem – např. kótu (C)">⬜ Zakrýt</button>
     <button class="ed-b" data-tool="erase" title="Guma – malování bílou (E)">🧽 Guma</button>
+    <button class="ed-b" data-tool="smart" title="Klikni na čáru nebo číslo kóty – smaže se celý propojený prvek, např. řada kót (X)">🎯 Smazat prvek</button>
     <button class="ed-b" data-tool="cable" title="Kreslit vedení (L)">〰 Vedení</button>
     <button class="ed-b" data-tool="sym" title="Vkládat značky – světla, zásuvky… (S)">💡 Značky</button>
     <button class="ed-b" data-tool="text" title="Text (T)">🅣 Text</button>
@@ -163,6 +164,7 @@ dialog.ed-dlg::backdrop{ background:rgba(8,12,18,.55); }
         <h3>Zobrazení</h3>
         <div class="ed-row"><label><input type="checkbox" id="showCov" /> Zvýraznit zakrytá místa</label></div>
         <div class="ed-row"><label><input type="checkbox" id="showEl" checked /> Zobrazit elektro vrstvu</label></div>
+        <div class="ed-row" title="Jak daleko od sebe smí být čáry a čísla, aby se braly jako jeden prvek">Dosah propojení <input type="range" id="smartR" min="1" max="14" value="5" /></div>
         <div class="ed-row">Guma – síla <input type="range" id="erSize" min="10" max="120" value="40" /></div>
         <div class="ed-row"><label><input type="checkbox" id="legend" checked /> Legenda v exportu</label></div>
       </div>
@@ -288,6 +290,7 @@ function paint(){
   if(cur) drawObjs(ctx, [cur], {ui:true, showCov:$('showCov').checked, el:true, preview:true});
   // výběr
   if(sel >= 0 && doc.objs[sel]) drawSel(ctx, doc.objs[sel]);
+  if(tool==='smart' && previewBlob && !previewBlob.tooBig && !gesture) ctx.drawImage(blobCanvas(previewBlob,'p'), previewBlob.x, previewBlob.y);
   // duch značky
   if(tool==='sym' && hover && !gesture){ ctx.save(); ctx.globalAlpha=.55; drawSym(ctx,{t:'sym',k:symKind,x:hover.x,y:hover.y,rot:0}); ctx.restore(); }
 }
@@ -295,6 +298,7 @@ function drawObjs(c, objs, o){
   // 1. vrstva: zakrytí/guma (jen originální výkres), 2. vrstva: vše ostatní
   for(const ob of objs){
     if(ob.t==='cover'){ c.save(); if(o.showCov){ c.fillStyle='rgba(214,69,69,.4)'; c.fillRect(ob.x,ob.y,ob.w,ob.h); c.strokeStyle='#d64545'; c.lineWidth=1.5/view.z; c.setLineDash([6/view.z,4/view.z]); c.strokeRect(ob.x,ob.y,ob.w,ob.h);} else { c.fillStyle='#fff'; c.fillRect(ob.x,ob.y,ob.w,ob.h);} c.restore(); }
+    else if(ob.t==='blob'){ c.drawImage(blobCanvas(ob, o.showCov?'r':'w'), ob.x, ob.y); }
     else if(ob.t==='erase'){ c.save(); c.lineCap=c.lineJoin='round'; c.lineWidth=ob.size; c.strokeStyle=o.showCov?'rgba(214,69,69,.4)':'#fff'; strokePts(c,ob.pts); c.restore(); }
   }
   if(o.el===false) { return; }
@@ -329,7 +333,7 @@ function drawSel(c, ob){
   c.restore();
 }
 function bounds(ob){
-  if(ob.t==='cover') return {x:ob.x,y:ob.y,w:ob.w,h:ob.h};
+  if(ob.t==='cover'||ob.t==='blob') return {x:ob.x,y:ob.y,w:ob.w,h:ob.h};
   if(ob.t==='sym'){ const r=symR()*1.5; return {x:ob.x-r,y:ob.y-r,w:2*r,h:2*r}; }
   if(ob.t==='text') return textBox(ob);
   const pts = ob.pts; const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
@@ -343,6 +347,7 @@ function hit(p){
     if(o.t==='sym' && Math.hypot(p.x-o.x,p.y-o.y) <= symR()*1.5 + tol*.5) return i;
     if(o.t==='text'){ const b=textBox(o); if(p.x>=b.x-tol&&p.x<=b.x+b.w+tol&&p.y>=b.y-tol&&p.y<=b.y+b.h+tol) return i; }
     if(o.t==='cover' && p.x>=o.x&&p.x<=o.x+o.w&&p.y>=o.y&&p.y<=o.y+o.h) return i;
+    if(o.t==='blob' && blobHas(o,p.x,p.y)) return i;
     if(o.t==='erase' && polyDist(p,o.pts) <= o.size/2 + tol*.5) return i;
   }
   return -1;
@@ -350,6 +355,86 @@ function hit(p){
 function moveObj(o, dx, dy){
   if(o.pts) o.pts.forEach(p=>{p.x+=dx;p.y+=dy;});
   else { o.x+=dx; o.y+=dy; }
+}
+
+
+/* ---------- chytré smazání prvku (souvislá oblast tmavých pixelů) ---------- */
+let sm = null, previewBlob = null, smartMsg = '', smartT = 0, blobN = 0;
+const blobCv = new Map();
+function blobCanvas(o, mode){
+  const key = o.id + mode; let c = blobCv.get(key); if(c) return c;
+  c = document.createElement('canvas'); c.width = o.w; c.height = o.h; const x = c.getContext('2d');
+  x.fillStyle = {w:'#fff', r:'rgba(214,69,69,.5)', p:'rgba(245,158,11,.75)'}[mode];
+  for(let i = 0; i < o.runs.length; i += 3) x.fillRect(o.runs[i+1] - o.x, o.runs[i] - o.y, o.runs[i+2], 1);
+  blobCv.set(key, c); return c;
+}
+function blobHas(o, px, py){
+  const x = Math.round(px), y = Math.round(py); if(x<o.x||y<o.y||x>=o.x+o.w||y>=o.y+o.h) return false;
+  for(let i = 0; i < o.runs.length; i += 3) if(o.runs[i]===y && x>=o.runs[i+1] && x<o.runs[i+1]+o.runs[i+2]) return true;
+  return false;
+}
+function smartPrep(r){
+  if(sm && sm.r===r && sm.bg===bg) return sm;
+  const W = doc.w, H = doc.h, n = W*H;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d', {willReadFrequently:true}); x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.drawImage(bg,0,0,W,H);
+  const d = x.getImageData(0,0,W,H).data;
+  // třídy pixelů: 1 = černá (zdi, silné čáry), 2 = šedá (kóty, šrafy, jemné čáry), 3 = okraj černé (vyhlazení), 0 = bílá
+  const cls = new Uint8Array(n);
+  for(let i=0;i<n;i++){ const k=i*4, t=d[k]+d[k+1]+d[k+2]; cls[i] = t < 300 ? 1 : (t < 560 ? 2 : 0); }
+  for(let y=1;y<H-1;y++) for(let xx=1;xx<W-1;xx++){ const i=y*W+xx; if(cls[i]===2 && (cls[i-1]===1||cls[i+1]===1||cls[i-W]===1||cls[i+W]===1)) cls[i]=3; }
+  const dil = k => {
+    const h1 = new Uint8Array(n), m = new Uint8Array(n);
+    for(let y=0;y<H;y++){ const row=y*W; for(let xx=0;xx<W;xx++){ if(cls[row+xx]===k){ const a=Math.max(0,xx-r), b=Math.min(W-1,xx+r); for(let t=a;t<=b;t++) h1[row+t]=1; } } }
+    for(let y=0;y<H;y++) for(let xx=0;xx<W;xx++){ if(h1[y*W+xx]){ const a=Math.max(0,y-r), b=Math.min(H-1,y+r); for(let t=a;t<=b;t++) m[t*W+xx]=1; } }
+    return m;
+  };
+  sm = {r, bg, cls, m:[null, dil(1), dil(2)], stamp:new Uint32Array(n), st:0, q:new Int32Array(1500000)};
+  return sm;
+}
+function smartFill(p){
+  const s = smartPrep(+$('smartR').value), W = doc.w, H = doc.h, cls = s.cls, stamp = s.stamp, q = s.q;
+  const sx = Math.round(p.x), sy = Math.round(p.y), rad = Math.max(5, Math.round(10 / view.z));
+  let best = -1, bd = 1e12;
+  for(let y=Math.max(0,sy-rad); y<=Math.min(H-1,sy+rad); y++) for(let x=Math.max(0,sx-rad); x<=Math.min(W-1,sx+rad); x++){
+    const c = cls[y*W+x]; if(c===1 || c===2){ const dd=(x-sx)*(x-sx)+(y-sy)*(y-sy) + (c===1?4:0); if(dd<bd){ bd=dd; best=y*W+x; } }
+  }
+  if(best < 0) return null;
+  const k = cls[best], m = s.m[k];
+  const st = ++s.st; let qh = 0, qt = 0; q[qt++] = best; stamp[best] = st;
+  let x0=W, y0=H, x1=0, y1=0;
+  while(qh < qt){
+    const i = q[qh++], y = (i / W) | 0, x = i - y*W;
+    if(qt > q.length - 8) return {tooBig:true};
+    if(x>0   && m[i-1] && stamp[i-1]!==st){ stamp[i-1]=st; q[qt++]=i-1; }
+    if(x<W-1 && m[i+1] && stamp[i+1]!==st){ stamp[i+1]=st; q[qt++]=i+1; }
+    if(y>0   && m[i-W] && stamp[i-W]!==st){ stamp[i-W]=st; q[qt++]=i-W; }
+    if(y<H-1 && m[i+W] && stamp[i+W]!==st){ stamp[i+W]=st; q[qt++]=i+W; }
+  }
+  // při šedém prvku nikdy nemažeme černé pixely ani jejich okraj (zdi)
+  const keep = i => k===2 && (cls[i]===1 || cls[i]===3);
+  for(let j=0;j<qt;j++){ const i=q[j]; if(keep(i)) continue; const y=(i/W)|0, x=i-y*W; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+  const bw = x1-x0+1, bh = y1-y0+1;
+  if(bw > W*0.6 || bh > H*0.6) return {tooBig:true};
+  const runs = [];
+  for(let y=y0; y<=y1; y++){ let x = x0; while(x <= x1){ const i=y*W+x; if(stamp[i]===st && !keep(i)){ const a=x; while(x<=x1 && stamp[y*W+x]===st && !keep(y*W+x)) x++; runs.push(y,a,x-a); } else x++; } }
+  return {t:'blob', id:'b'+Date.now().toString(36)+(blobN++), x:x0, y:y0, w:bw, h:bh, runs, k};
+}
+function smartHover(){
+  const now = performance.now(); if(now - smartT < 60 || !hover) return; smartT = now;
+  if(previewBlob && previewBlob.id) blobCv.delete(previewBlob.id+'p');
+  previewBlob = smartFill(hover);
+  if(previewBlob && previewBlob.tooBig){ if(smartMsg!==TOOBIG){ smartMsg = TOOBIG; renderHint(); } }
+  else if(smartMsg){ smartMsg = ''; renderHint(); }
+  redraw();
+}
+const TOOBIG = 'Tohle je propojené s okolím (např. se zdí) – nejde smazat najednou. Zmenši „Dosah propojení“ nebo použij Zakrýt / Gumu.';
+function smartClick(p){
+  const b = smartFill(p);
+  if(!b){ smartMsg = 'Tady nic není – klikni přímo na čáru nebo číslo kóty.'; }
+  else if(b.tooBig){ smartMsg = TOOBIG; }
+  else { smartMsg = ''; doc.objs.push(b); previewBlob = null; sel = -1; commit(); return; }
+  previewBlob = null; updateUi();
 }
 
 /* ---------- historie ---------- */
@@ -383,13 +468,14 @@ function renderHint(){
   const T = {
     select:'Klikni na prvek pro výběr a tažením ho přesuň. Tažením prázdného místa posouváš výkres, kolečkem přibližuješ.',
     cover:'Tažením vytvoř obdélník, který zakryje kótu nebo prvek (bílá výplň). Zpět ho vrátí.',
+    smart:'Najeď na čáru nebo číslo kóty – oranžově se ukáže, co se smaže. Kliknutím to smažeš. Prvek je moc velký nebo se maže i zeď? Zmenši „Dosah propojení“.',
     erase:'Tažením „smazuješ“ bílou barvou – vhodné pro čáry, texty a kóty.',
     cable:cur?'Klikej body trasy. Dokonči dvojklikem, Enterem, nebo kliknutím na poslední bod.':'Klikni pro začátek vedení. Druh vedení vybereš vpravo.',
     sym:'Klikni, kam chceš umístit vybranou značku (vpravo). R = otočit.',
     text:'Klikni na místo, kam chceš napsat poznámku.',
     scale:cur&&cur.pts?'Klikni na druhý bod známé vzdálenosti.':'Klikni na první bod vzdálenosti, kterou znáš (např. kóta).'
   };
-  const s = document.createElement('span'); s.textContent = T[tool]; h.appendChild(s);
+  const s = document.createElement('span'); s.textContent = (tool==='smart' && smartMsg) ? smartMsg : T[tool]; h.appendChild(s);
   if(tool==='cable' && cur){
     const b = document.createElement('button'); b.className='ed-b on'; b.textContent='✓ Dokončit vedení'; b.onclick=finishCable; h.appendChild(b);
     const c2 = document.createElement('button'); c2.className='ed-b'; c2.textContent='✕ Zrušit'; c2.onclick=()=>{cur=null;updateUi();redraw();}; h.appendChild(c2);
@@ -425,7 +511,7 @@ function renderSum(){
     b.appendChild(cn); b.appendChild(document.createTextNode(SYMS[k].n));
     b.onclick=()=>{ symKind=k; setTool('sym'); }; sc.appendChild(b); }
 })();
-function setTool(t){ tool=t; cur=null; if(t!=='select') sel=-1; updateUi(); redraw(); cv.style.cursor = t==='select'?'default':'crosshair'; }
+function setTool(t){ tool=t; cur=null; previewBlob=null; smartMsg=''; if(t!=='select') sel=-1; updateUi(); redraw(); cv.style.cursor = t==='select'?'default':'crosshair'; }
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
 
 /* ---------- ukazatel ---------- */
@@ -469,6 +555,7 @@ cv.addEventListener('pointermove', e=>{
   hover = toWorld(s.x, s.y);
   if(pr){ pr.s = s; if(Math.hypot(s.x-pr.e0.x, s.y-pr.e0.y) > 6) pr.moved = true; }
   if(!doc) return;
+  if(tool==='smart' && !ptrs.size) smartHover();
   if(gesture && gesture.type==='pinch' && ptrs.size===2){
     const a=[...ptrs.values()]; const d=Math.hypot(a[0].s.x-a[1].s.x,a[0].s.y-a[1].s.y);
     const c={x:(a[0].s.x+a[1].s.x)/2,y:(a[0].s.y+a[1].s.y)/2};
@@ -478,7 +565,7 @@ cv.addEventListener('pointermove', e=>{
   }
   if(gesture && pr){
     if(gesture.type==='pan'){ view = {z:gesture.v0.z, x:gesture.v0.x + s.x - gesture.s0.x, y:gesture.v0.y + s.y - gesture.s0.y}; }
-    else if(gesture.type==='move' && pr.moved){ const o=doc.objs[sel]; moveObj(o, hover.x-gesture.last.x, hover.y-gesture.last.y); gesture.last=hover; gesture.did=true; }
+    else if(gesture.type==='move' && pr.moved){ const o=doc.objs[sel]; if(o.t!=='blob'){ moveObj(o, hover.x-gesture.last.x, hover.y-gesture.last.y); gesture.did=true; } gesture.last=hover; }
     else if(gesture.type==='resize'){ const o=gesture.o; o.w=Math.max(4,hover.x-o.x); o.h=Math.max(4,hover.y-o.y); gesture.did=true; }
     else if(gesture.type==='draw' && cur){
       if(cur.t==='cover'){ cur.x=Math.min(gesture.p0.x,hover.x); cur.y=Math.min(gesture.p0.y,hover.y); cur.w=Math.abs(hover.x-gesture.p0.x); cur.h=Math.abs(hover.y-gesture.p0.y); }
@@ -508,12 +595,13 @@ function endPtr(e){
 }
 cv.addEventListener('pointerup', endPtr);
 cv.addEventListener('pointercancel', endPtr);
-cv.addEventListener('pointerleave', ()=>{ if(!ptrs.size){ hover=null; redraw(); } });
+cv.addEventListener('pointerleave', ()=>{ if(!ptrs.size){ hover=null; previewBlob=null; redraw(); } });
 cv.addEventListener('dblclick', e=>{
   if(tool==='cable' && cur){ finishCable(); }
   else if(tool==='select' && sel>=0 && doc.objs[sel].t==='text'){ const o=doc.objs[sel]; const s=prompt('Upravit text:',o.s); if(s!==null&&s.trim()){ o.s=s.trim(); commit(); } }
 });
 function tapTool(p, scr){
+  if(tool==='smart'){ smartClick(p); return; }
   if(tool==='sym'){ doc.objs.push({t:'sym', k:symKind, x:p.x, y:p.y, rot:0}); sel=doc.objs.length-1; commit(); }
   else if(tool==='text'){
     const s = prompt('Text poznámky (např. „zásuvka nad linkou, 110 cm“):'); if(s && s.trim()){ doc.objs.push({t:'text', x:p.x, y:p.y, s:s.trim(), size:11*u(), color:'#1d4fc4'}); sel=doc.objs.length-1; commit(); }
@@ -574,7 +662,7 @@ window.addEventListener('keydown', e=>{
   else if(k==='escape'){ cur=null; sel=-1; updateUi(); redraw(); }
   else if(k==='enter'){ if(tool==='cable'&&cur) finishCable(); }
   else if(k==='r') rotSel();
-  else { const m={v:'select',c:'cover',e:'erase',l:'cable',s:'sym',t:'text',m:'scale'}; if(m[k]) setTool(m[k]); }
+  else { const m={x:'smart',v:'select',c:'cover',e:'erase',l:'cable',s:'sym',t:'text',m:'scale'}; if(m[k]) setTool(m[k]); }
 });
 window.addEventListener('keyup', e=>{ if(e.key==='Shift') shiftDown=false; if(e.code==='Space') spaceDown=false; });
 
@@ -644,6 +732,7 @@ async function openDoc(d, blob){
   bg = await loadImage(blob);
   doc = {id:d.id||newId(), name:d.name||'Výkres', w:bg.naturalWidth, h:bg.naturalHeight, mm:d.mm||null, symScale:d.symScale||1, objs:d.objs||[], bgBlob:blob};
   $('name').value = doc.name; $('symScale').value = Math.round(doc.symScale*100);
+  sm = null; blobCv.clear();
   hist = [snap()]; hi = 0; sel = -1; cur = null; setTool('select');
   fit(); updateUi(); scheduleSave();
 }

@@ -76,7 +76,7 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 - `vykresy.html` – **editor výkresů** (samostatná stránka, vše v inline skriptu, bez Firebase):
   otevře PDF z `dokumentace/` (pdf.js z cdnjs → PNG ~4000 px) nebo vlastní PDF/obrázek/zálohu `.json`.
   Nedestruktivní objekty (`cover` zakrytí kót, `erase` guma, `line` vedení po kategoriích, `sym` značky
-  elektro, `text`), výběr/posun, undo/redo, měřítko (kalibrace → délky vedení v m), soupis, export PNG
+  elektro, `text`, `blob` = „🎯 Smazat prvek“: klik → souvislá oblast pixelů stejné třídy barvy (šedá kóta × černá zeď), RLE v `runs`), výběr/posun, undo/redo, měřítko (kalibrace → délky vedení v m), soupis, export PNG
   s legendou, záloha `.json`. Ukládá se do IndexedDB (`rdmodrice-vykresy`) jen v prohlížeči uživatele.
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
   (`assets/board.js`).
