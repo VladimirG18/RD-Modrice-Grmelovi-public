@@ -36,7 +36,6 @@
     border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-weight:600; }
   .vlinks a:hover{ border-color:var(--accent); text-decoration:none; }
   .viewer iframe{ display:block; width:100%; height:min(80vh, 940px); border:0; background:#525659; }
-  .viewer #docImg{ display:none; width:100%; height:auto; max-height:min(80vh, 940px); object-fit:contain; background:#fff; }
   .doctab.shared{ border-style:dashed; }
   @media (max-width:560px){ .viewer iframe{ height:68vh; } .vlinks a span{ display:none; } }
 </style>
@@ -82,12 +81,12 @@
         <span class="vsub" id="docSub"></span>
       </div>
       <div class="vlinks">
+        <a id="docEdit" href="#" style="display:none">✎ <span>Upravit v editoru</span></a>
         <a id="docOpen" href="#" target="_blank" rel="noopener">↗ <span>Otevřít</span></a>
         <a id="docDownload" href="#" download>⬇ <span>Stáhnout</span></a>
       </div>
     </div>
     <iframe id="docFrame" title="Náhled dokumentu" src="about:blank"></iframe>
-    <img id="docImg" alt="Upravený výkres" />
   </div>
 
   <p class="note">Zdroj: projektová dokumentace (07/2023), koordinační situace (10/2024). Formát PDF.
@@ -117,10 +116,45 @@
   var elOpen = document.getElementById('docOpen');
   var elDown = document.getElementById('docDownload');
   var tabs   = [];
-  var img    = document.getElementById('docImg');
+  var elEdit = document.getElementById('docEdit');
+  var pdfUrl = null;
   var elOpenLbl = elOpen.querySelector('span');
   var cfgP = null;
   function cfg(){ return cfgP || (cfgP = import('./assets/firebase-config.js').then(function(m){ return m.firebaseConfig; })); }
+
+  // JPEG (data URL) -> jednostránkové PDF (A3 na šířku, stránka podle poměru stran obrázku)
+  function jpegToPdf(dataUrl){
+    return new Promise(function(res, rej){
+      var im = new Image();
+      im.onload = function(){
+        var iw = im.naturalWidth, ih = im.naturalHeight;
+        var bin = atob(dataUrl.split(',')[1]), jpg = new Uint8Array(bin.length);
+        for(var k=0;k<bin.length;k++) jpg[k] = bin.charCodeAt(k);
+        var W = 1190.55, H = Math.round(W * ih / iw * 100) / 100;
+        var enc = new TextEncoder(), parts = [], offs = [], len = 0;
+        function add(x){ var b = (typeof x === 'string') ? enc.encode(x) : x; parts.push(b); len += b.length; }
+        function obj(n, head, stream){
+          offs[n] = len; add(n + ' 0 obj\n' + head);
+          if(stream){ add('\nstream\n'); add(stream); add('\nendstream'); }
+          add('\nendobj\n');
+        }
+        add('%PDF-1.4\n');
+        obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+        obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+        obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
+        obj(4, '<< /Type /XObject /Subtype /Image /Width ' + iw + ' /Height ' + ih + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpg.length + ' >>', jpg);
+        var cs = 'q ' + W + ' 0 0 ' + H + ' 0 0 cm /Im0 Do Q';
+        obj(5, '<< /Length ' + cs.length + ' >>', enc.encode(cs));
+        var xr = len;
+        var t = 'xref\n0 6\n0000000000 65535 f \n';
+        for(var n=1;n<=5;n++) t += ('0000000000' + offs[n]).slice(-10) + ' 00000 n \n';
+        add(t + 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xr + '\n%%EOF');
+        res(new Blob(parts, {type:'application/pdf'}));
+      };
+      im.onerror = function(){ rej(new Error('obrázek')); };
+      im.src = dataUrl;
+    });
+  }
 
   function select(i){
     var d = DOCS[i];
@@ -129,23 +163,30 @@
     elS.textContent = d.sub;
     try{ history.replaceState(null, '', '#' + d.id); }catch(e){}
     if(d.shared){
-      // upravený výkres z editoru (obrázek) – stáhne se až po kliknutí
-      frame.style.display = 'none'; frame.src = 'about:blank';
-      img.style.display = 'block'; img.removeAttribute('src');
-      elOpenLbl.textContent = 'Upravit v editoru';
-      elOpen.href = 'vykresy.html?s=' + encodeURIComponent(d.sid); elOpen.removeAttribute('target');
-      elDown.href = '#'; elDown.removeAttribute('download');
+      // upravený výkres z editoru: z uloženého obrázku se tady sestaví PDF a zobrazí stejně jako ostatní
+      frame.src = 'about:blank';
+      elEdit.style.display = 'inline-flex'; elEdit.href = 'vykresy.html?s=' + encodeURIComponent(d.sid);
+      elOpenLbl.textContent = 'Otevřít'; elOpen.target = '_blank'; elOpen.removeAttribute('href');
+      elDown.removeAttribute('href'); elDown.removeAttribute('download');
       cfg().then(function(c){
         return fetch('https://firestore.googleapis.com/v1/projects/'+c.projectId+'/databases/(default)/documents/vykresy_plne/'+encodeURIComponent(d.sid)+'?key='+c.apiKey+'&mask.fieldPaths=img');
       }).then(function(r){ return r.json(); }).then(function(j){
         var u = j && j.fields && j.fields.img && j.fields.img.stringValue;
         if(tabs[i].getAttribute('aria-selected') !== 'true') return;
-        if(u){ img.src = u; elDown.href = u; elDown.setAttribute('download', (d.title||'vykres').replace(/[^\w\u00C0-\u017F-]+/g,'_') + '.jpg'); }
-        else elS.textContent = 'Výkres se nepodařilo načíst.';
+        if(!u) throw new Error('bez obrázku');
+        return jpegToPdf(u).then(function(blob){
+          if(tabs[i].getAttribute('aria-selected') !== 'true') return;
+          if(pdfUrl) URL.revokeObjectURL(pdfUrl);
+          pdfUrl = URL.createObjectURL(blob);
+          elOpen.href = pdfUrl; elDown.href = pdfUrl;
+          elDown.setAttribute('download', (d.title||'vykres').replace(/[^\w\u00C0-\u017F-]+/g,'_') + '.pdf');
+          frame.src = pdfUrl + '#view=Fit&toolbar=1';
+        });
       }).catch(function(){ elS.textContent = 'Výkres se nepodařilo načíst.'; });
       return;
     }
-    img.style.display = 'none'; frame.style.display = 'block';
+    elEdit.style.display = 'none';
+    frame.style.display = 'block';
     elOpenLbl.textContent = 'Otevřít'; elOpen.target = '_blank';
     elOpen.href = d.file;
     elDown.href = d.file;
