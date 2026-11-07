@@ -901,10 +901,21 @@ async function loadSharedList(){
       it.innerHTML = `<img alt="" src="${esc(d.thumb)}"><div class="t"></div>`;
       it.querySelector('.t').innerHTML = `${esc(d.name)}<small>${new Date(d.ts).toLocaleString('cs-CZ')}</small>`;
       const o = document.createElement('button'); o.className='ed-b on'; o.textContent='Otevřít'; o.onclick=()=>openShared(d.id);
+      const rn = document.createElement('button'); rn.className='ed-b'; rn.textContent='✏️'; rn.title='Přejmenovat ve sdílené Dokumentaci';
+      rn.onclick = async()=>{
+        const n = prompt('Nový název výkresu:', d.name); if(n===null) return; const nn = n.trim(); if(!nn || nn===d.name) return;
+        try{
+          const cfg = (await import('./assets/firebase-config.js')).firebaseConfig;
+          const r = await fetch(`https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/vykresy/${encodeURIComponent(d.id)}?key=${cfg.apiKey}&updateMask.fieldPaths=name`, {method:'PATCH', headers:{'content-type':'application/json'}, body:JSON.stringify({fields:{name:{stringValue:nn}}})});
+          if(!r.ok) throw new Error('HTTP '+r.status);
+          if(doc && doc.id===d.id){ doc.name = nn; $('name').value = nn; scheduleSave(); }
+        }catch(e){ alert('Přejmenování se nepovedlo: '+e.message); }
+        loadSharedList();
+      };
       const x = document.createElement('button'); x.className='ed-b danger'; x.textContent='🗑'; x.title='Odebrat z Dokumentace';
       x.onclick = async()=>{ if(!confirm(`Odebrat „${d.name}“ ze sdílené Dokumentace pro všechny? (Tvoje lokální kopie zůstane.)`)) return;
         try{ const {F,db} = await fire(); for(const c of ['vykresy','vykresy_plne','vykresy_bg']) await F.deleteDoc(F.doc(db,c,d.id)); if(doc&&doc.id===d.id){ doc.shared=false; scheduleSave(); } }catch(e){ alert('Nepovedlo se: '+e.message); } loadSharedList(); };
-      it.appendChild(o); it.appendChild(x); sl.appendChild(it);
+      it.appendChild(o); it.appendChild(rn); it.appendChild(x); sl.appendChild(it);
     });
   }catch(e){ sl.innerHTML = '<p class="ed-small" style="margin:0">Sdílené výkresy se nepodařilo načíst (' + esc(e.message) + ').</p>'; }
 }
