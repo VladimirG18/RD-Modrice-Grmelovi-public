@@ -35,6 +35,7 @@
   .vlinks a{ display:inline-flex; align-items:center; gap:6px; font-size:.82rem; padding:7px 12px;
     border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-weight:600; }
   .vlinks a:hover{ border-color:var(--accent); text-decoration:none; }
+  .vlinks a.danger:hover{ border-color:var(--danger); color:var(--danger); }
   .viewer iframe{ display:block; width:100%; height:min(80vh, 940px); border:0; background:#525659; }
   .doctab.shared{ border-style:dashed; }
   .zoomer{ display:none; position:relative; width:100%; height:min(80vh, 940px); background:#525659; overflow:hidden;
@@ -91,6 +92,7 @@
         <span class="vsub" id="docSub"></span>
       </div>
       <div class="vlinks">
+        <a id="docDelete" class="danger" href="#" style="display:none" title="Smazat tento upravený výkres z Dokumentace (původní výkresy to neovlivní)">🗑 <span>Smazat</span></a>
         <a id="docEdit" href="#" style="display:none">✎ <span>Upravit v editoru</span></a>
         <a id="docOpen" href="#" target="_blank" rel="noopener">↗ <span>Otevřít</span></a>
         <a id="docDownload" href="#" download>⬇ <span>Stáhnout</span></a>
@@ -180,6 +182,22 @@
   document.addEventListener('fullscreenchange', function(){ if(zoomer.style.display === 'block') setTimeout(zFit, 50); });
   window.addEventListener('resize', function(){ if(zoomer.style.display === 'block' && zImg.naturalWidth) zFit(); });
   var pdfUrl = null;
+  var elDel = document.getElementById('docDelete'), curShared = null;
+  elDel.addEventListener('click', function(ev){
+    ev.preventDefault();
+    if(!curShared) return;
+    var sh = curShared;
+    if(!confirm('Opravdu smazat upravený výkres „' + sh.d.title + '“ z Dokumentace pro všechny?\n\nPůvodní výkresy z projektu to neovlivní. Kopie, kterou má někdo rozdělanou v editoru u sebe, zůstane jen tam.')) return;
+    cfg().then(function(c){
+      var base = 'https://firestore.googleapis.com/v1/projects/'+c.projectId+'/databases/(default)/documents/';
+      return Promise.all(['vykresy','vykresy_plne','vykresy_bg'].map(function(col){
+        return fetch(base + col + '/' + encodeURIComponent(sh.d.sid) + '?key=' + c.apiKey, { method:'DELETE' });
+      }));
+    }).then(function(){
+      tabs[sh.i].style.display = 'none'; sh.d.deleted = true;
+      select(0);
+    }).catch(function(){ alert('Smazání se nepovedlo – zkus to prosím znovu.'); });
+  });
   var elOpenLbl = elOpen.querySelector('span');
   var cfgP = null;
   function cfg(){ return cfgP || (cfgP = import('./assets/firebase-config.js').then(function(m){ return m.firebaseConfig; })); }
@@ -229,6 +247,7 @@
       frame.src = 'about:blank'; frame.style.display = 'none'; zoomer.style.display = 'block';
       zImg.style.display = 'none'; zMsg.style.display = 'block'; zMsg.textContent = 'Načítám výkres…';
       elEdit.style.display = 'inline-flex'; elEdit.href = 'vykresy.html?s=' + encodeURIComponent(d.sid);
+      elDel.style.display = 'inline-flex'; curShared = { i:i, d:d };
       elOpenLbl.textContent = 'Otevřít'; elOpen.target = '_blank'; elOpen.removeAttribute('href');
       elDown.removeAttribute('href'); elDown.removeAttribute('download');
       cfg().then(function(c){
@@ -250,7 +269,7 @@
       return;
     }
     zoomer.style.display = 'none';
-    elEdit.style.display = 'none';
+    elEdit.style.display = 'none'; elDel.style.display = 'none'; curShared = null;
     frame.style.display = 'block';
     elOpenLbl.textContent = 'Otevřít'; elOpen.target = '_blank';
     elOpen.href = d.file;
