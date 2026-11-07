@@ -73,6 +73,11 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   ručně i změnit v úpravách. Nad výpisem jsou filtry podle fáze (odkaz `fotky-stavby.html?faze=<id>`
   otevře rovnou konkrétní fázi) a u starších fotek bez fáze tlačítko na hromadné doplnění podle data.
   Zmenšování obrázků je sdílené s nástěnkami (`compressFile`/`compressForInline` z `board.js`).
+- `vykresy.html` – **editor výkresů** (samostatná stránka, vše v inline skriptu, bez Firebase):
+  otevře PDF z `dokumentace/` (pdf.js z cdnjs → PNG ~4000 px) nebo vlastní PDF/obrázek/zálohu `.json`.
+  Nedestruktivní objekty (`cover` zakrytí kót, `erase` guma, `line` vedení po kategoriích, `sym` značky
+  elektro, `text`), výběr/posun, undo/redo, měřítko (kalibrace → délky vedení v m), soupis, export PNG
+  s legendou, záloha `.json`. Ukládá se do IndexedDB (`rdmodrice-vykresy`) jen v prohlížeči uživatele.
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
   (`assets/board.js`).
 - `poznamky.html` – sdílené poznámky.
