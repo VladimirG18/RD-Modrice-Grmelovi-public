@@ -81,7 +81,8 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   IndexedDB (`rdmodrice-vykresy`). „🌐 Sdílet do Dokumentace“ zapíše do Firestore: `vykresy/<id>` (name, ts, w, h, mm,
   symScale, `src` = slug PDF z `dokumentace/` nebo '', `objs` = JSON string, `thumb`), `vykresy_plne/<id>` (`img` = hotový
   JPEG s legendou, ~850 kB max) a `vykresy_bg/<id>` (`bg` jen pro nahrané výkresy bez `src`). `dokumentace.html` je přes REST
-  (`mask.fieldPaths`) přidá jako čárkované záložky; `vykresy.html?s=<id>` je otevře k úpravám.
+  (`mask.fieldPaths`) přidá jako čárkované záložky (zobrazení = vlastní zoom prohlížeč `#docZoom` nad `img`; PDF se skládá
+  v prohlížeči `jpegToPdf` jen pro Otevřít/Stáhnout – blob PDF ve vloženém iframe některé prohlížeče nezobrazí); `vykresy.html?s=<id>` je otevře k úpravám.
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
   (`assets/board.js`).
 - `poznamky.html` – sdílené poznámky.
