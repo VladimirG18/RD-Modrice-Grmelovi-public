@@ -128,8 +128,12 @@ dialog.ed-dlg::backdrop{ background:rgba(8,12,18,.55); }
     <button class="ed-b danger" id="bDel" title="Smazat vybrané (Del)">🗑 Smazat</button>
     <span class="sep"></span>
     <button class="ed-b" id="bPng" title="Stáhnout hotový výkres jako obrázek">⬇ PNG</button>
+    <button class="ed-b" id="bSaveAs" title="Uloží upravený výkres jako novou kopii – originál zůstane beze změny">📑 Uložit jako…</button>
+    <button class="ed-b on" id="bShare" title="Zveřejní výkres rodině v Dokumentaci">🌐 Sdílet do Dokumentace</button>
     <button class="ed-b" id="bJson" title="Zálohovat do souboru, který lze poslat dál a znovu otevřít">💾 Záloha</button>
   </div>
+
+  <p class="ed-small" id="status" style="min-height:1.2em;margin:-4px 0 8px"></p>
 
   <div class="ed-main">
     <div class="ed-stage" id="stage">
@@ -189,6 +193,8 @@ dialog.ed-dlg::backdrop{ background:rgba(8,12,18,.55); }
     <h4>Vlastní soubor (PDF, JPG, PNG)</h4>
     <input type="file" id="fFile" accept="application/pdf,image/*,.json" />
     <p class="ed-small">Půdorys z PDF se převede na obrázek – kóty tedy nejdou smazat, ale zakrýt (nedestruktivně, vrátíš to Zpět). Soubor zálohy (.json) otevře rozpracovaný výkres.</p>
+    <h4>Sdílené výkresy rodiny (z Dokumentace)</h4>
+    <div class="ed-list" id="dShared"></div>
     <h4>Moje rozpracované výkresy</h4>
     <div class="ed-list" id="dSaved"></div>
   </div>
@@ -456,7 +462,7 @@ function updateUi(){
   $('bRedo').disabled = !doc || hi >= hist.length - 1;
   const o = doc && doc.objs[sel];
   $('bDel').disabled = !o; $('bRot').disabled = !(o && o.t==='sym');
-  ['bPng','bJson'].forEach(i=>$(i).disabled = !doc);
+  ['bPng','bJson','bSaveAs','bShare'].forEach(i=>$(i).disabled = !doc);
   document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('on', b.dataset.tool===tool));
   document.querySelectorAll('.ed-cat').forEach(b=>b.classList.toggle('on', b.dataset.cat===cat));
   document.querySelectorAll('.ed-sym').forEach(b=>b.classList.toggle('on', b.dataset.k===symKind && tool==='sym'));
@@ -695,7 +701,7 @@ function download(blob, fn){ const a=document.createElement('a'); a.href=URL.cre
 const safe = s => (s||'vykres').replace(/[^\p{L}\p{N}_-]+/gu,'_').replace(/^_+|_+$/g,'') || 'vykres';
 $('bPng').onclick = ()=> renderExport().toBlob(b=>download(b, safe(doc.name)+'.png'), 'image/png');
 $('bJson').onclick = async ()=>{
-  const data = {format:'rdmodrice-vykres', v:1, name:doc.name, w:doc.w, h:doc.h, mm:doc.mm, symScale:doc.symScale, objs:doc.objs, bg: await blobToDataURL(doc.bgBlob)};
+  const data = {format:'rdmodrice-vykres', v:1, name:doc.name, src:doc.src, w:doc.w, h:doc.h, mm:doc.mm, symScale:doc.symScale, objs:doc.objs, bg: await blobToDataURL(doc.bgBlob)};
   download(new Blob([JSON.stringify(data)],{type:'application/json'}), safe(doc.name)+'.rdvykres.json');
 };
 const blobToDataURL = b => new Promise(r=>{ const f=new FileReader(); f.onload=()=>r(f.result); f.readAsDataURL(b); });
@@ -719,7 +725,7 @@ async function save(){
     const t = document.createElement('canvas'); const k = 220/Math.max(doc.w,doc.h); t.width=Math.round(doc.w*k); t.height=Math.round(doc.h*k);
     const x = t.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,t.width,t.height); x.drawImage(bg,0,0,t.width,t.height); x.scale(k,k); const sv=view; view={x:0,y:0,z:1}; drawObjs(x,doc.objs,{ui:false,showCov:false,el:true}); view=sv;
     doc.updated = Date.now();
-    await dbDo('readwrite', s=>s.put({id:doc.id,name:doc.name,w:doc.w,h:doc.h,mm:doc.mm,symScale:doc.symScale,objs:doc.objs,bgBlob:doc.bgBlob,updated:doc.updated,thumb:t.toDataURL('image/jpeg',.7)}));
+    await dbDo('readwrite', s=>s.put({id:doc.id,name:doc.name,w:doc.w,h:doc.h,mm:doc.mm,symScale:doc.symScale,objs:doc.objs,bgBlob:doc.bgBlob,src:doc.src,shared:doc.shared,updated:doc.updated,thumb:t.toDataURL('image/jpeg',.7)}));
     try{ localStorage.setItem('rdmodrice-vykres-last', doc.id); }catch(e){}
   }catch(e){ if(!saveWarned){ saveWarned = true; alert('Výkres se nepodařilo uložit v prohlížeči (možná soukromé okno). Použij „💾 Záloha“, ať o práci nepřijdeš.'); } }
 }
@@ -730,7 +736,7 @@ function newId(){ return 'v' + Date.now().toString(36) + Math.random().toString(
 function loadImage(blob){ return new Promise((res,rej)=>{ const url=URL.createObjectURL(blob); const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('Obrázek nejde načíst')); im.src=url; }); }
 async function openDoc(d, blob){
   bg = await loadImage(blob);
-  doc = {id:d.id||newId(), name:d.name||'Výkres', w:bg.naturalWidth, h:bg.naturalHeight, mm:d.mm||null, symScale:d.symScale||1, objs:d.objs||[], bgBlob:blob};
+  doc = {id:d.id||newId(), name:d.name||'Výkres', w:d.w||bg.naturalWidth, h:d.h||bg.naturalHeight, mm:d.mm||null, symScale:d.symScale||1, objs:d.objs||[], bgBlob:blob, src:d.src||null, shared:!!d.shared};
   $('name').value = doc.name; $('symScale').value = Math.round(doc.symScale*100);
   sm = null; blobCv.clear();
   hist = [snap()]; hi = 0; sel = -1; cur = null; setTool('select');
@@ -762,7 +768,7 @@ async function openProject(slug, label){
   try{
     const r = await fetch(`dokumentace/${slug}.pdf`); if(!r.ok) throw new Error('Soubor se nepodařilo stáhnout');
     const blob = await pdfToBlob(await r.arrayBuffer(), 1);
-    await openDoc({name:label}, blob);
+    await openDoc({name:label, src:slug}, blob);
   }catch(e){ alert('Chyba: ' + e.message); restoreEmpty(); }
 }
 function restoreEmpty(){ $('empty').innerHTML = '<b>Zatím není otevřený žádný výkres</b><span>Vyber půdorys z projektové dokumentace nebo nahraj vlastní PDF / foto.</span><button class="ed-b on" id="bOpen2">📂 Otevřít výkres</button>'; $('bOpen2').onclick=openDlg; updateUi(); }
@@ -801,15 +807,114 @@ async function openDlg(){
       it.appendChild(o); it.appendChild(x); sl.appendChild(it); });
   }catch(e){ sl.innerHTML='<p class="ed-small" style="margin:0">Ukládání v prohlížeči není dostupné.</p>'; }
   if(!$('dlg').open) $('dlg').showModal();
+  loadSharedList();
 }
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 $('bOpen').onclick = openDlg; $('bOpen2').onclick = openDlg;
 $('dClose').onclick = ()=>$('dlg').close();
 
+/* ---------- uložit jako / sdílení ---------- */
+let stT = 0;
+function setStatus(m, ok){ const e=$('status'); e.textContent=m||''; e.style.color = ok===false?'var(--danger)':(ok?'var(--ok)':''); clearTimeout(stT); if(m && ok!==undefined) stT=setTimeout(()=>e.textContent='',9000); }
+async function saveAs(){
+  if(!doc) return;
+  const n = prompt('Název nové kopie výkresu:', doc.name.replace(/ – kopie$/,'') + ' – kopie');
+  if(!n || !n.trim()) return;
+  await save();                                   // původní zůstane uložený pod svým jménem
+  doc.id = newId(); doc.name = n.trim(); doc.shared = false; $('name').value = doc.name;
+  await save();
+  setStatus(`Uloženo jako nová kopie „${doc.name}“. Původní výkres zůstal beze změny.`, true);
+}
+$('bSaveAs').onclick = saveAs;
+let fb = null;
+async function fire(){
+  if(fb) return fb;
+  const cfg = (await import('./assets/firebase-config.js')).firebaseConfig;
+  if(!cfg.apiKey) throw new Error('Sdílená databáze není nastavená.');
+  const A = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+  const F = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+  fb = {F, db:F.getFirestore(A.initializeApp(cfg)), cfg}; return fb;
+}
+function toBlobP(c, q){ return new Promise(r=>c.toBlob(r,'image/jpeg',q)); }
+// JPEG data URL pod limitem – postupně snižuje kvalitu a pak velikost
+async function jpegUnder(src, max){
+  let c = document.createElement('canvas'); c.width = src.width; c.height = src.height;
+  let x = c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(src,0,0,c.width,c.height);
+  for(let k=0;k<8;k++){
+    for(const q of [.88,.78,.68,.58]){ const u2 = c.toDataURL('image/jpeg', q); if(u2.length <= max) return u2; }
+    const n = document.createElement('canvas'); n.width = Math.round(c.width*.8); n.height = Math.round(c.height*.8);
+    n.getContext('2d').drawImage(c,0,0,n.width,n.height); c = n;
+  }
+  throw new Error('Obrázek se nepodařilo dostatečně zmenšit');
+}
+async function share(){
+  if(!doc) return;
+  if(doc.shared && !confirm(`Výkres „${doc.name}“ už je ve sdílené Dokumentaci. Přepsat ho touto verzí?\n(Chceš-li ponechat obě verze, dej Zrušit a nejdřív použij „Uložit jako…“.)`)) return;
+  const btn = $('bShare'); btn.disabled = true; setStatus('Odesílám do Dokumentace…');
+  try{
+    const {F, db} = await fire();
+    const objs = JSON.stringify(doc.objs);
+    if(objs.length > 900000) throw new Error('Výkres obsahuje příliš mnoho úprav (smazané prvky). Zkus pár zakrýt obdélníkem místo „Smazat prvek“.');
+    const out = renderExport();
+    const img = await jpegUnder(out, 850000);
+    const tc = document.createElement('canvas'); const k = 360/Math.max(doc.w,doc.h); tc.width = Math.round(doc.w*k); tc.height = Math.round(doc.h*k);
+    const tx = tc.getContext('2d'); tx.fillStyle='#fff'; tx.fillRect(0,0,tc.width,tc.height); tx.drawImage(out,0,0,tc.width,tc.height);
+    const thumb = tc.toDataURL('image/jpeg', .7);
+    if(!doc.src){ const bgU = await jpegUnder(bg, 850000); await F.setDoc(F.doc(db,'vykresy_bg',doc.id), {bg:bgU}); }
+    await F.setDoc(F.doc(db,'vykresy_plne',doc.id), {img});
+    await F.setDoc(F.doc(db,'vykresy',doc.id), {name:doc.name, ts:Date.now(), w:doc.w, h:doc.h, mm:doc.mm||0, symScale:doc.symScale, src:doc.src||'', objs, thumb});
+    doc.shared = true; await save();
+    setStatus(`Hotovo – „${doc.name}“ je teď v Dokumentaci jako další výkres.`, true);
+  }catch(e){ setStatus('Sdílení se nepovedlo: ' + e.message, false); }
+  btn.disabled = false;
+}
+$('bShare').onclick = share;
+// seznam sdílených výkresů přes REST (jen potřebná pole, ať se netahají objs ani obrázky)
+function fsVal(v){ if(!v) return ''; return v.stringValue!==undefined ? v.stringValue : (v.integerValue!==undefined ? +v.integerValue : (v.doubleValue!==undefined ? v.doubleValue : '')); }
+async function fsList(){
+  const cfg = (await import('./assets/firebase-config.js')).firebaseConfig;
+  if(!cfg.apiKey) throw new Error('Databáze není nastavená');
+  const u = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/vykresy?key=${cfg.apiKey}&pageSize=100&mask.fieldPaths=name&mask.fieldPaths=ts&mask.fieldPaths=thumb`;
+  const r = await fetch(u); if(!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  return (j.documents||[]).map(d=>({id:d.name.split('/').pop(), name:fsVal(d.fields.name), ts:fsVal(d.fields.ts), thumb:fsVal(d.fields.thumb)})).sort((a,b)=>b.ts-a.ts);
+}
+async function loadSharedList(){
+  const sl = $('dShared'); sl.innerHTML = '<p class="ed-small">Načítám…</p>';
+  try{
+    const all = await fsList(); sl.innerHTML = '';
+    if(!all.length) sl.innerHTML = '<p class="ed-small" style="margin:0">Zatím nikdo nic nesdílel.</p>';
+    all.forEach(d=>{
+      const it = document.createElement('div'); it.className='ed-item';
+      it.innerHTML = `<img alt="" src="${esc(d.thumb)}"><div class="t"></div>`;
+      it.querySelector('.t').innerHTML = `${esc(d.name)}<small>${new Date(d.ts).toLocaleString('cs-CZ')}</small>`;
+      const o = document.createElement('button'); o.className='ed-b on'; o.textContent='Otevřít'; o.onclick=()=>openShared(d.id);
+      const x = document.createElement('button'); x.className='ed-b danger'; x.textContent='🗑'; x.title='Odebrat z Dokumentace';
+      x.onclick = async()=>{ if(!confirm(`Odebrat „${d.name}“ ze sdílené Dokumentace pro všechny? (Tvoje lokální kopie zůstane.)`)) return;
+        try{ const {F,db} = await fire(); for(const c of ['vykresy','vykresy_plne','vykresy_bg']) await F.deleteDoc(F.doc(db,c,d.id)); if(doc&&doc.id===d.id){ doc.shared=false; scheduleSave(); } }catch(e){ alert('Nepovedlo se: '+e.message); } loadSharedList(); };
+      it.appendChild(o); it.appendChild(x); sl.appendChild(it);
+    });
+  }catch(e){ sl.innerHTML = '<p class="ed-small" style="margin:0">Sdílené výkresy se nepodařilo načíst (' + esc(e.message) + ').</p>'; }
+}
+async function openShared(id){
+  if($('dlg').open) $('dlg').close(); busy('Otevírám sdílený výkres…');
+  try{
+    const {F, db} = await fire();
+    const snap = await F.getDoc(F.doc(db,'vykresy',id)); if(!snap.exists()) throw new Error('Výkres už ve sdílené Dokumentaci není.');
+    const d = snap.data();
+    let blob;
+    if(d.src){ const r = await fetch(`dokumentace/${d.src}.pdf`); if(!r.ok) throw new Error('Původní PDF se nepodařilo stáhnout'); blob = await pdfToBlob(await r.arrayBuffer(), 1); }
+    else { const b = await F.getDoc(F.doc(db,'vykresy_bg',id)); if(!b.exists()) throw new Error('Chybí podkladový obrázek'); blob = await dataURLToBlob(b.data().bg); }
+    try{ const loc = await dbDo('readonly', s=>s.get(id)); if(loc && loc.updated > d.ts && !confirm('V tomto prohlížeči máš novější neodeslanou verzi tohoto výkresu. Otevřít sdílenou verzi a přepsat ji?')){ return openSaved(id); } }catch(e){}
+    await openDoc({id, name:d.name, w:d.w, h:d.h, mm:d.mm||null, symScale:d.symScale, objs:JSON.parse(d.objs), src:d.src||null, shared:true}, blob);
+  }catch(e){ alert('Chyba: ' + e.message); restoreEmpty(); }
+}
+
 /* ---------- start ---------- */
 sizeCanvas(); updateUi();
 const q = new URLSearchParams(location.search);
-if(q.get('v')){ const hit = PROJECT.find(p=>p[0]===q.get('v')); if(hit) openProject(hit[0], hit[1]); }
+if(q.get('s')){ openShared(q.get('s')); }
+else if(q.get('v')){ const hit = PROJECT.find(p=>p[0]===q.get('v')); if(hit) openProject(hit[0], hit[1]); }
 else { let last = null; try{ last = localStorage.getItem('rdmodrice-vykres-last'); }catch(e){} if(last) openSaved(last).catch(()=>{}); }
 window.__ed = {get doc(){return doc;}, get view(){return view;}};   // pro testy
 })();

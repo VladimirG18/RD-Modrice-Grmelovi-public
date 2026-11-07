@@ -77,7 +77,11 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   otevře PDF z `dokumentace/` (pdf.js z cdnjs → PNG ~4000 px) nebo vlastní PDF/obrázek/zálohu `.json`.
   Nedestruktivní objekty (`cover` zakrytí kót, `erase` guma, `line` vedení po kategoriích, `sym` značky
   elektro, `text`, `blob` = „🎯 Smazat prvek“: klik → souvislá oblast pixelů stejné třídy barvy (šedá kóta × černá zeď), RLE v `runs`), výběr/posun, undo/redo, měřítko (kalibrace → délky vedení v m), soupis, export PNG
-  s legendou, záloha `.json`. Ukládá se do IndexedDB (`rdmodrice-vykresy`) jen v prohlížeči uživatele.
+  s legendou, záloha `.json`, „📑 Uložit jako…“ (nová kopie, originál se nepřepisuje). Lokálně se ukládá do
+  IndexedDB (`rdmodrice-vykresy`). „🌐 Sdílet do Dokumentace“ zapíše do Firestore: `vykresy/<id>` (name, ts, w, h, mm,
+  symScale, `src` = slug PDF z `dokumentace/` nebo '', `objs` = JSON string, `thumb`), `vykresy_plne/<id>` (`img` = hotový
+  JPEG s legendou, ~850 kB max) a `vykresy_bg/<id>` (`bg` jen pro nahrané výkresy bez `src`). `dokumentace.html` je přes REST
+  (`mask.fieldPaths`) přidá jako čárkované záložky; `vykresy.html?s=<id>` je otevře k úpravám.
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
   (`assets/board.js`).
 - `poznamky.html` – sdílené poznámky.

@@ -36,6 +36,8 @@
     border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-weight:600; }
   .vlinks a:hover{ border-color:var(--accent); text-decoration:none; }
   .viewer iframe{ display:block; width:100%; height:min(80vh, 940px); border:0; background:#525659; }
+  .viewer #docImg{ display:none; width:100%; height:auto; max-height:min(80vh, 940px); object-fit:contain; background:#fff; }
+  .doctab.shared{ border-style:dashed; }
   @media (max-width:560px){ .viewer iframe{ height:68vh; } .vlinks a span{ display:none; } }
 </style>
 </head>
@@ -85,6 +87,7 @@
       </div>
     </div>
     <iframe id="docFrame" title="Náhled dokumentu" src="about:blank"></iframe>
+    <img id="docImg" alt="Upravený výkres" />
   </div>
 
   <p class="note">Zdroj: projektová dokumentace (07/2023), koordinační situace (10/2024). Formát PDF.
@@ -114,18 +117,54 @@
   var elOpen = document.getElementById('docOpen');
   var elDown = document.getElementById('docDownload');
   var tabs   = [];
+  var img    = document.getElementById('docImg');
+  var elOpenLbl = elOpen.querySelector('span');
+  var cfgP = null;
+  function cfg(){ return cfgP || (cfgP = import('./assets/firebase-config.js').then(function(m){ return m.firebaseConfig; })); }
 
   function select(i){
     var d = DOCS[i];
     tabs.forEach(function(t,j){ t.setAttribute('aria-selected', String(j===i)); });
     elT.textContent = d.title;
     elS.textContent = d.sub;
+    try{ history.replaceState(null, '', '#' + d.id); }catch(e){}
+    if(d.shared){
+      // upravený výkres z editoru (obrázek) – stáhne se až po kliknutí
+      frame.style.display = 'none'; frame.src = 'about:blank';
+      img.style.display = 'block'; img.removeAttribute('src');
+      elOpenLbl.textContent = 'Upravit v editoru';
+      elOpen.href = 'vykresy.html?s=' + encodeURIComponent(d.sid); elOpen.removeAttribute('target');
+      elDown.href = '#'; elDown.removeAttribute('download');
+      cfg().then(function(c){
+        return fetch('https://firestore.googleapis.com/v1/projects/'+c.projectId+'/databases/(default)/documents/vykresy_plne/'+encodeURIComponent(d.sid)+'?key='+c.apiKey+'&mask.fieldPaths=img');
+      }).then(function(r){ return r.json(); }).then(function(j){
+        var u = j && j.fields && j.fields.img && j.fields.img.stringValue;
+        if(tabs[i].getAttribute('aria-selected') !== 'true') return;
+        if(u){ img.src = u; elDown.href = u; elDown.setAttribute('download', (d.title||'vykres').replace(/[^\w\u00C0-\u017F-]+/g,'_') + '.jpg'); }
+        else elS.textContent = 'Výkres se nepodařilo načíst.';
+      }).catch(function(){ elS.textContent = 'Výkres se nepodařilo načíst.'; });
+      return;
+    }
+    img.style.display = 'none'; frame.style.display = 'block';
+    elOpenLbl.textContent = 'Otevřít'; elOpen.target = '_blank';
     elOpen.href = d.file;
     elDown.href = d.file;
     elDown.setAttribute('download', d.file.split('/').pop());
     // #view=Fit pomůže vejít stránku na výšku prohlížeče
     frame.src = d.file + '#view=Fit&toolbar=1';
-    try{ history.replaceState(null, '', '#' + d.id); }catch(e){}
+  }
+
+  function addTab(d){
+    var i = DOCS.push(d) - 1;
+    var b = document.createElement('button');
+    b.className = 'doctab' + (d.shared ? ' shared' : ''); b.type = 'button'; b.setAttribute('role','tab');
+    b.setAttribute('aria-selected','false');
+    b.textContent = '';
+    var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = d.icon;
+    b.appendChild(ic); b.appendChild(document.createTextNode(d.title));
+    b.addEventListener('click', function(){ select(i); });
+    bar.appendChild(b); tabs.push(b);
+    return i;
   }
 
   DOCS.forEach(function(d,i){
@@ -142,6 +181,23 @@
   var h = (location.hash || '').replace('#','');
   if(h){ var k = DOCS.findIndex(function(d){ return d.id===h; }); if(k>=0) start = k; }
   select(start);
+
+  // upravené výkresy sdílené z editoru (Firestore, jen název + čas)
+  cfg().then(function(c){
+    if(!c.apiKey) return;
+    return fetch('https://firestore.googleapis.com/v1/projects/'+c.projectId+'/databases/(default)/documents/vykresy?key='+c.apiKey+'&pageSize=100&mask.fieldPaths=name&mask.fieldPaths=ts')
+      .then(function(r){ return r.json(); }).then(function(j){
+        var list = (j.documents || []).map(function(x){
+          var f = x.fields || {};
+          return { sid:x.name.split('/').pop(), name:(f.name&&f.name.stringValue)||'Výkres', ts:+((f.ts&&(f.ts.integerValue||f.ts.doubleValue))||0) };
+        }).sort(function(a,b){ return b.ts - a.ts; });
+        list.forEach(function(x){
+          var idx = addTab({ id:'sh-'+x.sid, sid:x.sid, shared:true, title:x.name, icon:'🖍️',
+            sub:'Upravený výkres rodiny · ' + (x.ts ? new Date(x.ts).toLocaleDateString('cs-CZ') : '') });
+          if(h === 'sh-'+x.sid) select(idx);
+        });
+      });
+  }).catch(function(){});
 })();
 </script>
 
