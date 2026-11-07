@@ -92,6 +92,7 @@
         <span class="vsub" id="docSub"></span>
       </div>
       <div class="vlinks">
+        <a id="docRename" href="#" style="display:none" title="Přejmenovat tento upravený výkres (původní výkresy z projektu přejmenovat nejde)">✏️ <span>Přejmenovat</span></a>
         <a id="docDelete" class="danger" href="#" style="display:none" title="Smazat tento upravený výkres z Dokumentace (původní výkresy to neovlivní)">🗑 <span>Smazat</span></a>
         <a id="docEdit" href="#" style="display:none">✎ <span>Upravit v editoru</span></a>
         <a id="docOpen" href="#" target="_blank" rel="noopener">↗ <span>Otevřít</span></a>
@@ -182,7 +183,23 @@
   document.addEventListener('fullscreenchange', function(){ if(zoomer.style.display === 'block') setTimeout(zFit, 50); });
   window.addEventListener('resize', function(){ if(zoomer.style.display === 'block' && zImg.naturalWidth) zFit(); });
   var pdfUrl = null;
-  var elDel = document.getElementById('docDelete'), curShared = null;
+  var elDel = document.getElementById('docDelete'), elRen = document.getElementById('docRename'), curShared = null;
+  elRen.addEventListener('click', function(ev){
+    ev.preventDefault();
+    if(!curShared) return;
+    var sh = curShared, n = prompt('Nový název výkresu:', sh.d.title);
+    if(n === null) return; n = n.trim();
+    if(!n || n === sh.d.title) return;
+    cfg().then(function(c){
+      return fetch('https://firestore.googleapis.com/v1/projects/'+c.projectId+'/databases/(default)/documents/vykresy/'+encodeURIComponent(sh.d.sid)+'?key='+c.apiKey+'&updateMask.fieldPaths=name', {
+        method:'PATCH', headers:{'content-type':'application/json'}, body:JSON.stringify({ fields:{ name:{ stringValue:n } } }) });
+    }).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      sh.d.title = n; elT.textContent = n;
+      tabs[sh.i].lastChild.nodeValue = n;
+      if(elDown.getAttribute('download')) elDown.setAttribute('download', n.replace(/[^\w\u00C0-\u017F-]+/g,'_') + '.pdf');
+    }).catch(function(){ alert('Přejmenování se nepovedlo – zkus to prosím znovu.'); });
+  });
   elDel.addEventListener('click', function(ev){
     ev.preventDefault();
     if(!curShared) return;
@@ -247,7 +264,7 @@
       frame.src = 'about:blank'; frame.style.display = 'none'; zoomer.style.display = 'block';
       zImg.style.display = 'none'; zMsg.style.display = 'block'; zMsg.textContent = 'Načítám výkres…';
       elEdit.style.display = 'inline-flex'; elEdit.href = 'vykresy.html?s=' + encodeURIComponent(d.sid);
-      elDel.style.display = 'inline-flex'; curShared = { i:i, d:d };
+      elDel.style.display = 'inline-flex'; elRen.style.display = 'inline-flex'; curShared = { i:i, d:d };
       elOpenLbl.textContent = 'Otevřít'; elOpen.target = '_blank'; elOpen.removeAttribute('href');
       elDown.removeAttribute('href'); elDown.removeAttribute('download');
       cfg().then(function(c){
@@ -269,7 +286,7 @@
       return;
     }
     zoomer.style.display = 'none';
-    elEdit.style.display = 'none'; elDel.style.display = 'none'; curShared = null;
+    elEdit.style.display = 'none'; elDel.style.display = 'none'; elRen.style.display = 'none'; curShared = null;
     frame.style.display = 'block';
     elOpenLbl.textContent = 'Otevřít'; elOpen.target = '_blank';
     elOpen.href = d.file;
