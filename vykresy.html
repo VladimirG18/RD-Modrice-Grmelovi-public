@@ -264,7 +264,10 @@ function evPt(e){ const r = cv.getBoundingClientRect(); return {x:e.clientX - r.
 function distSeg(p,a,b){ const dx=b.x-a.x, dy=b.y-a.y, l=dx*dx+dy*dy; let t=l?((p.x-a.x)*dx+(p.y-a.y)*dy)/l:0; t=Math.max(0,Math.min(1,t)); return Math.hypot(p.x-a.x-t*dx, p.y-a.y-t*dy); }
 function polyDist(p,pts){ let m=1e18; for(let i=0;i<pts.length-1;i++) m=Math.min(m,distSeg(p,pts[i],pts[i+1])); if(pts.length===1) m=Math.hypot(p.x-pts[0].x,p.y-pts[0].y); return m; }
 function polyLen(pts){ let s=0; for(let i=0;i<pts.length-1;i++) s+=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y); return s; }
-const symR = () => 11 * u() * (doc ? doc.symScale : 1);
+// výchozí velikost podle druhu značky (1 = stropní světlo); celkově jde měnit posuvníkem „Velikost“
+const SYMZ = { light:1, rd:.8, outdoor:.6, spot:.5, wall:.5, strip:.6, ambient:.5, orient:.4, sw:.45, sw2:.45,
+  sock:.5, sock2:.5, sock400:.55, appl:.6, data:.45, tv:.45, pir:.45, cam:.55, other:.5 };
+const symR = k => 11 * u() * (doc ? doc.symScale : 1) * (SYMZ[k] || 1);
 function textBox(o){ ctxM.font='650 '+o.size+'px Inter,Arial,sans-serif'; const w=ctxM.measureText(o.s).width; return {x:o.x,y:o.y-o.size,w,h:o.size*1.3}; }
 const ctxM = document.createElement('canvas').getContext('2d');
 
@@ -327,7 +330,7 @@ function drawObjs(c, objs, o){
 }
 function strokePts(c,pts){ c.beginPath(); pts.forEach((p,i)=> i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y)); if(pts.length===1) c.lineTo(pts[0].x+.01,pts[0].y); c.stroke(); }
 function drawSym(c, ob){
-  const s = SYMS[ob.k]; if(!s) return; const r = symR();
+  const s = SYMS[ob.k]; if(!s) return; const r = symR(ob.k);
   c.save(); c.translate(ob.x,ob.y); c.rotate((ob.rot||0)*Math.PI/2);
   c.strokeStyle = CATS[s.cat].c; c.fillStyle = CATS[s.cat].c; c.lineWidth = Math.max(r*.16, 1/view.z); c.lineJoin=c.lineCap='round';
   s.d(c,r); c.restore();
@@ -342,7 +345,7 @@ function drawSel(c, ob){
 }
 function bounds(ob){
   if(ob.t==='cover'||ob.t==='blob') return {x:ob.x,y:ob.y,w:ob.w,h:ob.h};
-  if(ob.t==='sym'){ const r=symR()*1.5; return {x:ob.x-r,y:ob.y-r,w:2*r,h:2*r}; }
+  if(ob.t==='sym'){ const r=symR(ob.k)*1.5; return {x:ob.x-r,y:ob.y-r,w:2*r,h:2*r}; }
   if(ob.t==='text') return textBox(ob);
   const pts = ob.pts; const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
   const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y};
@@ -352,7 +355,7 @@ function hit(p){
   for(let i = doc.objs.length - 1; i >= 0; i--){
     const o = doc.objs[i];
     if(o.t==='line' && polyDist(p,o.pts) <= Math.max(o.w, 0) + tol) return i;
-    if(o.t==='sym' && Math.hypot(p.x-o.x,p.y-o.y) <= symR()*1.5 + tol*.5) return i;
+    if(o.t==='sym' && Math.hypot(p.x-o.x,p.y-o.y) <= symR(o.k)*1.5 + tol*.5) return i;
     if(o.t==='text'){ const b=textBox(o); if(p.x>=b.x-tol&&p.x<=b.x+b.w+tol&&p.y>=b.y-tol&&p.y<=b.y+b.h+tol) return i; }
     if(o.t==='cover' && p.x>=o.x&&p.x<=o.x+o.w&&p.y>=o.y&&p.y<=o.y+o.h) return i;
     if(o.t==='blob' && blobHas(o,p.x,p.y)) return i;
