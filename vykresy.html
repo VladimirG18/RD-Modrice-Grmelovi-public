@@ -453,7 +453,7 @@ function commit(){
 function restore(){ const s = JSON.parse(hist[hi]); doc.objs = s.objs; doc.mm = s.mm; sel = -1; cur = null; changed(); }
 function undo(){ if(cur){ cur = null; redraw(); updateUi(); return; } if(hi > 0){ hi--; restore(); } }
 function redo(){ if(hi < hist.length - 1){ hi++; restore(); } }
-function changed(){ updateUi(); redraw(); scheduleSave(); }
+function changed(){ if(doc) doc.dirty = true; updateUi(); redraw(); scheduleSave(); }
 
 /* ---------- UI ---------- */
 function updateUi(){
@@ -466,7 +466,17 @@ function updateUi(){
   document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('on', b.dataset.tool===tool));
   document.querySelectorAll('.ed-cat').forEach(b=>b.classList.toggle('on', b.dataset.cat===cat));
   document.querySelectorAll('.ed-sym').forEach(b=>b.classList.toggle('on', b.dataset.k===symKind && tool==='sym'));
-  renderHint(); renderSum();
+  renderHint(); renderSum(); updateShareBtn();
+}
+function updateShareBtn(){
+  const b = $('bShare'); if(!b) return;
+  if(doc && doc.shared){
+    b.textContent = doc.dirty ? '💾 Uložit změny do Dokumentace ●' : '💾 Uložit do Dokumentace';
+    b.title = 'Uloží tento výkres zpět do jeho kopie ve sdílené Dokumentaci (původní PDF se nikdy nepřepisují)';
+  } else {
+    b.textContent = '🌐 Sdílet do Dokumentace';
+    b.title = 'Zveřejní výkres rodině v Dokumentaci jako novou kopii';
+  }
 }
 function renderHint(){
   const h = $('hint'); h.innerHTML = '';
@@ -654,7 +664,7 @@ function rotSel(){ const o=doc&&doc.objs[sel]; if(o&&o.t==='sym'){ o.rot=((o.rot
 ['showCov','showEl'].forEach(i=>$(i).onchange=redraw);
 $('symScale').oninput = e=>{ if(doc){ doc.symScale = e.target.value/100; redraw(); } };
 $('symScale').onchange = ()=>{ scheduleSave(); };
-$('name').oninput = e=>{ if(doc){ doc.name = e.target.value; scheduleSave(); } };
+$('name').oninput = e=>{ if(doc){ doc.name = e.target.value; doc.dirty = true; updateShareBtn(); scheduleSave(); } };
 window.addEventListener('keydown', e=>{
   if(e.target.matches('input[type=text],input:not([type]),textarea') ) return;
   if(e.key==='Shift') shiftDown = true;
@@ -849,10 +859,12 @@ async function jpegUnder(src, max){
 }
 async function share(){
   if(!doc) return;
-  if(doc.shared && !confirm(`Výkres „${doc.name}“ už je ve sdílené Dokumentaci. Přepsat ho touto verzí?\n(Chceš-li ponechat obě verze, dej Zrušit a nejdřív použij „Uložit jako…“.)`)) return;
-  const btn = $('bShare'); btn.disabled = true; setStatus('Odesílám do Dokumentace…');
+  const btn = $('bShare'); btn.disabled = true; setStatus('Ukládám do Dokumentace…');
   try{
     const {F, db} = await fire();
+    // kopie mohla být mezitím někým smazána z Dokumentace – pak se založí znovu jako nová
+    let update = false;
+    if(doc.shared){ const ex = await F.getDoc(F.doc(db,'vykresy',doc.id)); update = ex.exists(); if(!update) doc.shared = false; }
     const objs = JSON.stringify(doc.objs);
     if(objs.length > 900000) throw new Error('Výkres obsahuje příliš mnoho úprav (smazané prvky). Zkus pár zakrýt obdélníkem místo „Smazat prvek“.');
     const out = renderExport();
@@ -863,10 +875,10 @@ async function share(){
     if(!doc.src){ const bgU = await jpegUnder(bg, 850000); await F.setDoc(F.doc(db,'vykresy_bg',doc.id), {bg:bgU}); }
     await F.setDoc(F.doc(db,'vykresy_plne',doc.id), {img});
     await F.setDoc(F.doc(db,'vykresy',doc.id), {name:doc.name, ts:Date.now(), w:doc.w, h:doc.h, mm:doc.mm||0, symScale:doc.symScale, src:doc.src||'', objs, thumb});
-    doc.shared = true; await save();
-    setStatus(`Hotovo – „${doc.name}“ je teď v Dokumentaci jako další výkres.`, true);
-  }catch(e){ setStatus('Sdílení se nepovedlo: ' + e.message, false); }
-  btn.disabled = false;
+    doc.shared = true; doc.dirty = false; await save();
+    setStatus(update ? `Uloženo – kopie „${doc.name}“ v Dokumentaci je aktualizovaná.` : `Hotovo – „${doc.name}“ je teď v Dokumentaci jako další výkres.`, true);
+  }catch(e){ setStatus('Uložení do Dokumentace se nepovedlo: ' + e.message, false); }
+  btn.disabled = false; updateUi();
 }
 $('bShare').onclick = share;
 // seznam sdílených výkresů přes REST (jen potřebná pole, ať se netahají objs ani obrázky)
