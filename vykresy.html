@@ -222,6 +222,7 @@ const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf
 /* značky: kreslí se v lokálním souřadném systému, r = poloměr */
 const SYMS = {
   light:{n:'Stropní světlo',cat:'svetla',d(c,r){ circ(c,r); c.beginPath(); c.moveTo(-.7*r,-.7*r);c.lineTo(.7*r,.7*r);c.moveTo(.7*r,-.7*r);c.lineTo(-.7*r,.7*r);c.stroke(); }},
+  pend:{n:'Závěsné světlo',cat:'svetla',d(c,r){ circ(c,r*.9); c.beginPath(); c.arc(0,0,r*.45,0,7); c.stroke(); c.beginPath(); c.moveTo(0,-r*.9); c.lineTo(0,-r*1.55); c.moveTo(-r*.35,-r*1.55); c.lineTo(r*.35,-r*1.55); c.stroke(); }},
   spot:{n:'Bodovka',cat:'svetla',d(c,r){ circ(c,r*.8); c.beginPath(); c.arc(0,0,r*.3,0,7); c.fill(); }},
   wall:{n:'Nástěnné světlo',cat:'svetla',d(c,r){ c.beginPath(); c.arc(0,0,r,Math.PI,0); c.closePath(); c.fillStyle='#fff'; c.fill(); c.stroke(); c.beginPath(); c.moveTo(-r*1.3,0); c.lineTo(r*1.3,0); c.stroke(); }},
   outdoor:{n:'Venkovní světlo',cat:'svetla',d(c,r){ circ(c,r); c.beginPath(); c.arc(0,0,r*1.35,0,7); c.stroke(); c.beginPath(); c.moveTo(-.6*r,-.6*r);c.lineTo(.6*r,.6*r);c.moveTo(.6*r,-.6*r);c.lineTo(-.6*r,.6*r);c.stroke(); }},
@@ -266,7 +267,7 @@ function distSeg(p,a,b){ const dx=b.x-a.x, dy=b.y-a.y, l=dx*dx+dy*dy; let t=l?((
 function polyDist(p,pts){ let m=1e18; for(let i=0;i<pts.length-1;i++) m=Math.min(m,distSeg(p,pts[i],pts[i+1])); if(pts.length===1) m=Math.hypot(p.x-pts[0].x,p.y-pts[0].y); return m; }
 function polyLen(pts){ let s=0; for(let i=0;i<pts.length-1;i++) s+=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y); return s; }
 // výchozí velikost podle druhu značky (1 = stropní světlo); celkově jde měnit posuvníkem „Velikost“
-const SYMZ = { light:1, rd:.8, outdoor:.6, spot:.5, wall:.5, strip:.6, ambient:.5, orient:.4, sw:.45, sw2:.45,
+const SYMZ = { light:1, pend:.8, rd:.8, outdoor:.6, spot:.5, wall:.5, strip:.6, ambient:.5, orient:.4, sw:.45, sw2:.45,
   sock:.5, sock2:.5, sock400:.55, appl:.6, data:.45, tv:.45, pir:.45, cam:.55, other:.5 };
 const symR = k => 11 * u() * (doc ? doc.symScale : 1) * (SYMZ[k] || 1);
 function textBox(o){ ctxM.font='650 '+o.size+'px Inter,Arial,sans-serif'; const w=ctxM.measureText(o.s).width; return {x:o.x,y:o.y-o.size,w,h:o.size*1.3}; }
