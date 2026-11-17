@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Výběry a rozhodnutí</title>
+<meta name="description" content="Co je potřeba vybrat a do kdy – okna, podlahy, obklady, kuchyň, technika – s porovnáním variant a cen." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+<script type="module" src="assets/search.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Hlavní navigace">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks" id="navlinks">
+      <a class="navhome" href="index.html" data-ic="🏡">Přehled</a>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Dům</button>
+        <div class="navmenu">
+          <a href="model.html" data-ic="🏠">3D model</a>
+          <a href="informace.html" data-ic="ℹ️">Informace o domě</a>
+          <a href="material.html" data-ic="🧱">Materiály</a>
+          <a href="dokumentace.html" data-ic="📐">Dokumentace</a>
+          <a href="vykresy.html" data-ic="🖍️">Editor výkresů</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Stavba</button>
+        <div class="navmenu">
+          <a href="stavba.html" data-ic="🏗️">Postup stavby</a>
+          <a href="harmonogram.html" data-ic="📅">Harmonogram</a>
+          <a href="denik.html" data-ic="📒">Stavební deník</a>
+          <a href="fotky-stavby.html" data-ic="📷">Fotky ze stavby</a>
+          <a href="pripojky.html" data-ic="🔌">Přípojky</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Nápady</button>
+        <div class="navmenu">
+          <a href="vizualizace.html" data-ic="🖼️">Vizualizace</a>
+          <a href="inspirace.html" data-ic="💡">Inspirace</a>
+          <a href="pozadavky.html" data-ic="✏️">Požadavky na model</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
+        <div class="navmenu">
+          <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
+          <a href="vybery.html" data-ic="🧭">Výběry a rozhodnutí</a>
+          <a href="kontakty.html" data-ic="📇">Kontakty</a>
+          <a href="poznamky.html" data-ic="📝">Poznámky</a>
+        </div>
+      </div>
+    </div>
+    <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span aria-hidden="true">☰</span></button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <span class="eyebrow">Plánování</span>
+  <h1>Výběry a rozhodnutí</h1>
+  <p class="lead">Co je potřeba vybrat a&nbsp;do kdy – okna, podlahy, obklady, kuchyň, technika. Ke každému
+  výběru si zapište varianty s&nbsp;cenou a&nbsp;odkazem a&nbsp;nakonec označte tu vybranou.</p>
+
+  <div id="status" class="statusbar">Načítám výběry…</div>
+  <div class="uk-sum" id="sum"></div>
+
+  <div class="kt-bar">
+    <div class="board-filter" id="fState" role="group" aria-label="Stav"></div>
+    <button type="button" class="btn primary" id="addBtn">＋ Nový výběr</button>
+  </div>
+
+  <form class="board-add vb-form" id="form" autocomplete="off" hidden>
+    <div class="ba-row">
+      <label class="ba-field ba-grow">Co vybíráme *
+        <input type="text" id="fTitle" required maxlength="100" placeholder="Např. „Okna a balkonové dveře“">
+      </label>
+      <label class="ba-field">Do kdy rozhodnout
+        <input type="date" id="fDue">
+      </label>
+      <label class="ba-field">Kdo to má na starosti
+        <select id="fWho"></select>
+      </label>
+    </div>
+    <div class="ba-row">
+      <label class="ba-field">Kategorie rozpočtu
+        <select id="fCat"></select>
+      </label>
+      <label class="ba-field">Fáze stavby
+        <select id="fPhase"></select>
+      </label>
+      <label class="ba-field ba-grow">Poznámka / požadavky
+        <input type="text" id="fNote" maxlength="300" placeholder="Barva, rozměry, co je důležité…">
+      </label>
+    </div>
+    <div class="vb-sugg" id="sugg"></div>
+    <div class="dk-form-foot">
+      <button type="button" class="btn" id="fCancel">Zrušit</button>
+      <button class="btn primary" type="submit" id="fSubmit">Přidat výběr</button>
+    </div>
+  </form>
+
+  <div id="list"><div class="now-skel"><i></i><i></i><i></i></div></div>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — výběry a rozhodnutí k vybavení domu.
+</footer>
+
+<script type="module">
+import { createStore, setStatusEl, esc, slug, uid, AUTHORS, myName, setMyName, fmtDate, dueState } from './assets/store.js';
+import { loadTimeline } from './assets/data.js';
+import { DEFAULT_CATEGORIES, fmtMoney } from './assets/rozpocet.js';
+
+const $ = id => document.getElementById(id);
+const STATES = [
+  { id:'vybirame',   name:'Vybíráme',   icon:'🔍' },
+  { id:'rozhodnuto', name:'Rozhodnuto', icon:'✅' },
+  { id:'objednano',  name:'Objednáno',  icon:'📦' },
+];
+const ST = Object.fromEntries(STATES.map(s => [s.id, s]));
+const CAT = Object.fromEntries(DEFAULT_CATEGORIES.map(c => [c.id, c]));
+const SUGG = [
+  ['Okna a balkonové dveře', 'vyplne'], ['Vstupní dveře', 'vyplne'], ['Garážová vrata', 'vyplne'],
+  ['Střešní okna', 'vyplne'], ['Stínění a žaluzie', 'vyplne'], ['Vnitřní dveře', 'vyplne'],
+  ['Podlahy – obytné místnosti', 'podlahy'], ['Dlažba a obklady – koupelny', 'fasada'], ['Fasádní omítka – barva', 'fasada'],
+  ['Sanitární keramika a baterie', 'kuchyn'], ['Kuchyňská linka a spotřebiče', 'kuchyn'], ['Schodiště a zábradlí', 'hruba'],
+  ['Kotel / tepelné čerpadlo', 'tzb'], ['Rekuperace', 'tzb'], ['Krbová vložka', 'tzb'], ['Fotovoltaika', 'tzb'],
+  ['Svítidla', 'nabytek'], ['Dlažba terasy a zpevněné plochy', 'venkovni'], ['Oplocení a brána', 'venkovni'],
+];
+
+let items = [], phases = [], store = null, editing = null;
+const FKEY = 'rdmodrice-vybery-filtr';
+let filt = 'open';
+try { filt = localStorage.getItem(FKEY) || 'open'; } catch(e){}
+
+const whoOpts = sel => '<option value="">— nikdo —</option>' + AUTHORS.map(a => `<option${a === sel ? ' selected' : ''}>${esc(a)}</option>`).join('');
+const catOpts = sel => '<option value="">— bez kategorie —</option>' + DEFAULT_CATEGORIES.map(c =>
+  `<option value="${c.id}"${c.id === sel ? ' selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('');
+const phaseOpts = sel => '<option value="">— bez fáze —</option>' + phases.map(p =>
+  `<option value="${esc(p.id)}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch(e){ return u; } };
+const isOpen = v => (v.status || 'vybirame') === 'vybirame';
+
+/* --- souhrn --- */
+function renderSum(){
+  const open = items.filter(isOpen);
+  const over = open.filter(v => dueState(v.due) === 'over').length;
+  const next = open.filter(v => v.due).sort((a, b) => a.due.localeCompare(b.due))[0];
+  const chosenSum = items.filter(v => v.chosen).reduce((s, v) => {
+    const c = (v.variants || []).find(x => x.id === v.chosen);
+    return s + (c && isFinite(c.price) ? Number(c.price) : 0);
+  }, 0);
+  $('sum').innerHTML = `<div class="stats">
+    <div class="stat"><b>${open.length}</b><span>k rozhodnutí</span></div>
+    <div class="stat"><b class="${over ? 'uk-over' : ''}">${over}</b><span>po termínu</span></div>
+    <div class="stat"><b>${next ? esc(fmtDate(next.due)) : '–'}</b><span>${next ? 'nejbližší: ' + esc(next.title) : 'nejbližší termín'}</span></div>
+    <div class="stat"><b>${chosenSum ? esc(fmtMoney(chosenSum)) : '–'}</b><span>vybrané varianty celkem</span></div>
+  </div>`;
+  const n = f => items.filter(v => f === 'all' || (f === 'open' ? isOpen(v) : !isOpen(v))).length;
+  $('fState').innerHTML = [['open', '🔍 K rozhodnutí'], ['done', '✅ Rozhodnuto'], ['all', 'Vše']].map(([v, l]) =>
+    `<button type="button" class="fchip${filt === v ? ' on' : ''}" data-f="${v}">${l} <b>${n(v)}</b></button>`).join('');
+}
+
+/* --- karta výběru --- */
+function variantsHTML(v){
+  const vars = v.variants || [];
+  const prices = vars.map(x => Number(x.price)).filter(p => isFinite(p) && p > 0);
+  const min = prices.length > 1 ? Math.min(...prices) : null;
+  const rows = vars.map(x => {
+    const chosen = v.chosen === x.id;
+    return `<div class="vb-var${chosen ? ' chosen' : ''}">
+      <button type="button" class="vb-pick" data-pick="${esc(v.id)}" data-var="${esc(x.id)}" aria-pressed="${chosen}"
+        title="${chosen ? 'Zrušit výběr' : 'Vybrat tuto variantu'}">${chosen ? '✓ Vybráno' : 'Vybrat'}</button>
+      <div class="vb-var-main">
+        <b>${esc(x.name)}</b>${x.price != null && x.price !== '' ? ` <span class="vb-price">${esc(fmtMoney(Number(x.price)))}</span>` : ''}${
+          min != null && Number(x.price) === min ? ' <span class="chip ok">nejlevnější</span>' : ''}
+        ${x.note ? `<span class="vb-var-note">${esc(x.note)}</span>` : ''}
+      </div>
+      ${x.link ? `<a class="vb-link" href="${esc(x.link)}" target="_blank" rel="noopener" title="${esc(x.link)}">🔗 ${esc(host(x.link))}</a>` : ''}
+      <button type="button" class="kt-ic" data-delvar="${esc(v.id)}" data-var="${esc(x.id)}" title="Odebrat variantu" aria-label="Odebrat variantu">✕</button>
+    </div>`;
+  }).join('');
+  return `<div class="vb-vars">${rows || '<p class="dk-muted vb-novar">Zatím žádné varianty – přidej první níže.</p>'}
+    <div class="vb-addvar" data-addvar="${esc(v.id)}">
+      <input type="text" class="vb-av-name" placeholder="+ Varianta (výrobce, model…)" maxlength="120" aria-label="Název varianty">
+      <input type="number" class="vb-av-price" placeholder="Cena Kč" min="0" step="1" aria-label="Cena">
+      <input type="url" class="vb-av-link" placeholder="Odkaz" aria-label="Odkaz">
+      <input type="text" class="vb-av-note" placeholder="Poznámka" maxlength="200" aria-label="Poznámka">
+      <button type="button" class="btn" data-savevar="${esc(v.id)}">Přidat</button>
+    </div></div>`;
+}
+function cardHTML(v){
+  const st = ST[v.status] || ST.vybirame, ds = dueState(v.due, !isOpen(v));
+  const c = CAT[v.budgetCat], p = phases.find(x => x.id === v.phase);
+  const chosen = (v.variants || []).find(x => x.id === v.chosen);
+  return `<article class="vb-card st-${st.id}${ds === 'over' ? ' over' : ''}" data-id="${esc(v.id)}">
+    <div class="vb-head">
+      <h3>${esc(v.title)}</h3>
+      <select class="vb-state st-${st.id}" data-state="${esc(v.id)}" aria-label="Stav">${STATES.map(s =>
+        `<option value="${s.id}"${s.id === st.id ? ' selected' : ''}>${s.icon} ${s.name}</option>`).join('')}</select>
+      <span class="kt-sp"></span>
+      <button type="button" class="kt-ic" data-edit="${esc(v.id)}" title="Upravit" aria-label="Upravit">✎</button>
+      <button type="button" class="kt-ic" data-del="${esc(v.id)}" title="Smazat" aria-label="Smazat">🗑</button>
+    </div>
+    <div class="uk-meta">
+      ${v.due ? `<span class="uk-chip uk-due ${ds}">📅 ${ds === 'over' ? 'po termínu · ' : 'do '}${esc(fmtDate(v.due))}</span>` : ''}
+      ${v.who ? `<span class="uk-chip who-${slug(v.who)}">👤 ${esc(v.who)}</span>` : ''}
+      ${c ? `<a class="uk-chip" href="rozpocet.html#cat-${encodeURIComponent(c.id)}">${c.icon} ${esc(c.name)}</a>` : ''}
+      ${p ? `<a class="uk-chip" href="stavba.html#faze=${encodeURIComponent(p.id)}">🏗️ ${esc(p.name)}</a>` : ''}
+    </div>
+    ${v.note ? `<p class="kt-note">${esc(v.note)}</p>` : ''}
+    ${chosen ? `<div class="vb-decided">✅ <b>${esc(chosen.name)}</b>${chosen.price ? ' · ' + esc(fmtMoney(Number(chosen.price))) : ''}${
+      v.decidedBy || v.decidedAt ? ` <span class="dk-muted">– ${[v.decidedBy, v.decidedAt ? new Date(v.decidedAt).toLocaleDateString('cs-CZ') : ''].filter(Boolean).map(esc).join(', ')}</span>` : ''}</div>` : ''}
+    ${variantsHTML(v)}
+  </article>`;
+}
+function render(){
+  renderSum();
+  const list = items.filter(v => filt === 'all' || (filt === 'open' ? isOpen(v) : !isOpen(v)))
+    .sort((a, b) => (isOpen(a) === isOpen(b) ? 0 : isOpen(a) ? -1 : 1) ||
+      String(a.due || '9999').localeCompare(String(b.due || '9999')) || (a.order || 0) - (b.order || 0));
+  // nerozepsané pole přidávání varianty přežije překreslení
+  const keep = {};
+  $('list').querySelectorAll('.vb-addvar').forEach(el => {
+    const vals = [...el.querySelectorAll('input')].map(i => i.value);
+    if(vals.some(Boolean)) keep[el.dataset.addvar] = vals;
+  });
+  $('list').innerHTML = list.length ? list.map(cardHTML).join('')
+    : `<div class="board-empty"><span class="be-ic">🧭</span><p>${items.length
+      ? (filt === 'open' ? 'Vše je rozhodnuto. 🎉' : 'Nic tu není.')
+      : 'Zatím tu nejsou žádné výběry. Přidej první tlačítkem „＋ Nový výběr“ – nabídnou se i typické položky.'}</p></div>`;
+  Object.entries(keep).forEach(([id, vals]) => {
+    const el = $('list').querySelector(`.vb-addvar[data-addvar="${CSS.escape(id)}"]`);
+    if(el) el.querySelectorAll('input').forEach((i, k) => { i.value = vals[k] || ''; });
+  });
+  renderSugg();
+}
+
+/* --- formulář (nový / úprava) --- */
+function renderSugg(){
+  if($('form').hidden || editing){ $('sugg').innerHTML = ''; return; }
+  const have = new Set(items.map(v => String(v.title).toLowerCase()));
+  const s = SUGG.filter(([t]) => !have.has(t.toLowerCase()));
+  $('sugg').innerHTML = s.length ? `<span class="dk-muted">Typické výběry:</span> ` + s.map(([t, c]) =>
+    `<button type="button" class="fchip" data-sugg="${esc(t)}" data-cat="${c}">${esc(t)}</button>`).join('') : '';
+}
+function openForm(v){
+  editing = v ? v.id : null;
+  $('fWho').innerHTML = whoOpts(v ? v.who : myName());
+  $('fCat').innerHTML = catOpts(v ? v.budgetCat : '');
+  $('fPhase').innerHTML = phaseOpts(v ? v.phase : '');
+  $('fTitle').value = v ? v.title : '';
+  $('fDue').value = v && v.due ? v.due : '';
+  $('fNote').value = v ? (v.note || '') : '';
+  $('fSubmit').textContent = v ? 'Uložit změny' : 'Přidat výběr';
+  $('form').hidden = false; $('addBtn').hidden = true;
+  renderSugg();
+  $('form').scrollIntoView({ behavior:'smooth', block:'start' });
+  $('fTitle').focus({ preventScroll:true });
+}
+function closeForm(){ editing = null; $('form').hidden = true; $('form').reset(); $('addBtn').hidden = false; renderSugg(); }
+$('addBtn').addEventListener('click', () => openForm(null));
+$('fCancel').addEventListener('click', closeForm);
+$('sugg').addEventListener('click', e => {
+  const b = e.target.closest('[data-sugg]'); if(!b) return;
+  $('fTitle').value = b.dataset.sugg; $('fCat').value = b.dataset.cat; $('fDue').focus();
+});
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = { title:$('fTitle').value.trim(), due:$('fDue').value || null, who:$('fWho').value,
+    budgetCat:$('fCat').value || null, phase:$('fPhase').value || null, note:$('fNote').value.trim() };
+  if(!data.title) return;
+  if(data.who) setMyName(data.who);
+  try {
+    if(editing) await store.update(editing, data);
+    else { await store.add({ ...data, status:'vybirame', variants:[], chosen:null, decidedBy:null, decidedAt:null, order:Date.now() }); filt = 'open'; }
+    closeForm();
+  } catch(err){ console.error(err); alert('Uložení se nepodařilo.'); }
+});
+
+/* --- akce na kartách --- */
+const save = (id, patch) => store.update(id, patch).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+function addVariant(id){
+  const v = items.find(x => x.id === id); if(!v) return;
+  const el = $('list').querySelector(`.vb-addvar[data-addvar="${CSS.escape(id)}"]`);
+  const name = el.querySelector('.vb-av-name').value.trim();
+  if(!name){ el.querySelector('.vb-av-name').focus(); return; }
+  const price = el.querySelector('.vb-av-price').value;
+  let link = el.querySelector('.vb-av-link').value.trim();
+  if(link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+  el.querySelectorAll('input').forEach(i => { i.value = ''; });
+  save(id, { variants:[...(v.variants || []), { id:uid(), name, price: price === '' ? null : Number(price), link, note:el.querySelector('.vb-av-note').value.trim() }] });
+}
+$('fState').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if(!b) return; filt = b.dataset.f; try { localStorage.setItem(FKEY, filt); } catch(x){} render(); });
+$('list').addEventListener('click', e => {
+  const t = e.target;
+  const pick = t.closest('[data-pick]');
+  if(pick){
+    const v = items.find(x => x.id === pick.dataset.pick); if(!v) return;
+    if(v.chosen === pick.dataset.var) save(v.id, { chosen:null, decidedBy:null, decidedAt:null, status:'vybirame' });
+    else save(v.id, { chosen:pick.dataset.var, decidedBy:myName(), decidedAt:Date.now(), status: v.status === 'objednano' ? 'objednano' : 'rozhodnuto' });
+    return;
+  }
+  const dv = t.closest('[data-delvar]');
+  if(dv){
+    const v = items.find(x => x.id === dv.dataset.delvar); if(!v) return;
+    const x = (v.variants || []).find(y => y.id === dv.dataset.var);
+    if(!x || !confirm(`Odebrat variantu „${x.name}“?`)) return;
+    const patch = { variants:(v.variants || []).filter(y => y.id !== x.id) };
+    if(v.chosen === x.id) Object.assign(patch, { chosen:null, decidedBy:null, decidedAt:null, status:'vybirame' });
+    save(v.id, patch);
+    return;
+  }
+  const sv = t.closest('[data-savevar]');
+  if(sv){ addVariant(sv.dataset.savevar); return; }
+  const ed = t.closest('[data-edit]');
+  if(ed){ openForm(items.find(x => x.id === ed.dataset.edit)); return; }
+  const del = t.closest('[data-del]');
+  if(del){
+    const v = items.find(x => x.id === del.dataset.del);
+    if(v && confirm(`Smazat výběr „${v.title}“ i s variantami?`)) store.remove(v.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+  }
+});
+$('list').addEventListener('change', e => {
+  const s = e.target.closest('[data-state]'); if(!s) return;
+  save(s.dataset.state, { status:s.value });
+});
+$('list').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.closest('.vb-addvar')){ e.preventDefault(); addVariant(e.target.closest('.vb-addvar').dataset.addvar); }
+});
+
+/* --- start --- */
+try { phases = (await loadTimeline()).phases || []; } catch(e){ console.warn(e); }
+store = await createStore({ coll:'vybery', localKey:'rdmodrice-vybery-v1', label:'Výběry',
+  onStatus: setStatusEl($('status')), onItems: list => { items = list; render(); } });
+</script>
+</body>
+</html>

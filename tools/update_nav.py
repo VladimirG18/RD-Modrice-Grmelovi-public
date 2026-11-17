@@ -29,6 +29,7 @@ GROUPS = [
     ("Stavba", [
         ("stavba.html", "🏗️", "Postup stavby"),
         ("harmonogram.html", "📅", "Harmonogram"),
+        ("denik.html", "📒", "Stavební deník"),
         ("fotky-stavby.html", "📷", "Fotky ze stavby"),
         ("pripojky.html", "🔌", "Přípojky"),
     ]),
@@ -40,6 +41,8 @@ GROUPS = [
     ("Plánování", [
         ("rozpocet.html", "💰", "Rozpočet"),
         ("checklist.html", "✅", "Úkoly"),
+        ("vybery.html", "🧭", "Výběry a rozhodnutí"),
+        ("kontakty.html", "📇", "Kontakty"),
         ("poznamky.html", "📝", "Poznámky"),
     ]),
 ]

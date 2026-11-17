@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Stavební deník</title>
+<meta name="description" content="Stavební deník rodinného domu v Modřicích – co se kdy na stavbě dělalo, kdo tam byl a co se dohodlo, s fotkami z každého dne." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+<script type="module" src="assets/search.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Hlavní navigace">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks" id="navlinks">
+      <a class="navhome" href="index.html" data-ic="🏡">Přehled</a>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Dům</button>
+        <div class="navmenu">
+          <a href="model.html" data-ic="🏠">3D model</a>
+          <a href="informace.html" data-ic="ℹ️">Informace o domě</a>
+          <a href="material.html" data-ic="🧱">Materiály</a>
+          <a href="dokumentace.html" data-ic="📐">Dokumentace</a>
+          <a href="vykresy.html" data-ic="🖍️">Editor výkresů</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Stavba</button>
+        <div class="navmenu">
+          <a href="stavba.html" data-ic="🏗️">Postup stavby</a>
+          <a href="harmonogram.html" data-ic="📅">Harmonogram</a>
+          <a href="denik.html" data-ic="📒">Stavební deník</a>
+          <a href="fotky-stavby.html" data-ic="📷">Fotky ze stavby</a>
+          <a href="pripojky.html" data-ic="🔌">Přípojky</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Nápady</button>
+        <div class="navmenu">
+          <a href="vizualizace.html" data-ic="🖼️">Vizualizace</a>
+          <a href="inspirace.html" data-ic="💡">Inspirace</a>
+          <a href="pozadavky.html" data-ic="✏️">Požadavky na model</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
+        <div class="navmenu">
+          <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
+          <a href="vybery.html" data-ic="🧭">Výběry a rozhodnutí</a>
+          <a href="kontakty.html" data-ic="📇">Kontakty</a>
+          <a href="poznamky.html" data-ic="📝">Poznámky</a>
+        </div>
+      </div>
+    </div>
+    <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span aria-hidden="true">☰</span></button>
+  </nav>
+</header>
+
+<div class="content">
+  <span class="eyebrow">Stavba</span>
+  <h1>Stavební deník</h1>
+  <p class="lead">Co se kdy na stavbě dělalo, kdo tam byl a&nbsp;co se dohodlo. Fotky z&nbsp;daného dne
+  se k&nbsp;zápisu připojí samy z&nbsp;<a href="fotky-stavby.html">fotodokumentace</a>.</p>
+
+  <div id="status" class="statusbar">Načítám deník…</div>
+
+  <form class="board-add dk-form" id="form" autocomplete="off">
+    <div class="ba-row">
+      <label class="ba-field">Datum
+        <input type="date" id="fDate" required>
+      </label>
+      <label class="ba-field">Kdo píše
+        <select id="fAuthor"></select>
+      </label>
+      <label class="ba-field">Počasí
+        <select id="fWeather"></select>
+      </label>
+      <label class="ba-field ba-grow">Fáze stavby
+        <select id="fPhase"><option value="auto">⏱️ Podle data</option></select>
+      </label>
+    </div>
+    <label class="ba-field dk-full">Co se dělalo
+      <textarea id="fText" rows="3" placeholder="Např. „Betonáž základové desky, přivezeno 20 m³ betonu, hotovo do 14:00“" required></textarea>
+    </label>
+    <div class="ba-row dk-row2">
+      <label class="ba-field ba-grow">Kdo byl na stavbě (nepovinné)
+        <input type="text" id="fOnsite" placeholder="Firma, počet lidí, technika…" maxlength="200">
+      </label>
+      <label class="ba-field ba-grow">Dohody a důležité (nepovinné)
+        <input type="text" id="fDeal" placeholder="Co se domluvilo, co hlídat, co objednat…" maxlength="300">
+      </label>
+    </div>
+    <div class="dk-form-foot">
+      <span class="dk-hint" id="fHint"></span>
+      <button type="button" class="btn" id="fCancel" hidden>Zrušit úpravu</button>
+      <button class="btn primary" type="submit" id="fSubmit">Uložit zápis</button>
+    </div>
+  </form>
+
+  <div class="dk-bar">
+    <input type="search" id="q" class="dk-search" placeholder="🔎 Hledat v deníku…" aria-label="Hledat v deníku">
+    <label class="dk-toggle"><input type="checkbox" id="onlyDeals"> jen dny s dohodami</label>
+  </div>
+
+  <div id="list"><div class="now-skel"><i></i><i></i><i></i></div></div>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — stavební deník rodiny; fotky se přebírají z fotodokumentace stavby.
+</footer>
+
+<script type="module">
+import { createStore, setStatusEl, esc, slug, fold, AUTHORS, myName, setMyName, todayISO, fmtDate, monthLabel }
+  from './assets/store.js';
+import { online, listDocs, getDocsById, localList, loadTimeline, phaseForDate, pluralCz } from './assets/data.js';
+
+const $ = id => document.getElementById(id);
+const WEATHER = [['', '—'], ['slunce', '☀️ slunečno'], ['polojasno', '⛅ polojasno'], ['zatazeno', '☁️ zataženo'],
+  ['dest', '🌧️ déšť'], ['vitr', '💨 vítr'], ['mraz', '❄️ mráz / sníh'], ['horko', '🔥 horko']];
+const W_ICON = Object.fromEntries(WEATHER.map(([k, l]) => [k, l.split(' ')[0]]));
+const W_NAME = Object.fromEntries(WEATHER.map(([k, l]) => [k, l.replace(/^\S+\s/, '')]));
+
+let entries = [], photos = [], phases = [], store = null, editing = null;
+const thumbs = new Map();
+
+/* --- formulář --- */
+$('fAuthor').innerHTML = AUTHORS.map(a => `<option>${esc(a)}</option>`).join('');
+$('fWeather').innerHTML = WEATHER.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('');
+$('fDate').value = todayISO();
+if(myName()) $('fAuthor').value = myName();
+$('fAuthor').addEventListener('change', e => setMyName(e.target.value));
+function fillPhases(){
+  const cur = $('fPhase').value;
+  $('fPhase').innerHTML = '<option value="auto">⏱️ Podle data</option><option value="">— bez fáze —</option>' +
+    phases.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+  $('fPhase').value = [...$('fPhase').options].some(o => o.value === cur) ? cur : 'auto';
+}
+function updateHint(){
+  const d = $('fDate').value;
+  const n = photos.filter(f => f.date === d).length;
+  const ex = !editing && entries.find(e => e.date === d);
+  $('fHint').innerHTML = [n ? `📷 ${n} ${pluralCz(n, 'fotka', 'fotky', 'fotek')} z tohoto dne se připojí` : '',
+    ex ? `ℹ️ Na tento den už zápis je – nový se přidá vedle něj` : ''].filter(Boolean).join(' · ');
+}
+$('fDate').addEventListener('change', updateHint);
+
+function resetForm(){
+  editing = null;
+  $('form').reset();
+  $('fDate').value = todayISO();
+  if(myName()) $('fAuthor').value = myName();
+  $('fPhase').value = 'auto';
+  $('fSubmit').textContent = 'Uložit zápis';
+  $('fCancel').hidden = true;
+  $('form').classList.remove('editing');
+  updateHint();
+}
+$('fCancel').addEventListener('click', resetForm);
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const date = $('fDate').value, text = $('fText').value.trim();
+  if(!date || !text) return;
+  const ph = $('fPhase').value;
+  const phase = ph === 'auto' ? ((phaseForDate(phases, date) || {}).id || null) : (ph || null);
+  const data = { date, text, author:$('fAuthor').value, weather:$('fWeather').value,
+    onsite:$('fOnsite').value.trim(), deal:$('fDeal').value.trim(), phase };
+  setMyName(data.author);
+  try {
+    if(editing) await store.update(editing, data);
+    else await store.add(data);
+    resetForm();
+  } catch(err){ console.error(err); alert('Uložení se nepodařilo.'); }
+});
+
+function startEdit(id){
+  const en = entries.find(x => x.id === id); if(!en) return;
+  editing = id;
+  $('fDate').value = en.date || todayISO();
+  $('fAuthor').value = en.author || myName() || AUTHORS[0];
+  $('fWeather').value = en.weather || '';
+  $('fPhase').value = en.phase && phases.some(p => p.id === en.phase) ? en.phase : 'auto';
+  $('fText').value = en.text || '';
+  $('fOnsite').value = en.onsite || '';
+  $('fDeal').value = en.deal || '';
+  $('fSubmit').textContent = 'Uložit změny';
+  $('fCancel').hidden = false;
+  $('form').classList.add('editing');
+  $('form').scrollIntoView({ behavior:'smooth', block:'start' });
+  $('fText').focus({ preventScroll:true });
+  updateHint();
+}
+
+/* --- výpis po dnech (zápisy + dny jen s fotkami) --- */
+function matches(en, q){
+  if(!q) return true;
+  const hay = [en.text, en.onsite, en.deal, en.author, fmtDate(en.date, { year:true }),
+    (phases.find(p => p.id === en.phase) || {}).name].join(' ');
+  const h = fold(hay);
+  return fold(q).split(/\s+/).every(w => h.includes(w));
+}
+function render(){
+  const q = $('q').value.trim().toLowerCase(), onlyDeals = $('onlyDeals').checked;
+  const days = new Map();
+  entries.forEach(en => {
+    if(!matches(en, q) || (onlyDeals && !en.deal)) return;
+    if(!days.has(en.date)) days.set(en.date, []);
+    days.get(en.date).push(en);
+  });
+  if(!q && !onlyDeals){
+    photos.forEach(f => { if(f.date && !days.has(f.date)) days.set(f.date, []); });
+  }
+  const sorted = [...days.keys()].sort().reverse();
+  if(!sorted.length){
+    $('list').innerHTML = `<div class="board-empty"><span class="be-ic">📒</span><p>${
+      entries.length ? 'Nic neodpovídá hledání.' : 'Deník je zatím prázdný – napiš první zápis výše.'}</p></div>`;
+    return;
+  }
+  let html = '', month = '';
+  sorted.forEach(d => {
+    const m = d.slice(0, 7);
+    if(m !== month){ month = m; html += `<h2 class="dk-month">${esc(monthLabel(m))}</h2>`; }
+    html += dayHTML(d, days.get(d).sort((a, b) => (a.ts || 0) - (b.ts || 0)));
+  });
+  $('list').innerHTML = html;
+  loadThumbs(sorted.slice(0, 30));
+}
+function dayHTML(d, list){
+  const ph = photos.filter(f => f.date === d);
+  const pics = ph.length ? `<div class="dk-photos">${ph.slice(0, 8).map(f =>
+      `<a class="dk-ph" href="fotky-stavby.html" data-photo="${esc(f.id)}" title="${esc(f.caption || 'Fotka ze stavby')}">${
+        thumbs.get(f.id) ? `<img src="${esc(thumbs.get(f.id))}" alt="" loading="lazy">` : ''}</a>`).join('')}${
+      ph.length > 8 ? `<a class="dk-ph dk-more" href="fotky-stavby.html">+${ph.length - 8}</a>` : ''}</div>` : '';
+  if(!list.length){
+    return `<article class="dk-day dk-empty">
+      <div class="dk-dayhead"><b>${esc(fmtDate(d, { weekday:true }))}</b>
+        <span class="dk-muted">📷 ${ph.length} ${pluralCz(ph.length, 'fotka', 'fotky', 'fotek')}, bez zápisu</span>
+        <button type="button" class="dk-addday" data-addday="${esc(d)}">＋ Doplnit zápis</button></div>
+      ${pics}
+    </article>`;
+  }
+  return `<article class="dk-day">
+    <div class="dk-dayhead"><b>${esc(fmtDate(d, { weekday:true }))}</b>${
+      ph.length ? `<span class="dk-muted">📷 ${ph.length}</span>` : ''}</div>
+    ${list.map(en => {
+      const p = phases.find(x => x.id === en.phase);
+      return `<div class="dk-entry" data-id="${esc(en.id)}">
+        <div class="dk-text">${esc(en.text)}</div>
+        ${en.onsite ? `<div class="dk-line">👷 ${esc(en.onsite)}</div>` : ''}
+        ${en.deal ? `<div class="dk-deal">🤝 ${esc(en.deal)}</div>` : ''}
+        <div class="dk-meta">
+          <span class="who who-${slug(en.author)}">${esc(en.author || '')}</span>
+          ${en.weather ? `<span title="${esc(W_NAME[en.weather] || '')}">${W_ICON[en.weather] || ''} ${esc(W_NAME[en.weather] || '')}</span>` : ''}
+          ${p ? `<a href="stavba.html#faze=${encodeURIComponent(p.id)}">🏗️ ${esc(p.name)}</a>` : ''}
+          <span class="dk-tools">
+            <button type="button" data-edit="${esc(en.id)}" title="Upravit" aria-label="Upravit">✎</button>
+            <button type="button" data-del="${esc(en.id)}" title="Smazat" aria-label="Smazat">🗑</button>
+          </span>
+        </div>
+      </div>`;
+    }).join('')}
+    ${pics}
+  </article>`;
+}
+
+async function loadThumbs(days){
+  const want = photos.filter(f => days.includes(f.date) && !thumbs.has(f.id));
+  want.forEach(f => { if(f.thumb || f.src) thumbs.set(f.id, f.thumb || f.src); });
+  const ids = want.filter(f => !thumbs.has(f.id)).map(f => f.id).slice(0, 120);
+  if(!ids.length || !online()) return;
+  try {
+    for(let i = 0; i < ids.length; i += 40){
+      (await getDocsById('fotky', ids.slice(i, i + 40), ['thumb', 'src'])).forEach(d => thumbs.set(d.id, d.thumb || d.src || ''));
+    }
+    $('list').querySelectorAll('.dk-ph[data-photo]').forEach(a => {
+      const src = thumbs.get(a.dataset.photo);
+      if(src && !a.firstChild) a.innerHTML = `<img src="${esc(src)}" alt="" loading="lazy">`;
+    });
+  } catch(e){ console.warn('Náhledy fotek:', e); }
+}
+
+$('q').addEventListener('input', render);
+$('onlyDeals').addEventListener('change', render);
+$('list').addEventListener('click', e => {
+  const add = e.target.closest('[data-addday]');
+  if(add){ resetForm(); $('fDate').value = add.dataset.addday; updateHint(); $('form').scrollIntoView({ behavior:'smooth' }); $('fText').focus({ preventScroll:true }); return; }
+  const ed = e.target.closest('[data-edit]');
+  if(ed){ startEdit(ed.dataset.edit); return; }
+  const del = e.target.closest('[data-del]');
+  if(del){
+    const en = entries.find(x => x.id === del.dataset.del);
+    if(en && confirm(`Smazat zápis z ${fmtDate(en.date, { year:true })}?`))
+      store.remove(en.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+  }
+});
+
+/* --- start --- */
+const [tl, ph] = await Promise.all([
+  loadTimeline().catch(() => null),
+  (online() ? listDocs('fotky', ['date', 'caption', 'src']) : Promise.reject(new Error('offline')))
+    .catch(() => localList('rdmodrice-fotky-v1')),
+]);
+phases = tl ? tl.phases : [];
+photos = Array.isArray(ph) ? ph : [];
+fillPhases();
+updateHint();
+store = await createStore({ coll:'denik', localKey:'rdmodrice-denik-v1', label:'Zápisy',
+  onStatus: setStatusEl($('status')),
+  onItems: list => { entries = list; render(); updateHint(); } });
+const qd = new URLSearchParams(location.search).get('den');
+if(qd && /^\d{4}-\d{2}-\d{2}$/.test(qd)){ $('fDate').value = qd; updateHint(); }
+</script>
+</body>
+</html>

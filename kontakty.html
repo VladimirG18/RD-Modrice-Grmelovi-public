@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Kontakty</title>
+<meta name="description" content="Kontakty ke stavbě domu v Modřicích – stavební firma, řemeslníci, dodavatelé, správci sítí a úřady na jednom místě." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+<script type="module" src="assets/search.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Hlavní navigace">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks" id="navlinks">
+      <a class="navhome" href="index.html" data-ic="🏡">Přehled</a>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Dům</button>
+        <div class="navmenu">
+          <a href="model.html" data-ic="🏠">3D model</a>
+          <a href="informace.html" data-ic="ℹ️">Informace o domě</a>
+          <a href="material.html" data-ic="🧱">Materiály</a>
+          <a href="dokumentace.html" data-ic="📐">Dokumentace</a>
+          <a href="vykresy.html" data-ic="🖍️">Editor výkresů</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Stavba</button>
+        <div class="navmenu">
+          <a href="stavba.html" data-ic="🏗️">Postup stavby</a>
+          <a href="harmonogram.html" data-ic="📅">Harmonogram</a>
+          <a href="denik.html" data-ic="📒">Stavební deník</a>
+          <a href="fotky-stavby.html" data-ic="📷">Fotky ze stavby</a>
+          <a href="pripojky.html" data-ic="🔌">Přípojky</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Nápady</button>
+        <div class="navmenu">
+          <a href="vizualizace.html" data-ic="🖼️">Vizualizace</a>
+          <a href="inspirace.html" data-ic="💡">Inspirace</a>
+          <a href="pozadavky.html" data-ic="✏️">Požadavky na model</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
+        <div class="navmenu">
+          <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
+          <a href="vybery.html" data-ic="🧭">Výběry a rozhodnutí</a>
+          <a href="kontakty.html" data-ic="📇">Kontakty</a>
+          <a href="poznamky.html" data-ic="📝">Poznámky</a>
+        </div>
+      </div>
+    </div>
+    <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span aria-hidden="true">☰</span></button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <span class="eyebrow">Plánování</span>
+  <h1>Kontakty</h1>
+  <p class="lead">Telefony a e-maily na všechny, kdo se na stavbě podílejí – firma, řemeslníci, dodavatelé,
+  správci sítí i&nbsp;úřady. Na mobilu stačí ťuknout na <b>Zavolat</b>.</p>
+
+  <div id="status" class="statusbar">Načítám kontakty…</div>
+
+  <div class="kt-bar">
+    <input type="search" id="q" class="dk-search" placeholder="🔎 Hledat jméno, firmu, obor, číslo…" aria-label="Hledat kontakt">
+    <button type="button" class="btn primary" id="addBtn">＋ Přidat kontakt</button>
+  </div>
+  <div class="board-filter" id="cats" role="group" aria-label="Kategorie"></div>
+
+  <form class="board-add kt-form" id="form" autocomplete="off" hidden>
+    <div class="ba-row">
+      <label class="ba-field ba-grow">Jméno *
+        <input type="text" id="fName" required maxlength="80" placeholder="Jan Novák">
+      </label>
+      <label class="ba-field ba-grow">Firma
+        <input type="text" id="fCompany" maxlength="80" placeholder="Stavby Novák s.r.o.">
+      </label>
+      <label class="ba-field">Kategorie
+        <select id="fCat"></select>
+      </label>
+    </div>
+    <div class="ba-row">
+      <label class="ba-field ba-grow">Co dělá / role
+        <input type="text" id="fRole" maxlength="100" placeholder="stavbyvedoucí, elektrikář, obchodník…">
+      </label>
+      <label class="ba-field">Telefon
+        <input type="tel" id="fPhone" maxlength="30" placeholder="+420 777 123 456">
+      </label>
+      <label class="ba-field ba-grow">E-mail
+        <input type="email" id="fEmail" maxlength="100" placeholder="jan@firma.cz">
+      </label>
+    </div>
+    <div class="ba-row">
+      <label class="ba-field ba-grow">Web
+        <input type="url" id="fWeb" maxlength="200" placeholder="https://…">
+      </label>
+      <label class="ba-field ba-grow">Poznámka
+        <input type="text" id="fNote" maxlength="300" placeholder="číslo smlouvy, kdy volat, co řeší…">
+      </label>
+    </div>
+    <div class="dk-form-foot">
+      <button type="button" class="btn" id="fCancel">Zrušit</button>
+      <button class="btn primary" type="submit" id="fSubmit">Uložit kontakt</button>
+    </div>
+  </form>
+
+  <div id="list" class="kt-grid"><div class="now-skel"><i></i><i></i><i></i></div></div>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — sdílené kontakty ke stavbě.
+</footer>
+
+<script type="module">
+import { createStore, setStatusEl, esc, fold } from './assets/store.js';
+
+const $ = id => document.getElementById(id);
+const CATS = [
+  { id:'stavba',   name:'Stavební firma', icon:'🏗️' },
+  { id:'remesla',  name:'Řemeslníci',     icon:'🔧' },
+  { id:'dodavatel',name:'Dodavatelé',     icon:'📦' },
+  { id:'site',     name:'Sítě a přípojky',icon:'🔌' },
+  { id:'projekt',  name:'Projekt a dozor',icon:'📐' },
+  { id:'urad',     name:'Úřady',          icon:'🏛️' },
+  { id:'finance',  name:'Banka a pojištění', icon:'🏦' },
+  { id:'ostatni',  name:'Ostatní',        icon:'👤' },
+];
+const CAT = Object.fromEntries(CATS.map(c => [c.id, c]));
+// výchozí kontakty – jen to, co je známé z podkladů webu (telefony doplní rodina)
+const SEED = [
+  { name:'EG.D – připojení k distribuční soustavě', company:'EG.D, a.s.', role:'elektrická přípojka', cat:'site',
+    web:'https://www.egd.cz/pripojeni-uplne-noveho-odberneho-mista', note:'Smlouva o připojení č. 9002317986, jistič 3×25 A/B.' },
+  { name:'GasNet – plynovodní přípojka', company:'GasNet, s.r.o.', role:'plynová přípojka', cat:'site',
+    web:'https://www.gasnet.cz/pripojeni-k-plynu/nove-pripojeni/plynovodni-pripojka', note:'Smlouva o připojení podepsaná, projekt hotový (7/2024).' },
+  { name:'BVK – přípojkové oddělení', company:'Brněnské vodárny a kanalizace, a.s.', role:'vodovodní přípojka', cat:'site',
+    web:'https://www.bvk.cz/vyjadrovaci-portal/vyjadrovani-k-projektove-dokumentaci/informace-ke-zrizeni-vodovodni-pripojky',
+    note:'Kladné vyjádření 8/2024. Realizaci objednat před zimou.' },
+  { name:'Ing. arch. Bradáč', company:'', role:'projektant – projektová dokumentace (07/2023)', cat:'projekt' },
+].map((c, i) => ({ phone:'', email:'', web:'', note:'', company:'', ...c, order:(i + 1) * 10 }));
+
+let items = [], store = null, editing = null, cat = '';
+$('fCat').innerHTML = CATS.map(c => `<option value="${c.id}">${c.icon} ${esc(c.name)}</option>`).join('');
+
+/* --- pomocné --- */
+const telHref = p => { const d = String(p || '').replace(/[^\d+]/g, ''); return d ? 'tel:' + d : ''; };
+function waNumber(p){
+  let d = String(p || '').replace(/\D/g, '');
+  if(d.startsWith('00')) d = d.slice(2);
+  if(d.length === 9) d = '420' + d;            // české číslo bez předvolby
+  return d.length >= 11 ? d : '';
+}
+const fmtPhone = p => {
+  const d = String(p || '').replace(/\s+/g, '');
+  const m = /^(\+?\d{3})?(\d{3})(\d{3})(\d{3})$/.exec(d);
+  return m ? [m[1], m[2], m[3], m[4]].filter(Boolean).join(' ') : p;
+};
+const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch(e){ return u; } };
+const initials = n => String(n || '?').replace(/^(Ing\.|Mgr\.|arch\.|Bc\.|JUDr\.|\s)+/gi, '').split(/\s+/)
+  .filter(w => /^\p{L}/u.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+
+function vcard(c){
+  const lines = ['BEGIN:VCARD', 'VERSION:3.0', `FN:${c.name}`];
+  if(c.company) lines.push(`ORG:${c.company}`);
+  if(c.role) lines.push(`TITLE:${c.role}`);
+  if(c.phone) lines.push(`TEL;TYPE=CELL:${String(c.phone).replace(/\s+/g, '')}`);
+  if(c.email) lines.push(`EMAIL:${c.email}`);
+  if(c.web) lines.push(`URL:${c.web}`);
+  lines.push(`NOTE:${['RD Modřice', c.note].filter(Boolean).join(' – ')}`, 'END:VCARD');
+  const blob = new Blob([lines.join('\r\n')], { type:'text/vcard' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  // název souboru bez diakritiky – s háčky a čárkami ho Chrome nahradí za „download"
+  a.download = ((c.name || 'kontakt').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9 ._-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) || 'kontakt') + '.vcf';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* --- výpis --- */
+function matches(c, q){
+  if(!q) return true;
+  const hay = [c.name, c.company, c.role, c.note, c.email, c.web, String(c.phone || '').replace(/\s/g, ''), (CAT[c.cat] || {}).name]
+    .join(' ');
+  const h = fold(hay);
+  return fold(q).split(/\s+/).every(w => h.includes(w));
+}
+function renderCats(){
+  const n = id => items.filter(c => !id || c.cat === id).length;
+  $('cats').innerHTML = `<button type="button" class="fchip${cat === '' ? ' on' : ''}" data-cat="">Vše <b>${items.length}</b></button>` +
+    CATS.filter(c => n(c.id)).map(c => `<button type="button" class="fchip${cat === c.id ? ' on' : ''}" data-cat="${c.id}">${c.icon} ${esc(c.name)} <b>${n(c.id)}</b></button>`).join('');
+}
+function cardHTML(c){
+  const k = CAT[c.cat] || CAT.ostatni;
+  const wa = waNumber(c.phone);
+  return `<article class="kt-card" data-id="${esc(c.id)}">
+    <div class="kt-head">
+      <span class="kt-av" aria-hidden="true">${esc(initials(c.name))}</span>
+      <div class="kt-who">
+        <b>${esc(c.name)}</b>
+        <span>${[c.company, c.role].filter(Boolean).map(esc).join(' · ') || esc(k.name)}</span>
+      </div>
+      <span class="kt-cat" title="${esc(k.name)}">${k.icon}</span>
+    </div>
+    <div class="kt-lines">
+      ${c.phone ? `<a href="${esc(telHref(c.phone))}">📞 ${esc(fmtPhone(c.phone))}</a>` : ''}
+      ${c.email ? `<a href="mailto:${esc(c.email)}">✉️ ${esc(c.email)}</a>` : ''}
+      ${c.web ? `<a href="${esc(c.web)}" target="_blank" rel="noopener">🌐 ${esc(host(c.web))}</a>` : ''}
+      ${!c.phone && !c.email && !c.web ? '<span class="dk-muted">Zatím bez telefonu a e-mailu – doplň ✎</span>' : ''}
+    </div>
+    ${c.note ? `<p class="kt-note">${esc(c.note)}</p>` : ''}
+    <div class="kt-actions">
+      ${c.phone ? `<a class="btn primary" href="${esc(telHref(c.phone))}">📞 Zavolat</a>` : ''}
+      ${wa ? `<a class="btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" title="Napsat přes WhatsApp">💬</a>` : ''}
+      ${c.email ? `<a class="btn" href="mailto:${esc(c.email)}" title="Poslat e-mail">✉️</a>` : ''}
+      <span class="kt-sp"></span>
+      <button type="button" class="kt-ic" data-vcf="${esc(c.id)}" title="Uložit do telefonu (vizitka .vcf)" aria-label="Uložit do telefonu">📇</button>
+      <button type="button" class="kt-ic" data-edit="${esc(c.id)}" title="Upravit" aria-label="Upravit">✎</button>
+      <button type="button" class="kt-ic" data-del="${esc(c.id)}" title="Smazat" aria-label="Smazat">🗑</button>
+    </div>
+  </article>`;
+}
+function render(){
+  renderCats();
+  const q = $('q').value.trim().toLowerCase();
+  const list = items.filter(c => (!cat || c.cat === cat) && matches(c, q))
+    .sort((a, b) => CATS.findIndex(x => x.id === a.cat) - CATS.findIndex(x => x.id === b.cat) ||
+      String(a.name).localeCompare(String(b.name), 'cs'));
+  $('list').innerHTML = list.length ? list.map(cardHTML).join('')
+    : `<div class="board-empty"><span class="be-ic">📇</span><p>${items.length ? 'Nic neodpovídá hledání.' : 'Zatím tu nejsou žádné kontakty.'}</p></div>`;
+}
+
+/* --- formulář --- */
+const F = ['Name', 'Company', 'Cat', 'Role', 'Phone', 'Email', 'Web', 'Note'];
+function openForm(c){
+  editing = c ? c.id : null;
+  $('form').hidden = false;
+  F.forEach(f => { $('f' + f).value = c ? (c[f.toLowerCase()] || '') : ''; });
+  if(!c) $('fCat').value = cat || 'remesla';
+  $('fSubmit').textContent = c ? 'Uložit změny' : 'Uložit kontakt';
+  $('addBtn').hidden = true;
+  $('form').scrollIntoView({ behavior:'smooth', block:'start' });
+  $('fName').focus({ preventScroll:true });
+}
+function closeForm(){ editing = null; $('form').hidden = true; $('form').reset(); $('addBtn').hidden = false; }
+$('addBtn').addEventListener('click', () => openForm(null));
+$('fCancel').addEventListener('click', closeForm);
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(F.map(f => [f.toLowerCase(), $('f' + f).value.trim()]));
+  if(!data.name) return;
+  if(data.web && !/^https?:\/\//i.test(data.web)) data.web = 'https://' + data.web;
+  try {
+    if(editing) await store.update(editing, data);
+    else await store.add({ ...data, order:Date.now() });
+    closeForm();
+  } catch(err){ console.error(err); alert('Uložení se nepodařilo.'); }
+});
+
+$('q').addEventListener('input', render);
+$('cats').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if(!b) return; cat = b.dataset.cat; render(); });
+$('list').addEventListener('click', e => {
+  const v = e.target.closest('[data-vcf]');
+  if(v){ const c = items.find(x => x.id === v.dataset.vcf); if(c) vcard(c); return; }
+  const ed = e.target.closest('[data-edit]');
+  if(ed){ openForm(items.find(x => x.id === ed.dataset.edit)); return; }
+  const del = e.target.closest('[data-del]');
+  if(del){
+    const c = items.find(x => x.id === del.dataset.del);
+    if(c && confirm(`Smazat kontakt „${c.name}“?`)) store.remove(c.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+  }
+});
+
+store = await createStore({ coll:'kontakty', localKey:'rdmodrice-kontakty-v1', label:'Kontakty', seed:SEED,
+  onStatus: setStatusEl($('status')), onItems: list => { items = list; render(); } });
+</script>
+</body>
+</html>

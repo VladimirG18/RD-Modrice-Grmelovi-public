@@ -268,6 +268,22 @@ const SOURCES = [
     row: d => ({ h: [clean(d.text).slice(0, 70), d.done ? 'hotovo' : ''].filter(Boolean).join(' · '),
       t: [d.text, d.note, d.group, d.who, d.due, d.done ? 'hotovo' : 'otevřený'].filter(Boolean).join(' · ') }) },
 
+  { coll:'denik', page:'denik.html', icon:'📒', label:'Stavební deník',
+    fields:['date','text','author','onsite','deal'], local:'rdmodrice-denik-v1',
+    row: (d, L) => ({ h: [L.day(d.date), d.author].filter(Boolean).join(' · '),
+      t: [d.text, d.onsite, d.deal, L.day(d.date), d.author].filter(Boolean).join(' · ') }) },
+
+  { coll:'kontakty', page:'kontakty.html', icon:'📇', label:'Kontakty',
+    fields:['name','company','role','phone','email','note'], local:'rdmodrice-kontakty-v1',
+    row: d => ({ h: [clean(d.name), d.company].filter(Boolean).join(' · '),
+      t: [d.name, d.company, d.role, d.phone, d.email, d.note].filter(Boolean).join(' · ') }) },
+
+  { coll:'vybery', page:'vybery.html', icon:'🧭', label:'Výběry',
+    fields:['title','note','status','due','variants'], local:'rdmodrice-vybery-v1',
+    row: d => ({ h: clean(d.title),
+      t: [d.title, d.note, d.due, ...(Array.isArray(d.variants) ? d.variants.map(v => [v && v.name, v && v.note].filter(Boolean).join(' ')) : [])]
+        .filter(Boolean).join(' · ') }) },
+
   { coll:'harmonogram_kroky', page:'harmonogram.html', icon:'📅', label:'Harmonogram – kroky',
     fields:['text','when','status'], local:'rdmodrice-harmonogram-kroky-v1',
     row: (d, L) => ({ h: clean(d.text).slice(0, 70),
