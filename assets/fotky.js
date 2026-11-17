@@ -18,6 +18,8 @@
 
 import { firebaseConfig } from './firebase-config.js';
 import { compressFile, compressForInline, blobToDataURL } from './board.js';
+import { phaseForDate, effectivePhase } from './data.js';
+export { phaseForDate, effectivePhase };     // logika fází je sdílená (Přehled, Postup stavby)
 
 const FB_VER = 'https://www.gstatic.com/firebasejs/10.12.2';
 const AUTHORS = ['Lucka', 'Vladimír', 'Jirka', 'Jarka'];
@@ -276,17 +278,6 @@ export async function watchPhases(cb){
   cb(localPhases());
 }
 
-/* Do které fáze fotka podle data spadá – vyhrává fáze, která začala
-   nejpozději před datem fotky a ještě neskončila (fáze se překrývají). */
-export function phaseForDate(phases, iso){
-  if(!isISO(iso) || !Array.isArray(phases)) return null;
-  const month = iso.slice(0, 7);
-  const hit = phases.filter(f => f.start && month >= f.start && (!f.end || month <= f.end));
-  if(!hit.length) return null;
-  hit.sort((a, b) => String(a.start).localeCompare(String(b.start)) || (a.order || 0) - (b.order || 0));
-  return hit[hit.length - 1];
-}
-
 /* ---------- Firebase (Firestore, realtime) ---------- */
 async function firebaseBackend(){
   const { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, onSnapshot, writeBatch }
@@ -372,19 +363,19 @@ export async function initFotky(opts){
             nebo <span class="linklike" id="fPick">vyber fotky</span></span>
         </div>
       </div>
-      <div class="ba-hint">Datum focení si aplikace u každé fotky vezme sama – z údajů ve fotce,
+      <details class="helpbox fot-help"><summary>💡 Jak se zjišťuje datum a fáze</summary>
+        <p>Datum focení si aplikace u každé fotky vezme sama – z údajů ve fotce,
         případně z názvu souboru (fotky přeposlané přes WhatsApp o své údaje přijdou, datum jim ale
         zůstane v názvu). Teprve když se nedá zjistit, použije se datum nastavené výše. Fotky se před
         uložením zmenší, ať se stránka rychle načítá – popisek, datum i fáze jdou kdykoli upravit.
-        Fáze se nabízejí z <a href="harmonogram.html">harmonogramu</a>; ve výchozím nastavení
-        se ke každé fotce doplní ta, do které podle data spadá.</div>
+        Fáze se berou z <a href="harmonogram.html">harmonogramu</a>: fotka, u které fázi nevybereš,
+        se sama zařadí do té, do které podle data spadá.</p></details>
 
       <div class="ba-progress" id="fProg" hidden></div>
     </div>
 
     <div class="fot-bar">
       <span class="fot-count" id="fCount"></span>
-      <button class="btn" id="fFill" type="button" hidden></button>
       <button class="btn" id="fOrder" type="button"></button>
     </div>
 
@@ -405,7 +396,7 @@ export async function initFotky(opts){
   const statusEl = $('fStatus'), authorEl = $('fAuthor'), dateEl = $('fDate'),
         capEl = $('fCaption'), bodyEl = $('fBody'), progEl = $('fProg'),
         countEl = $('fCount'), orderBtn = $('fOrder'), phaseEl = $('fPhase'),
-        filterEl = $('fFilter'), fillBtn = $('fFill');
+        filterEl = $('fFilter');
 
   dateEl.value = todayISO();
   try {
@@ -433,14 +424,10 @@ export async function initFotky(opts){
   } catch(e){}
 
   const phaseById = id => phases.find(f => f.id === id) || null;
-  const phaseLabel = it => {
-    const f = phaseById(it.phase);
-    return f ? f.name : (it.phaseName || '');
-  };
-  const phaseIcon = it => {
-    const f = phaseById(it.phase);
-    return PHASE_ICON[f ? f.status : ''] || '🏗️';
-  };
+  const eff = it => effectivePhase(phases, it);              // uložená fáze, jinak podle data
+  const phaseKey = it => { const f = eff(it); return f ? f.id : ''; };
+  const phaseLabel = it => { const f = eff(it); return f ? f.name : ''; };
+  const phaseIcon = it => { const f = eff(it); return PHASE_ICON[f ? f.status : ''] || '🏗️'; };
 
   function fillPhaseSelect(){
     const cur = phaseEl.value;
@@ -512,7 +499,8 @@ export async function initFotky(opts){
         const full  = await blobToDataURL(await compressForInline(f));
         const faze = phaseChoice === 'auto' ? phaseForDate(phases, date) : phaseById(phaseChoice);
         await backend.add({ date, dateSrc: src, caption, author, thumb, ts: Date.now(),
-          phase: faze ? faze.id : null, phaseName: faze ? faze.name : null }, full);
+          phase: faze ? faze.id : null, phaseName: faze ? faze.name : null,
+          phaseManual: phaseChoice === '' }, full);
         zdroje[src] = (zdroje[src] || 0) + 1;
         ok++;
       } catch(e){
@@ -591,8 +579,8 @@ export async function initFotky(opts){
           <input type="text" class="fot-in-cap" value="${esc(it.caption || '')}" placeholder="Popisek fotky" />
           <input type="date" class="fot-in-date" value="${esc(it.date || '')}" />
           <select class="fot-in-phase">
-            <option value=""${it.phase ? '' : ' selected'}>— bez fáze —</option>
-            ${phases.map(f => `<option value="${esc(f.id)}"${f.id === it.phase ? ' selected' : ''}>${
+            <option value=""${phaseKey(it) ? '' : ' selected'}>— bez fáze —</option>
+            ${phases.map(f => `<option value="${esc(f.id)}"${f.id === phaseKey(it) ? ' selected' : ''}>${
               PHASE_ICON[f.status] || '🏗️'} ${esc(f.name)}</option>`).join('')}
           </select>
           <div class="fot-edit-btns">
@@ -611,8 +599,8 @@ export async function initFotky(opts){
         <img src="${esc(src)}" alt="${esc(it.caption || 'Fotka ze stavby')}" loading="lazy" />
       </button>
       <figcaption>
-        ${phaseLabel(it) ? `<button class="fot-phase" type="button" data-phase="${esc(it.phase || '')}"
-            title="Zobrazit jen fotky z této fáze">${phaseIcon(it)} <span>${esc(phaseLabel(it))}</span></button>` : ''}
+        ${phaseLabel(it) ? `<button class="fot-phase" type="button" data-phase="${esc(phaseKey(it))}"
+            title="${eff(it).auto ? 'Fáze podle data fotky · ' : ''}Zobrazit jen fotky z této fáze">${phaseIcon(it)} <span>${esc(phaseLabel(it))}</span></button>` : ''}
         ${it.caption ? `<span class="fot-cap">${esc(it.caption)}</span>` : '<span class="fot-cap fot-cap-empty">Bez popisku</span>'}
         <span class="fot-meta">${who}${it.ts ? ` · přidáno ${esc(fmtAdded(it.ts))}` : ''}${
           it.dateSrc && it.dateSrc !== 'formular' && SRC_TEXT[it.dateSrc]
@@ -626,7 +614,7 @@ export async function initFotky(opts){
   function renderFilter(){
     if(!items.length || (!phases.length && !items.some(i => i.phase))){ filterEl.innerHTML = ''; return; }
     const pocty = {};
-    items.forEach(i => { const k = i.phase || ''; pocty[k] = (pocty[k] || 0) + 1; });
+    items.forEach(i => { const k = phaseKey(i); pocty[k] = (pocty[k] || 0) + 1; });
     const chip = (val, label, n) =>                       // val === null → „Vše"
       `<button class="fchip${activePhase === val ? ' on' : ''}" ${
         val === null ? 'data-vse="1"' : `data-faze="${esc(val)}"`}>${label} <b>${n}</b></button>`;
@@ -640,7 +628,7 @@ export async function initFotky(opts){
     filterEl.innerHTML = html;
   }
 
-  const vFiltru = () => activePhase === null ? items : items.filter(i => (i.phase || '') === activePhase);
+  const vFiltru = () => activePhase === null ? items : items.filter(i => phaseKey(i) === activePhase);
 
   function render(list){
     items = Array.isArray(list) ? list : [];
@@ -653,7 +641,6 @@ export async function initFotky(opts){
     orderBtn.hidden = items.length < 2;
 
     renderFilter();
-    updateFillBtn();
 
     if(!items.length){
       bodyEl.innerHTML = `<div class="board-empty">
@@ -673,36 +660,6 @@ export async function initFotky(opts){
         <div class="gallery">${g.items.map(cardHTML).join('')}</div>
       </section>`).join('');
   }
-
-  /* --- hromadné doplnění fází u fotek, které ji ještě nemají --- */
-  const bezFaze = () => items.filter(i => !i.phase && phaseForDate(phases, i.date));
-
-  function updateFillBtn(){
-    const n = bezFaze().length;
-    fillBtn.hidden = !n;
-    if(n) fillBtn.textContent = `🏗️ Doplnit fáze podle data (${n})`;
-  }
-
-  fillBtn.addEventListener('click', async () => {
-    const list = bezFaze();
-    if(!list.length) return;
-    if(!confirm(`Doplnit fázi u ${list.length} ${pluralCz(list.length, 'fotky', 'fotek', 'fotek')} bez fáze?\n\n` +
-      'U každé se použije fáze z harmonogramu, do které fotka podle data spadá. ' +
-      'Fotky, které fázi už mají, se nemění.')) return;
-    fillBtn.disabled = true;
-    let ok = 0;
-    for(const it of list){
-      const f = phaseForDate(phases, it.date);
-      if(!f) continue;
-      try { await backend.update(it.id, { phase:f.id, phaseName:f.name }); ok++; }
-      catch(e){ console.error(e); }
-      busy(true, `Doplňuji fáze… (${ok}/${list.length})`);
-    }
-    fillBtn.disabled = false;
-    busy(true, `✅ Fáze doplněna u ${ok} ${pluralCz(ok, 'fotky', 'fotek', 'fotek')}.`);
-    clearTimeout(busyTimer);
-    busyTimer = setTimeout(() => busy(false), 7000);
-  });
 
   /* --- filtr podle fáze --- */
   function setPhaseFilter(val){          // null = vše
@@ -749,7 +706,8 @@ export async function initFotky(opts){
       const orig = items.find(i => i.id === save.dataset.save);
       const novy = isISO(date) ? date : todayISO();
       const patch = { caption, date: novy,
-        phase: faze ? faze.id : null, phaseName: faze ? faze.name : null };
+        phase: faze ? faze.id : null, phaseName: faze ? faze.name : null,
+        phaseManual: !faze };                                     // „bez fáze" vybrané ručně → nedoplňovat podle data
       if(orig && orig.date !== novy) patch.dateSrc = 'rucne';     // datum zadané ručně
       backend.update(save.dataset.save, patch)
         .catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
@@ -834,6 +792,5 @@ export async function initFotky(opts){
 
   // testovací háček (neškodný) – ať jde přidávání ověřit z automatického testu
   window.__fotky = { add: addFiles, items: () => items, exifDate, detectDate, dateFromName,
-                     phases: () => phases, phaseForDate, filter: setPhaseFilter,
-                     fill: () => fillBtn.click() };
+                     phases: () => phases, phaseForDate, effectivePhase, filter: setPhaseFilter };
 }

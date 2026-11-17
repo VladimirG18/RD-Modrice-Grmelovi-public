@@ -534,6 +534,7 @@ function applyDepthFix(){
 }
 
 let modelSize = 10, modelCenter = new THREE.Vector3();
+let houseRadius = 8, houseCenter = new THREE.Vector3();   // jen dům (bez terénu a sousedů) – na něj míří úvodní pohled
 let loadedModel = null;   // kořen načteného modelu (pro raycast „špendlíku")
 
 // --- Načtení modelu ---
@@ -565,7 +566,14 @@ loader.load('RDModrice.glb', (gltf) => {
   const size = box.getSize(new THREE.Vector3());
   modelSize = Math.max(size.x, size.y, size.z);
 
-  orbit.target.copy(modelCenter);
+  // úvodní pohled míří na samotný dům – s terénem a sousedními domy by byl na obrazovce maličký
+  const houseBox = new THREE.Box3();
+  model.traverse(o=>{ if(o.isMesh && /^(RD_Obvod|RD_strecha|vypln)/i.test(o.name || '')) houseBox.expandByObject(o); });
+  if(houseBox.isEmpty()) houseBox.copy(box);
+  houseBox.getCenter(houseCenter);
+  houseRadius = houseBox.getSize(new THREE.Vector3()).length() / 2;
+
+  orbit.target.copy(houseCenter);
   orbit.minDistance = modelSize * 0.02;
   orbit.maxDistance = modelSize * 6;
   resetView();
@@ -582,10 +590,16 @@ loader.load('RDModrice.glb', (gltf) => {
   document.getElementById('loader').innerHTML = '<div style="color:#ff6b6b">Nepodařilo se načíst model.<br>'+err+'</div>';
 });
 
+// vzdálenost, ze které se celý dům vejde do záběru (na výšku na mobilu je záběr užší → dál)
+function fitDistance(){
+  const vF = THREE.MathUtils.degToRad(camera.fov);
+  const hF = 2 * Math.atan(Math.tan(vF / 2) * camera.aspect);
+  return houseRadius / Math.sin(Math.min(vF, hF) / 2) * 0.9;
+}
 function resetView(){
-  const d = modelSize * 1.6;
-  camera.position.set(modelCenter.x + d*0.7, modelCenter.y + d*0.5, modelCenter.z + d*0.7);
-  orbit.target.copy(modelCenter);
+  const dir = new THREE.Vector3(0.7, 0.5, 0.7).normalize();
+  camera.position.copy(houseCenter).addScaledVector(dir, fitDistance());
+  orbit.target.copy(houseCenter);
   orbit.update();
 }
 
@@ -855,9 +869,9 @@ function applyLight(p){
 document.getElementById('dollhouse').addEventListener('click', ()=>{
   document.getElementById('t-roof').checked = false; groups.roof.forEach(o=>o.visible=false);
   document.getElementById('t-walls').checked = false; groups.walls.forEach(o=>o.visible=false);
-  const d = modelSize * 1.4;
-  camera.position.set(modelCenter.x + d*0.25, modelCenter.y + d*1.1, modelCenter.z + d*0.25);
-  orbit.target.copy(modelCenter); orbit.update();
+  const dir = new THREE.Vector3(0.25, 1.1, 0.25).normalize();
+  camera.position.copy(houseCenter).addScaledVector(dir, fitDistance());
+  orbit.target.copy(houseCenter); orbit.update();
 });
 
 document.getElementById('resetBtn').addEventListener('click', resetView);
