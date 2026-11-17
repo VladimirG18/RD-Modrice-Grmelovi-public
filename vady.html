@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD Modřice – Vady a nedodělky</title>
+<meta name="description" content="Evidence vad a nedodělků na stavbě domu v Modřicích – s fotkou, místem, zhotovitelem, termínem a stavem opravy." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+<script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/site.js"></script>
+<script type="module" src="assets/search.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Hlavní navigace">
+    <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
+    <div class="navlinks" id="navlinks">
+      <a class="navhome" href="index.html" data-ic="🏡">Přehled</a>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Dům</button>
+        <div class="navmenu">
+          <a href="model.html" data-ic="🏠">3D model</a>
+          <a href="informace.html" data-ic="ℹ️">Informace o domě</a>
+          <a href="material.html" data-ic="🧱">Materiály</a>
+          <a href="dokumentace.html" data-ic="📐">Dokumentace</a>
+          <a href="vykresy.html" data-ic="🖍️">Editor výkresů</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Stavba</button>
+        <div class="navmenu">
+          <a href="stavba.html" data-ic="🏗️">Postup stavby</a>
+          <a href="harmonogram.html" data-ic="📅">Harmonogram</a>
+          <a href="denik.html" data-ic="📒">Stavební deník</a>
+          <a href="fotky-stavby.html" data-ic="📷">Fotky ze stavby</a>
+          <a href="vady.html" data-ic="🔧">Vady a nedodělky</a>
+          <a href="pripojky.html" data-ic="🔌">Přípojky</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Nápady</button>
+        <div class="navmenu">
+          <a href="vizualizace.html" data-ic="🖼️">Vizualizace</a>
+          <a href="inspirace.html" data-ic="💡">Inspirace</a>
+          <a href="pozadavky.html" data-ic="✏️">Požadavky na model</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
+        <div class="navmenu">
+          <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
+          <a href="vybery.html" data-ic="🧭">Výběry a rozhodnutí</a>
+          <a href="kontakty.html" data-ic="📇">Kontakty</a>
+          <a href="poznamky.html" data-ic="📝">Poznámky</a>
+        </div>
+      </div>
+    </div>
+    <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
+    <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span aria-hidden="true">☰</span></button>
+  </nav>
+</header>
+
+<div class="content wide">
+  <span class="eyebrow">Stavba</span>
+  <h1>Vady a nedodělky</h1>
+  <p class="lead">Co je na stavbě špatně nebo nedodělané – s&nbsp;fotkou, místem, zhotovitelem a&nbsp;termínem.
+  Sledujte, jestli je to nahlášené, opravené a&nbsp;zkontrolované. Hodí se hlavně při přebírání prací.</p>
+
+  <div id="status" class="statusbar">Načítám…</div>
+  <div class="uk-sum" id="sum"></div>
+
+  <div class="kt-bar">
+    <input type="search" id="q" class="dk-search" placeholder="🔎 Hledat vadu, místo, firmu…" aria-label="Hledat">
+    <button type="button" class="btn" id="printBtn" title="Vytisknout / uložit do PDF seznam otevřených vad">📄 Soupis k předání</button>
+    <button type="button" class="btn primary" id="addBtn">＋ Zapsat vadu</button>
+  </div>
+  <div class="board-filter" id="fState" role="group" aria-label="Stav"></div>
+
+  <form class="board-add vd-form" id="form" autocomplete="off" hidden>
+    <div class="ba-row">
+      <label class="ba-field ba-grow">Co je špatně *
+        <input type="text" id="fTitle" required maxlength="120" placeholder="Např. „Prasklina v omítce nad oknem“">
+      </label>
+      <label class="ba-field">Závažnost
+        <select id="fSev"></select>
+      </label>
+    </div>
+    <label class="ba-field dk-full">Popis (nepovinné)
+      <textarea id="fDesc" rows="2" maxlength="1000" placeholder="Rozměr, jak se to projevuje, co s tím má firma udělat…"></textarea>
+    </label>
+    <div class="ba-row">
+      <label class="ba-field ba-grow">Kde
+        <input type="text" id="fPlace" maxlength="100" list="places" placeholder="Obývák, jižní fasáda, garáž…">
+        <datalist id="places"></datalist>
+      </label>
+      <label class="ba-field ba-grow">Zhotovitel (kdo má opravit)
+        <input type="text" id="fWho" maxlength="100" list="firms" placeholder="Firma / řemeslník">
+        <datalist id="firms"></datalist>
+      </label>
+      <label class="ba-field">Termín odstranění
+        <input type="date" id="fDue">
+      </label>
+    </div>
+    <div class="ba-row">
+      <label class="ba-field">Zjištěno dne
+        <input type="date" id="fFound">
+      </label>
+      <label class="ba-field">Kdo zjistil
+        <select id="fBy"></select>
+      </label>
+      <label class="ba-field ba-grow">Fáze stavby
+        <select id="fPhase"></select>
+      </label>
+    </div>
+    <div class="vd-photos-edit" id="fPhotos"></div>
+    <div class="dk-form-foot">
+      <label class="btn vd-addphoto">📷 Přidat fotky<input type="file" id="fFile" accept="image/*" multiple hidden></label>
+      <span class="dk-hint" id="fHint">až 4 fotky; zmenší se před uložením</span>
+      <button type="button" class="btn" id="fCancel">Zrušit</button>
+      <button class="btn primary" type="submit" id="fSubmit">Uložit vadu</button>
+    </div>
+  </form>
+
+  <div id="list"><div class="now-skel"><i></i><i></i><i></i></div></div>
+
+  <p class="note">Tip: při přebírání prací projděte dům s&nbsp;mobilem, každou vadu vyfoťte a&nbsp;zapište.
+  Tlačítko <b>📄 Soupis k&nbsp;předání</b> pak vytiskne (nebo uloží do PDF) seznam otevřených vad, třeba jako
+  přílohu předávacího protokolu.</p>
+</div>
+
+<footer class="site-footer">
+  RD Modřice · Grmelovi — evidence vad a nedodělků na stavbě.
+</footer>
+
+<div class="lightbox" id="light" hidden>
+  <button class="lb-close" id="lbClose" aria-label="Zavřít">✕</button>
+  <figure class="lb-fig"><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+</div>
+<div id="printArea" class="vd-printarea" aria-hidden="true"></div>
+
+<script type="module">
+import { createStore, setStatusEl, esc, slug, fold, AUTHORS, myName, setMyName, todayISO, fmtDate, dueState }
+  from './assets/store.js';
+import { online, listDocs, localList, loadTimeline, phaseForDate, pluralCz } from './assets/data.js';
+import { compressFile, compressForInline, blobToDataURL } from './assets/board.js';
+
+const $ = id => document.getElementById(id);
+const SEV = [
+  { id:'drobna',  name:'Drobná',  icon:'🟡', w:1 },
+  { id:'stredni', name:'Střední', icon:'🟠', w:2 },
+  { id:'zavazna', name:'Závažná', icon:'🔴', w:3 },
+];
+const SEVB = Object.fromEntries(SEV.map(s => [s.id, s]));
+const STATES = [
+  { id:'zjisteno',  name:'Zjištěno',               icon:'🔎' },
+  { id:'nahlaseno', name:'Nahlášeno firmě',         icon:'📤' },
+  { id:'opraveno',  name:'Opraveno – ke kontrole',  icon:'🔧' },
+  { id:'uzavreno',  name:'Zkontrolováno, uzavřeno', icon:'✅' },
+];
+const STB = Object.fromEntries(STATES.map(s => [s.id, s]));
+const MAX_PHOTOS = 4, AUX = 'vady_foto';
+
+let items = [], phases = [], contacts = [], store = null, editing = null, sendOpen = null;
+let formPhotos = [];                    // [{t, f}] uložené + [{t, file}] nové
+let filt = 'open';
+try { filt = localStorage.getItem('rdmodrice-vady-filtr') || 'open'; } catch(e){}
+
+const isOpen = v => v.status !== 'uzavreno';
+const phaseOf = v => phases.find(p => p.id === v.phase) || null;
+const contactOf = v => contacts.find(c => v.contractor && (fold(c.company) === fold(v.contractor) || fold(c.name) === fold(v.contractor))) || null;
+
+/* --- souhrn a filtry --- */
+function renderSum(){
+  const open = items.filter(v => v.status === 'zjisteno' || v.status === 'nahlaseno');
+  const check = items.filter(v => v.status === 'opraveno');
+  const sev = open.filter(v => v.severity === 'zavazna').length;
+  const over = items.filter(v => isOpen(v) && v.status !== 'opraveno' && dueState(v.due) === 'over').length;
+  $('sum').innerHTML = `<div class="stats">
+    <div class="stat"><b>${open.length}</b><span>neopravených${sev ? ` · <span class="uk-over">${sev} závažn${sev === 1 ? 'á' : 'é'}</span>` : ''}</span></div>
+    <div class="stat"><b class="${over ? 'uk-over' : ''}">${over}</b><span>po termínu odstranění</span></div>
+    <div class="stat"><b>${check.length}</b><span>opraveno – čeká na kontrolu</span></div>
+    <div class="stat"><b>${items.filter(v => v.status === 'uzavreno').length}</b><span>uzavřených</span></div>
+  </div>`;
+  const n = f => items.filter(v => matchState(v, f)).length;
+  $('fState').innerHTML = [['open', '🔎 Neopravené'], ['check', '🔧 Ke kontrole'], ['closed', '✅ Uzavřené'], ['all', 'Vše']]
+    .map(([v, l]) => `<button type="button" class="fchip${filt === v ? ' on' : ''}" data-f="${v}">${l} <b>${n(v)}</b></button>`).join('');
+}
+function matchState(v, f){
+  if(f === 'all') return true;
+  if(f === 'open') return v.status === 'zjisteno' || v.status === 'nahlaseno' || !v.status;
+  if(f === 'check') return v.status === 'opraveno';
+  return v.status === 'uzavreno';
+}
+function matchQ(v, q){
+  if(!q) return true;
+  const h = fold([v.title, v.desc, v.place, v.contractor, v.foundBy, (phaseOf(v) || {}).name].join(' '));
+  return fold(q).split(/\s+/).every(w => h.includes(w));
+}
+const sortV = (a, b) => (isOpen(a) === isOpen(b) ? 0 : isOpen(a) ? -1 : 1)
+  || ((SEVB[b.severity] || SEV[0]).w - (SEVB[a.severity] || SEV[0]).w)
+  || String(a.due || '9999').localeCompare(String(b.due || '9999'))
+  || String(b.foundAt || '').localeCompare(String(a.foundAt || ''));
+
+/* --- karta --- */
+function shareText(v){
+  return [`Vada na stavbě RD Modřice: ${v.title}`, v.place ? `Místo: ${v.place}` : '', v.desc ? `Popis: ${v.desc}` : '',
+    `Zjištěno: ${fmtDate(v.foundAt, { year:true })}`, v.due ? `Prosíme o odstranění do: ${fmtDate(v.due, { year:true })}` : '']
+    .filter(Boolean).join('\n');
+}
+function waNumber(p){ let d = String(p || '').replace(/\D/g, ''); if(d.startsWith('00')) d = d.slice(2); if(d.length === 9) d = '420' + d; return d.length >= 11 ? d : ''; }
+function sendHTML(v){
+  const c = contactOf(v), txt = shareText(v), wa = c && waNumber(c.phone);
+  return `<div class="vd-send">
+    <span class="dk-muted">Poslat ${c ? esc(c.name) : 'zhotoviteli'}:</span>
+    ${c && c.email ? `<a class="btn" data-sent="${esc(v.id)}" href="mailto:${esc(c.email)}?subject=${encodeURIComponent('Vada na stavbě RD Modřice – ' + v.title)}&body=${encodeURIComponent(txt)}">✉️ E-mail</a>` : ''}
+    <a class="btn" data-sent="${esc(v.id)}" target="_blank" rel="noopener" href="https://wa.me/${wa || ''}?text=${encodeURIComponent(txt)}">💬 WhatsApp</a>
+    ${navigator.share ? `<button type="button" class="btn" data-share="${esc(v.id)}">📤 Sdílet…</button>` : ''}
+    <button type="button" class="btn" data-copy="${esc(v.id)}">📋 Kopírovat text</button>
+    ${!c ? '<span class="dk-muted">Tip: když zhotovitele zapíšeš stejně jako v <a href="kontakty.html">Kontaktech</a>, nabídne se jeho e-mail a WhatsApp.</span>' : ''}
+  </div>`;
+}
+function photoStrip(list, id, kind){
+  return (list || []).map((p, i) => `<button type="button" class="vd-ph" data-open="${esc(id)}" data-kind="${kind}" data-i="${i}" aria-label="Zvětšit fotku"><img src="${esc(p.t)}" alt="" loading="lazy"></button>`).join('');
+}
+function cardHTML(v){
+  const s = SEVB[v.severity] || SEV[0], st = STB[v.status] || STATES[0], p = phaseOf(v);
+  const ds = (v.status === 'zjisteno' || v.status === 'nahlaseno') ? dueState(v.due) : '';
+  return `<article class="vd-card st-${st.id} sev-${s.id}${ds === 'over' ? ' over' : ''}" data-id="${esc(v.id)}">
+    ${(v.photos || []).length ? `<div class="vd-photos">${photoStrip(v.photos, v.id, 'photos')}</div>` : ''}
+    <div class="vd-body">
+      <div class="vb-head">
+        <span class="vd-sev" title="${esc(s.name)} vada">${s.icon}</span>
+        <h3>${esc(v.title)}</h3>
+        <span class="kt-sp"></span>
+        <button type="button" class="kt-ic" data-edit="${esc(v.id)}" title="Upravit" aria-label="Upravit">✎</button>
+        <button type="button" class="kt-ic" data-del="${esc(v.id)}" title="Smazat" aria-label="Smazat">🗑</button>
+      </div>
+      <div class="uk-meta">
+        ${v.place ? `<span class="uk-chip">📍 ${esc(v.place)}</span>` : ''}
+        ${v.contractor ? `<span class="uk-chip">🏗️ ${esc(v.contractor)}</span>` : ''}
+        ${v.due ? `<span class="uk-chip uk-due ${ds}">📅 ${ds === 'over' ? 'po termínu · ' : 'do '}${esc(fmtDate(v.due))}</span>` : ''}
+        ${p ? `<a class="uk-chip" href="stavba.html#faze=${encodeURIComponent(p.id)}">${esc(p.name)}</a>` : ''}
+      </div>
+      ${v.desc ? `<p class="kt-note">${esc(v.desc)}</p>` : ''}
+      <div class="vd-foot">
+        <select class="vb-state vd-state st-${st.id}" data-state="${esc(v.id)}" aria-label="Stav">${STATES.map(x =>
+          `<option value="${x.id}"${x.id === st.id ? ' selected' : ''}>${x.icon} ${x.name}</option>`).join('')}</select>
+        <span class="dk-muted">zjištěno ${esc(fmtDate(v.foundAt))}${v.foundBy ? ' · ' + esc(v.foundBy) : ''}${
+          v.closedAt ? ` · uzavřeno ${esc(new Date(v.closedAt).toLocaleDateString('cs-CZ'))}${v.closedBy ? ' (' + esc(v.closedBy) + ')' : ''}` : ''}</span>
+        <span class="kt-sp"></span>
+        ${isOpen(v) ? `<button type="button" class="btn" data-send="${esc(v.id)}">📤 Poslat firmě</button>` : ''}
+        ${v.status === 'zjisteno' || v.status === 'nahlaseno' ? `<label class="btn" title="Vyfotit opravenou vadu">📷 Opraveno<input type="file" accept="image/*" data-fix="${esc(v.id)}" hidden></label>` : ''}
+        ${v.status === 'opraveno' ? `<button type="button" class="btn primary" data-close="${esc(v.id)}">✅ Zkontrolováno</button>` : ''}
+      </div>
+      ${(v.fixPhotos || []).length ? `<div class="vd-fix"><span class="dk-muted">Po opravě:</span>${photoStrip(v.fixPhotos, v.id, 'fixPhotos')}</div>` : ''}
+      ${sendOpen === v.id && isOpen(v) ? sendHTML(v) : ''}
+    </div>
+  </article>`;
+}
+function render(){
+  renderSum();
+  const q = $('q').value.trim();
+  const list = items.filter(v => matchState(v, filt) && matchQ(v, q)).sort(sortV);
+  $('list').innerHTML = list.length ? list.map(cardHTML).join('')
+    : `<div class="board-empty"><span class="be-ic">${items.length ? '🎉' : '🔍'}</span><p>${
+      !items.length ? 'Zatím tu nejsou žádné vady. Až při kontrole něco najdete, zapište to tlačítkem „＋ Zapsat vadu“.'
+      : q ? 'Nic neodpovídá hledání.' : filt === 'open' ? 'Žádné neopravené vady. 👍' : 'Nic tu není.'}</p></div>`;
+  $('places').innerHTML = [...new Set(items.map(v => v.place).filter(Boolean))].map(x => `<option value="${esc(x)}">`).join('');
+  $('firms').innerHTML = [...new Set([...items.map(v => v.contractor), ...contacts.map(c => c.company || c.name)].filter(Boolean))]
+    .map(x => `<option value="${esc(x)}">`).join('');
+}
+
+/* --- fotky --- */
+async function makePhoto(file){
+  const t = await blobToDataURL(await compressFile(file, 480, .66));
+  const full = await blobToDataURL(await compressForInline(file));
+  const f = await store.putAux(AUX, { img: full, ts: Date.now() });
+  return { t, f };
+}
+function renderFormPhotos(){
+  $('fPhotos').innerHTML = formPhotos.map((p, i) => `<span class="vd-pe"><img src="${esc(p.t)}" alt=""><button type="button" data-rm="${i}" aria-label="Odebrat fotku">✕</button></span>`).join('');
+  $('fHint').textContent = formPhotos.length >= MAX_PHOTOS ? 'víc fotek se nevejde' : `až ${MAX_PHOTOS} fotky; zmenší se před uložením`;
+}
+$('fFile').addEventListener('change', async e => {
+  const files = [...e.target.files].slice(0, MAX_PHOTOS - formPhotos.length);
+  e.target.value = '';
+  for(const file of files){
+    try { formPhotos.push({ t: await blobToDataURL(await compressFile(file, 480, .66)), file }); }
+    catch(err){ console.error(err); alert('Fotku se nepodařilo načíst (formát HEIC z iPhonu ulož jako JPEG).'); }
+  }
+  renderFormPhotos();
+});
+$('fPhotos').addEventListener('click', e => {
+  const b = e.target.closest('[data-rm]'); if(!b) return;
+  formPhotos.splice(Number(b.dataset.rm), 1); renderFormPhotos();
+});
+
+/* --- formulář --- */
+const fill = (el, opts, sel) => { el.innerHTML = opts; if(sel != null) el.value = sel; };
+function openForm(v){
+  editing = v ? v.id : null;
+  fill($('fSev'), SEV.map(s => `<option value="${s.id}">${s.icon} ${s.name}</option>`).join(''), v ? v.severity || 'stredni' : 'stredni');
+  fill($('fBy'), AUTHORS.map(a => `<option>${esc(a)}</option>`).join(''), v ? v.foundBy : (myName() || AUTHORS[0]));
+  fill($('fPhase'), '<option value="auto">⏱️ Podle data zjištění</option><option value="">— bez fáze —</option>' +
+    phases.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''), v && v.phase ? v.phase : 'auto');
+  $('fTitle').value = v ? v.title : ''; $('fDesc').value = v ? v.desc || '' : '';
+  $('fPlace').value = v ? v.place || '' : ''; $('fWho').value = v ? v.contractor || '' : '';
+  $('fDue').value = v ? v.due || '' : ''; $('fFound').value = v ? v.foundAt || todayISO() : todayISO();
+  formPhotos = v ? (v.photos || []).map(p => ({ ...p })) : [];
+  renderFormPhotos();
+  $('fSubmit').textContent = v ? 'Uložit změny' : 'Uložit vadu';
+  $('form').hidden = false; $('addBtn').hidden = true;
+  $('form').scrollIntoView({ behavior:'smooth', block:'start' });
+  $('fTitle').focus({ preventScroll:true });
+}
+function closeForm(){ editing = null; formPhotos = []; $('form').hidden = true; $('form').reset(); $('addBtn').hidden = false; }
+$('addBtn').addEventListener('click', () => openForm(null));
+$('fCancel').addEventListener('click', closeForm);
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = $('fSubmit'); if(btn.disabled) return;
+  const title = $('fTitle').value.trim(); if(!title) return;
+  btn.disabled = true; btn.textContent = 'Ukládám…';
+  try {
+    const photos = [];
+    for(const p of formPhotos) photos.push(p.file ? await makePhoto(p.file) : { t:p.t, f:p.f });
+    const foundAt = $('fFound').value || todayISO(), ph = $('fPhase').value;
+    const data = { title, desc:$('fDesc').value.trim(), place:$('fPlace').value.trim(), contractor:$('fWho').value.trim(),
+      severity:$('fSev').value, due:$('fDue').value || null, foundAt, foundBy:$('fBy').value,
+      phase: ph === 'auto' ? ((phaseForDate(phases, foundAt) || {}).id || null) : (ph || null), photos };
+    setMyName(data.foundBy);
+    if(editing){
+      const old = items.find(x => x.id === editing);
+      const keep = new Set(photos.map(p => p.f));
+      ((old && old.photos) || []).forEach(p => { if(p.f && !keep.has(p.f)) store.delAux(AUX, p.f).catch(() => {}); });
+      await store.update(editing, data);
+    } else {
+      await store.add({ ...data, status:'zjisteno', fixPhotos:[], reportedAt:null, fixedAt:null, closedAt:null, closedBy:null });
+      if(filt !== 'open' && filt !== 'all'){ filt = 'open'; }
+    }
+    closeForm();
+  } catch(err){ console.error(err); alert('Uložení se nepodařilo.'); }
+  finally { btn.disabled = false; btn.textContent = editing ? 'Uložit změny' : 'Uložit vadu'; }
+});
+
+/* --- stav --- */
+function statePatch(v, s){
+  const patch = { status:s };
+  if(s === 'nahlaseno' && !v.reportedAt) patch.reportedAt = Date.now();
+  if(s === 'opraveno' && !v.fixedAt) patch.fixedAt = Date.now();
+  if(s === 'uzavreno'){ patch.closedAt = Date.now(); patch.closedBy = myName(); }
+  else { patch.closedAt = null; patch.closedBy = null; }
+  return patch;
+}
+const save = (id, patch) => store.update(id, patch).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+
+/* --- lightbox (plná fotka se stahuje až teď) --- */
+async function openLb(v, kind, i){
+  const p = (v[kind] || [])[i]; if(!p) return;
+  $('lbImg').src = p.t; $('lbCap').textContent = v.title + (kind === 'fixPhotos' ? ' – po opravě' : '');
+  $('light').hidden = false; document.body.style.overflow = 'hidden';
+  if(p.f){ try { const d = await store.getAux(AUX, p.f); if(d && d.img && !$('light').hidden) $('lbImg').src = d.img; } catch(e){ console.warn(e); } }
+}
+function closeLb(){ $('light').hidden = true; $('lbImg').src = ''; document.body.style.overflow = ''; }
+$('lbClose').addEventListener('click', closeLb);
+$('light').addEventListener('click', e => { if(e.target === $('light')) closeLb(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('light').hidden) closeLb(); });
+
+/* --- události na kartách --- */
+$('q').addEventListener('input', render);
+$('fState').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if(!b) return; filt = b.dataset.f; try { localStorage.setItem('rdmodrice-vady-filtr', filt); } catch(x){} render(); });
+$('list').addEventListener('click', async e => {
+  const t = e.target, find = id => items.find(x => x.id === id);
+  const op = t.closest('[data-open]');
+  if(op){ const v = find(op.dataset.open); if(v) openLb(v, op.dataset.kind, Number(op.dataset.i)); return; }
+  const sd = t.closest('[data-send]');
+  if(sd){ sendOpen = sendOpen === sd.dataset.send ? null : sd.dataset.send; render(); return; }
+  const sent = t.closest('[data-sent]');
+  if(sent){ const v = find(sent.dataset.sent); if(v && v.status === 'zjisteno') save(v.id, statePatch(v, 'nahlaseno')); sendOpen = null; return; }
+  const sh = t.closest('[data-share]');
+  if(sh){
+    const v = find(sh.dataset.share); if(!v) return;
+    try { await navigator.share({ title:'Vada na stavbě – ' + v.title, text:shareText(v) }); if(v.status === 'zjisteno') save(v.id, statePatch(v, 'nahlaseno')); sendOpen = null; render(); }
+    catch(err){ /* zrušeno */ }
+    return;
+  }
+  const cp = t.closest('[data-copy]');
+  if(cp){
+    const v = find(cp.dataset.copy); if(!v) return;
+    try { await navigator.clipboard.writeText(shareText(v)); cp.textContent = '✓ Zkopírováno'; }
+    catch(err){ prompt('Zkopíruj text:', shareText(v)); }
+    if(v.status === 'zjisteno') save(v.id, statePatch(v, 'nahlaseno'));
+    return;
+  }
+  const cl = t.closest('[data-close]');
+  if(cl){ const v = find(cl.dataset.close); if(v) save(v.id, statePatch(v, 'uzavreno')); return; }
+  const ed = t.closest('[data-edit]');
+  if(ed){ openForm(find(ed.dataset.edit)); return; }
+  const del = t.closest('[data-del]');
+  if(del){
+    const v = find(del.dataset.del);
+    if(!v || !confirm(`Smazat vadu „${v.title}“ i s fotkami?`)) return;
+    [...(v.photos || []), ...(v.fixPhotos || [])].forEach(p => { if(p.f) store.delAux(AUX, p.f).catch(() => {}); });
+    store.remove(v.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+  }
+});
+$('list').addEventListener('change', async e => {
+  const s = e.target.closest('[data-state]');
+  if(s){ const v = items.find(x => x.id === s.dataset.state); if(v) save(v.id, statePatch(v, s.value)); return; }
+  const fx = e.target.closest('[data-fix]');
+  if(fx && fx.files && fx.files[0]){
+    const v = items.find(x => x.id === fx.dataset.fix); if(!v) return;
+    const lbl = fx.closest('label'); if(lbl) lbl.firstChild.textContent = 'Ukládám… ';
+    try {
+      const p = await makePhoto(fx.files[0]);
+      save(v.id, { ...statePatch(v, 'opraveno'), fixPhotos:[...(v.fixPhotos || []), p] });
+    } catch(err){ console.error(err); alert('Fotku se nepodařilo uložit.'); }
+  }
+});
+
+/* --- soupis k předání (tisk / PDF) --- */
+$('printBtn').addEventListener('click', () => {
+  const list = items.filter(isOpen).sort((a, b) => String(a.contractor || '~').localeCompare(String(b.contractor || '~'), 'cs') || sortV(a, b));
+  if(!list.length){ alert('Žádné otevřené vady k vytištění.'); return; }
+  const groups = {};
+  list.forEach(v => { const k = v.contractor || 'Bez určeného zhotovitele'; (groups[k] = groups[k] || []).push(v); });
+  $('printArea').innerHTML = `<h1>Soupis vad a nedodělků – RD Modřice</h1>
+    <p>Stav k ${esc(new Date().toLocaleDateString('cs-CZ'))} · otevřených ${list.length}</p>` +
+    Object.entries(groups).map(([g, arr]) => `<h2>${esc(g)}</h2><table><tr><th>#</th><th>Vada</th><th>Místo</th><th>Závažnost</th><th>Zjištěno</th><th>Termín</th><th>Stav</th></tr>${
+      arr.map((v, i) => `<tr><td>${i + 1}</td><td><b>${esc(v.title)}</b>${v.desc ? `<br><small>${esc(v.desc)}</small>` : ''}${
+        (v.photos || []).length ? `<div class="pp">${v.photos.map(p => `<img src="${esc(p.t)}" alt="">`).join('')}</div>` : ''}</td>
+        <td>${esc(v.place || '')}</td><td>${esc((SEVB[v.severity] || SEV[0]).name)}</td><td>${esc(fmtDate(v.foundAt, { year:true }))}</td>
+        <td>${esc(v.due ? fmtDate(v.due, { year:true }) : '')}</td><td>${esc((STB[v.status] || STATES[0]).name)}</td></tr>`).join('')}</table>`).join('') +
+    `<p class="sig">Předal: ………………………… &nbsp;&nbsp; Převzal: ………………………… &nbsp;&nbsp; Datum: …………………</p>`;
+  document.body.classList.add('vd-printing');
+  setTimeout(() => { window.print(); }, 50);
+});
+window.addEventListener('afterprint', () => document.body.classList.remove('vd-printing'));
+
+/* --- start --- */
+const [tl, kt] = await Promise.all([
+  loadTimeline().catch(() => null),
+  (online() ? listDocs('kontakty', ['name', 'company', 'phone', 'email']) : Promise.reject(new Error('offline')))
+    .catch(() => localList('rdmodrice-kontakty-v1')),
+]);
+phases = tl ? tl.phases : []; contacts = Array.isArray(kt) ? kt : [];
+store = await createStore({ coll:'vady', localKey:'rdmodrice-vady-v1', label:'Vady',
+  onStatus: setStatusEl($('status')), onItems: list => { items = list; render(); } });
+</script>
+</body>
+</html>
