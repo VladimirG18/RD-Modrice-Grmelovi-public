@@ -52,7 +52,7 @@
         <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
         <div class="navmenu">
           <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
-          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
           <a href="poznamky.html" data-ic="📝">Poznámky</a>
         </div>
       </div>
@@ -92,6 +92,11 @@
   „Od“ (nastavíš v&nbsp;seznamu). Dlouhé mezery bez plánované aktivity jsou zkrácené (⋯ Xm). Fáze bez
   termínu jsou jako čipy pod grafem – klikni na ni pro rychlý přechod do seznamu, kde jí termín doplníš.</p></details>
 
+  <div class="hg-listtools" id="listTools">
+    <button type="button" class="toolbtn" id="expandAll">▾ Rozbalit vše</button>
+    <button type="button" class="toolbtn" id="collapseDone">▸ Sbalit hotové</button>
+    <button type="button" class="toolbtn" id="collapseAll">▸ Sbalit vše</button>
+  </div>
   <div id="root"></div>
   <div id="ganttRoot" class="hg-gantt" hidden></div>
 
@@ -158,12 +163,37 @@ function krokHTML(k, idx, listLen){
   </div>`;
 }
 
+/* --- sbalování fází (pamatuje si prohlížeč; hotové fáze jsou ve výchozím stavu sbalené) --- */
+const COLL_KEY = 'rdmodrice-harmonogram-sbalene';
+let collapsedMap = {};
+try { collapsedMap = JSON.parse(localStorage.getItem(COLL_KEY) || '{}') || {}; } catch(e){}
+const isCollapsed = p => (p.id in collapsedMap) ? !!collapsedMap[p.id] : p.status === 'hotovo';
+function setCollapsed(ids, val){
+  ids.forEach(id => { collapsedMap[id] = val; });
+  try { localStorage.setItem(COLL_KEY, JSON.stringify(collapsedMap)); } catch(e){}
+  render();
+}
+
 function phaseHTML(p, idx, total){
   const st = STATUS_BY_ID[p.status] || STATUSES[0];
   const cat = p.budgetCat ? BUDGET_CAT_BY_ID[p.budgetCat] : null;
   const myKroky = sortByOrder(kroky.filter(k => k.phase === p.id));
+  const coll = isCollapsed(p);
+  const doneN = myKroky.filter(k => k.status === 'hotovo').length;
+  if(coll){
+    return `<section class="hg-phase hg-collapsed" data-phase-id="${esc(p.id)}">
+      <button type="button" class="hg-colhead" data-collapse="${esc(p.id)}" aria-expanded="false" title="Rozbalit fázi">
+        <span class="hg-chev" aria-hidden="true"></span>
+        <span class="hg-col-ic" aria-hidden="true">${st.icon}</span>
+        <span class="hg-col-name">${esc(p.name || 'Bez názvu')}</span>
+        ${p.when ? `<span class="hg-col-when">${esc(p.when)}</span>` : ''}
+        ${myKroky.length ? `<span class="hg-col-n">${doneN}/${myKroky.length}</span>` : ''}
+      </button>
+    </section>`;
+  }
   return `<section class="hg-phase" data-phase-id="${esc(p.id)}">
     <div class="hg-head">
+      <button type="button" class="hg-coltoggle" data-collapse="${esc(p.id)}" aria-expanded="true" title="Sbalit fázi" aria-label="Sbalit fázi"><span class="hg-chev" aria-hidden="true"></span></button>
       <span class="hg-draghandle" draggable="true" data-drag-phase="${esc(p.id)}" title="Přetáhnout pro změnu pořadí">⠿</span>
       <div class="hg-arrows">
         <button type="button" data-move="up" data-kind="phase" data-id="${esc(p.id)}"${idx === 0 ? ' disabled' : ''} title="Posunout výš" aria-label="Posunout výš">▲</button>
@@ -228,6 +258,7 @@ function setView(v){
   currentView = v;
   try { localStorage.setItem(VIEW_KEY, v); } catch(e){}
   rootEl.hidden = v !== 'list';
+  $('listTools').hidden = v !== 'list';
   ganttRoot.hidden = v !== 'gantt';
   $('listHelp').hidden = v !== 'list';
   $('ganttHelp').hidden = v !== 'gantt';
@@ -335,6 +366,7 @@ function renderGantt(){
 
 ganttRoot.addEventListener('click', e => {
   const jump = e.target.closest('[data-jump]'); if(!jump) return;
+  if(phases.some(p => p.id === jump.dataset.jump && isCollapsed(p))){ collapsedMap[jump.dataset.jump] = false; render(); }
   setView('list');
   requestAnimationFrame(() => {
     const el = rootEl.querySelector(`.hg-phase[data-phase-id="${CSS.escape(jump.dataset.jump)}"]`);
@@ -382,6 +414,12 @@ rootEl.addEventListener('keydown', e => {
 
 /* --- klik: cyklení stavu kroku, mazání, šipky pro přeuspořádání --- */
 rootEl.addEventListener('click', e => {
+  const col = e.target.closest('[data-collapse]');
+  if(col){
+    const p = phases.find(x => x.id === col.dataset.collapse);
+    if(p) setCollapsed([p.id], !isCollapsed(p));
+    return;
+  }
   const cyc = e.target.closest('.hg-krok-status[data-id]');
   if(cyc){
     const k = kroky.find(x => x.id === cyc.dataset.id); if(!k) return;
@@ -497,6 +535,13 @@ rootEl.addEventListener('dragend', () => {
     }
     if(pendingRender){ pendingRender = false; render(); }
   }
+});
+
+$('expandAll').addEventListener('click', () => setCollapsed(phases.map(p => p.id), false));
+$('collapseAll').addEventListener('click', () => setCollapsed(phases.map(p => p.id), true));
+$('collapseDone').addEventListener('click', () => {
+  phases.forEach(p => { collapsedMap[p.id] = p.status === 'hotovo'; });
+  setCollapsed([], true);
 });
 
 /* --- nová fáze --- */

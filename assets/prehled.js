@@ -82,9 +82,10 @@ function renderPhotos(photos){
 function tile(id, html){ const el = $(id); if(el) el.innerHTML = html; }
 
 function renderBudget(items){
-  let off = 0, est = 0, bez = 0;
+  let off = 0, est = 0, bez = 0, paid = 0;
   items.forEach(it => {
     const o = itemOfficialTotal(it), e = itemEstimateTotal(it);
+    if(it.paid != null && isFinite(it.paid)) paid += Number(it.paid);
     if(o != null) off += o;
     if(e != null) est += e;
     if(o == null && e == null) bez++;
@@ -92,7 +93,7 @@ function renderBudget(items){
   const diff = est - off;
   tile('nowBudget', `<span class="now-tile-ic">💰</span>
     <span class="now-tile-main"><b>${esc(fmtMoney(est))}</b>
-    <small>rozpočet (aktuální odhad)${
+    <small>rozpočet (aktuální odhad)${paid ? ` · zaplaceno ${esc(fmtMoney(paid))}` : ''}${
       Math.abs(diff) >= 1 ? ` · <span class="${diff > 0 ? 'rz-over' : 'rz-under'}">${diff > 0 ? '+' : '−'}${esc(fmtMoney(Math.abs(diff)))} proti plánu</span>` : ''}${
       bez ? ` · ${bez} ${pluralCz(bez, 'položka', 'položky', 'položek')} bez ceny` : ''}</small></span>`);
 }
@@ -105,6 +106,20 @@ function renderRequests(list){
   const sub = [run && novy ? `${run} rozpracováno` : '', hot ? `${hot} hotovo` : ''].filter(Boolean).join(' · ') || 'úpravy 3D modelu';
   tile('nowReq', `<span class="now-tile-ic">✏️</span>
     <span class="now-tile-main"><b>${esc(main)}</b><small>${esc(sub)} · požadavky na model</small></span>`);
+}
+
+function renderTasks(list){
+  const open = list.filter(t => !t.done);
+  const today = new Date().toLocaleDateString('sv-SE');
+  const over = open.filter(t => t.due && t.due < today).length;
+  let me = '';
+  try { me = localStorage.getItem('rdmodrice-board-author') || ''; } catch(e){}
+  const mine = me ? open.filter(t => t.who === me).length : 0;
+  const sub = [over ? `<span class="rz-over">${over} po termínu</span>` : '', mine ? `${mine} na tobě` : '']
+    .filter(Boolean).join(' · ');
+  tile('nowTasks', `<span class="now-tile-ic">✅</span>
+    <span class="now-tile-main"><b>${!list.length ? 'Úkoly' : open.length ? `${open.length} ${pluralCz(open.length, 'otevřený úkol', 'otevřené úkoly', 'otevřených úkolů')}` : 'Vše hotovo'}</b>
+    <small>${sub ? sub + ' · ' : ''}co zařídit a rozhodnout</small></span>`);
 }
 
 function renderNotes(list){
@@ -140,7 +155,7 @@ async function init(){
   ).then(renderPhotos);
 
   tryPart(
-    () => on ? listDocs('rozpocet', ['qty','priceOff','priceUnoff']) : Promise.reject(new Error('offline')),
+    () => on ? listDocs('rozpocet', ['qty','priceOff','priceUnoff','paid']) : Promise.reject(new Error('offline')),
     () => localList('rdmodrice-rozpocet-items-v1')
   ).then(renderBudget);
 
@@ -148,6 +163,11 @@ async function init(){
     () => on ? listDocs('pozadavky', ['status']) : Promise.reject(new Error('offline')),
     () => localList('rdmodrice-pozadavky-v1')
   ).then(renderRequests);
+
+  tryPart(
+    () => on ? listDocs('ukoly', ['done', 'due', 'who']) : Promise.reject(new Error('offline')),
+    () => localList('rdmodrice-ukoly-v1')
+  ).then(renderTasks);
 
   tryPart(
     () => on ? queryDocs('poznamky', { fields:['text','author','ts'], orderBy:'ts', limit:1 }) : Promise.reject(new Error('offline')),

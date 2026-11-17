@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>RD Modřice – Checklist</title>
-<meta name="description" content="Checklist úkolů a rozhodnutí pro stavbu rodinného domu v Modřicích." />
+<title>RD Modřice – Úkoly</title>
+<meta name="description" content="Sdílený seznam úkolů rodiny ke stavbě domu v Modřicích – kdo, do kdy a ke které fázi." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
 <script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -52,7 +52,7 @@
         <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
         <div class="navmenu">
           <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
-          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
           <a href="poznamky.html" data-ic="📝">Poznámky</a>
         </div>
       </div>
@@ -64,144 +64,307 @@
 </header>
 
 <div class="content">
-  <span class="eyebrow">Úkoly a rozhodnutí</span>
-  <h1>Checklist</h1>
-  <p class="lead">Úkoly a rozhodnutí napříč stavbou. Odškrtnutí se ukládá ve tvém prohlížeči (localStorage).</p>
+  <span class="eyebrow">Plánování</span>
+  <h1>Úkoly</h1>
+  <p class="lead">Společný seznam toho, co je potřeba zařídit, objednat a rozhodnout – kdo to má na starosti,
+  do kdy a ke které fázi stavby to patří. Odškrtnutí vidí hned všichni.</p>
 
-  <div class="progresswrap">
-    <div class="progressbar"><i id="pfill"></i></div>
-    <small id="pcount">0 / 0 hotovo</small>
-    <button class="toolbtn" id="resetCl" style="float:right">Vynulovat</button>
+  <div id="status" class="statusbar">Načítám úkoly…</div>
+  <div id="migr" class="callout info uk-migr" hidden></div>
+
+  <div class="uk-sum" id="sum"></div>
+
+  <form class="board-add uk-add" id="addForm" autocomplete="off">
+    <div class="ba-row">
+      <label class="ba-field ba-grow">Nový úkol
+        <input type="text" id="fText" placeholder="Co je potřeba udělat – např. „Objednat vytyčení sítí BVK“" maxlength="200" required>
+      </label>
+    </div>
+    <div class="ba-row uk-add-row">
+      <label class="ba-field">Kdo
+        <select id="fWho"></select>
+      </label>
+      <label class="ba-field">Do kdy
+        <input type="date" id="fDue">
+      </label>
+      <label class="ba-field">Skupina
+        <select id="fGroup"></select>
+      </label>
+      <label class="ba-field">Fáze stavby
+        <select id="fPhase"><option value="">— bez fáze —</option></select>
+      </label>
+      <button class="btn primary uk-add-btn" type="submit">Přidat úkol</button>
+    </div>
+  </form>
+
+  <div class="uk-filters">
+    <div class="board-filter" id="fState" role="group" aria-label="Stav"></div>
+    <div class="board-filter" id="fPerson" role="group" aria-label="Kdo"></div>
   </div>
 
-  <div id="list">
-    <div class="clgroup" data-group="Příprava a povolení">
-      <h2>Příprava a povolení</h2>
-      <div data-item>Koupě / vyřešení pozemku</div>
-      <div data-item>Geodetické zaměření pozemku</div>
-      <div data-item>Geologický / radonový průzkum</div>
-      <div data-item>Studie a projektová dokumentace (DSP)</div>
-      <div data-item>Vyjádření správců sítí (elektřina, voda, plyn, kanalizace)</div>
-      <div data-item>Stavební povolení / ohlášení</div>
-      <div data-item>Výběr stavební firmy / dodavatele</div>
-      <div data-item>Demolice stávající garáže na pozemku</div>
-    </div>
+  <div id="list"><div class="now-skel"><i></i><i></i><i></i></div></div>
+  <div class="uk-toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <div class="clgroup" data-group="Financování">
-      <h2>Financování</h2>
-      <div data-item>Rozpočet stavby</div>
-      <div data-item>Hypotéka / úvěr schválen</div>
-      <div data-item>Rezerva na vícepráce (10–15 %)</div>
-      <div data-item>Pojištění stavby</div>
-    </div>
-
-    <div class="clgroup" data-group="Přípojky">
-      <h2>Přípojky</h2>
-      <div data-item>Přípojka elektřiny</div>
-      <div data-item>Přípojka vody</div>
-      <div data-item>Přípojka kanalizace / ČOV</div>
-      <div data-item>Přípojka plynu (pokud bude)</div>
-      <div data-item>Jímka na vyvážení 6,4 m³ + vsak dešťových vod (AS-KRECHT)</div>
-      <div data-item>Datová / internetová přípojka</div>
-    </div>
-
-    <div class="clgroup" data-group="Hrubá stavba">
-      <h2>Hrubá stavba</h2>
-      <div data-item>Skrývka ornice a vytyčení stavby</div>
-      <div data-item>Základová deska</div>
-      <div data-item>Svislé konstrukce 1.&nbsp;NP</div>
-      <div data-item>Strop nad 1.&nbsp;NP</div>
-      <div data-item>Svislé konstrukce 2.&nbsp;NP</div>
-      <div data-item>Krov a střešní krytina</div>
-      <div data-item>Okna a vstupní dveře</div>
-    </div>
-
-    <div class="clgroup" data-group="Rozhodnutí – interiér">
-      <h2>Rozhodnutí – interiér</h2>
-      <div data-item>Vytápění (tepelné čerpadlo / kotel / podlahové)</div>
-      <div data-item>Rekuperace / větrání</div>
-      <div data-item>Elektroinstalace – rozmístění zásuvek a světel</div>
-      <div data-item>Rozvody vody a odpadů</div>
-      <div data-item>Kuchyňská linka – návrh a dodavatel</div>
-      <div data-item>Koupelny – obklady a zařizovací předměty</div>
-      <div data-item>Podlahy – vinyl / dlažba</div>
-      <div data-item>Vnitřní dveře</div>
-      <div data-item>Schodiště – provedení a zábradlí</div>
-      <div data-item>Krbová vložka (6 kW) – výběr a napojení na komín</div>
-    </div>
-
-    <div class="clgroup" data-group="Dokončení a okolí">
-      <h2>Dokončení a okolí</h2>
-      <div data-item>Fasáda a zateplení</div>
-      <div data-item>Terasa</div>
-      <div data-item>Oplocení a vjezd</div>
-      <div data-item>Zpevněné plochy a chodníky</div>
-      <div data-item>Zahrada a terénní úpravy</div>
-      <div data-item>Kolaudace</div>
-    </div>
-  </div>
-
-  <p class="note">Položky lze libovolně upravit, doplnit nebo smazat – napiš, co chceš přidat či změnit.</p>
+  <p class="note">Stavební kroky (zdivo, strop, krov…) jsou v&nbsp;<a href="harmonogram.html">harmonogramu</a>;
+  sem patří to, co musí někdo z&nbsp;rodiny zařídit. Úkoly k&nbsp;přípojkám se ukazují i&nbsp;na stránkách
+  <a href="pripojky.html">Přípojek</a>, úkoly navázané na fázi v&nbsp;detailu fáze na stránce
+  <a href="stavba.html">Postup stavby</a>.</p>
 </div>
 
 <footer class="site-footer">
-  RD Modřice · Grmelovi — údaje vycházejí z projektové dokumentace (07/2023) a koordinační situace (10/2024).
+  RD Modřice · Grmelovi — sdílený seznam úkolů rodiny.
 </footer>
 
-<script>
-const KEY = 'rdmodrice-checklist-v1';
-let state = {};
-try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ state = {}; }
+<script type="module">
+import { createTaskStore, sortTasks, dueState, fmtDue, esc, slug, AUTHORS, myName, setMyName,
+         GROUP_ORDER, legacyChecked, markMigrated } from './assets/ukoly.js';
+import { loadTimeline } from './assets/data.js';
 
-const list = document.getElementById('list');
-const items = [];
+const $ = id => document.getElementById(id);
+const statusEl = $('status'), listEl = $('list');
+let tasks = [], phases = [], store = null, editing = null;
+const openDone = new Set();                         // skupiny s rozbalenými hotovými úkoly
 
-list.querySelectorAll('.clgroup').forEach(g => {
-  const group = g.getAttribute('data-group');
-  g.querySelectorAll('[data-item]').forEach(div => {
-    const text = div.textContent.trim();
-    const id = group + '::' + text;
-    div.classList.add('clitem');
-    div.removeAttribute('data-item');
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = !!state[id];
-    const span = document.createElement('span');
-    span.innerHTML = div.innerHTML;
-    div.innerHTML = '';
-    div.appendChild(cb);
-    div.appendChild(span);
-    if(cb.checked) div.classList.add('done');
-    const toggle = (fromLabel) => {
-      if(fromLabel) cb.checked = !cb.checked;
-      state[id] = cb.checked;
-      div.classList.toggle('done', cb.checked);
-      localStorage.setItem(KEY, JSON.stringify(state));
-      updateProgress();
-    };
-    cb.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(false); });
-    div.addEventListener('click', ()=> toggle(true));
-    items.push(cb);
-  });
-});
+const FKEY = 'rdmodrice-ukoly-filtr';
+let filt = { state:'open', person:'' };
+try { Object.assign(filt, JSON.parse(localStorage.getItem(FKEY) || '{}')); } catch(e){}
+const saveFilt = () => { try { localStorage.setItem(FKEY, JSON.stringify(filt)); } catch(e){} };
 
-const pfill = document.getElementById('pfill');
-const pcount = document.getElementById('pcount');
-function updateProgress(){
-  const total = items.length;
-  const done = items.filter(c => c.checked).length;
-  pfill.style.width = total ? (done/total*100)+'%' : '0%';
-  pcount.textContent = done + ' / ' + total + ' hotovo';
+const phaseById = id => phases.find(p => p.id === id) || null;
+const groupsAll = () => {
+  const extra = [...new Set(tasks.map(t => t.group).filter(g => g && !GROUP_ORDER.includes(g)))].sort((a, b) => a.localeCompare(b, 'cs'));
+  return [...GROUP_ORDER, ...extra];
+};
+const whoOptions = sel => `<option value="">— nikdo —</option>` +
+  AUTHORS.map(a => `<option value="${esc(a)}"${a === sel ? ' selected' : ''}>${esc(a)}</option>`).join('');
+const phaseOptions = sel => `<option value="">— bez fáze —</option>` +
+  phases.map(p => `<option value="${esc(p.id)}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+const groupOptions = sel => groupsAll().map(g => `<option value="${esc(g)}"${g === sel ? ' selected' : ''}>${esc(g)}</option>`).join('') +
+  `<option value="__new">➕ Nová skupina…</option>`;
+
+function fillForm(){
+  const fw = $('fWho'), fg = $('fGroup'), fp = $('fPhase');
+  const w = fw.value, g = fg.value, ph = fp.value;
+  fw.innerHTML = whoOptions(w || '');
+  fg.innerHTML = groupOptions(g || 'Příprava a povolení');
+  fp.innerHTML = phaseOptions(ph || '');
 }
-updateProgress();
 
-document.getElementById('resetCl').addEventListener('click', ()=>{
-  if(!confirm('Opravdu odškrtnout všechny položky?')) return;
-  state = {};
-  localStorage.removeItem(KEY);
-  items.forEach(c => { c.checked = false; c.closest('.clitem').classList.remove('done'); });
-  updateProgress();
+/* --- souhrn a filtry --- */
+function renderSum(){
+  const open = tasks.filter(t => !t.done), done = tasks.length - open.length;
+  const over = open.filter(t => dueState(t) === 'over').length, soon = open.filter(t => dueState(t) === 'soon').length;
+  const me = myName(), mine = me ? open.filter(t => t.who === me).length : 0;
+  $('sum').innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${open.length}</b><span>otevřených úkolů</span></div>
+      <div class="stat"><b class="${over ? 'uk-over' : ''}">${over}</b><span>po termínu</span></div>
+      <div class="stat"><b>${soon}</b><span>termín do týdne</span></div>
+      <div class="stat"><b>${me ? mine : '–'}</b><span>${me ? 'na mně (' + esc(me) + ')' : 'na mně – vyber „Kdo“'}</span></div>
+    </div>
+    <div class="progresswrap"><div class="progressbar"><i style="width:${tasks.length ? (done / tasks.length * 100).toFixed(1) : 0}%"></i></div>
+      <small>${done} / ${tasks.length} hotovo</small></div>`;
+}
+function renderFilters(){
+  const n = st => tasks.filter(t => st === 'all' || (st === 'done' ? t.done : !t.done)).length;
+  $('fState').innerHTML = [['open', 'Otevřené'], ['done', 'Hotové'], ['all', 'Vše']].map(([v, l]) =>
+    `<button type="button" class="fchip${filt.state === v ? ' on' : ''}" data-state="${v}">${l} <b>${n(v)}</b></button>`).join('');
+  const me = myName();
+  const people = [['', 'Všichni'], ...AUTHORS.map(a => [a, (a === me ? '👤 ' : '') + a]), ['-', 'Nepřiřazené']];
+  $('fPerson').innerHTML = people.map(([v, l]) =>
+    `<button type="button" class="fchip${filt.person === v ? ' on' : ''}" data-person="${esc(v)}">${esc(l)}</button>`).join('');
+}
+const matchPerson = t => !filt.person || (filt.person === '-' ? !t.who : t.who === filt.person);
+const matchState = t => filt.state === 'all' || (filt.state === 'done' ? !!t.done : !t.done);
+
+/* --- řádek úkolu --- */
+function rowHTML(t){
+  if(editing === t.id){
+    return `<div class="uk-row editing" data-id="${esc(t.id)}">
+      <input type="text" class="uk-e-text" value="${esc(t.text)}" maxlength="200" aria-label="Text úkolu">
+      <textarea class="uk-e-note" rows="2" placeholder="Poznámka (nepovinné)…">${esc(t.note || '')}</textarea>
+      <div class="uk-e-row">
+        <label>Kdo <select class="uk-e-who">${whoOptions(t.who)}</select></label>
+        <label>Do kdy <input type="date" class="uk-e-due" value="${esc(t.due || '')}"></label>
+        <label>Skupina <select class="uk-e-group">${groupOptions(t.group)}</select></label>
+        <label>Fáze <select class="uk-e-phase">${phaseOptions(t.phase)}</select></label>
+        <label class="uk-e-urg"><input type="checkbox" class="uk-e-urgent"${t.urgent ? ' checked' : ''}> ⏰ Urgentní</label>
+      </div>
+      <div class="uk-e-btns">
+        <button type="button" class="btn primary" data-save="${esc(t.id)}">Uložit</button>
+        <button type="button" class="btn" data-cancel="1">Zrušit</button>
+      </div>
+    </div>`;
+  }
+  const ds = dueState(t), ph = phaseById(t.phase);
+  const meta = [
+    t.who ? `<span class="uk-chip who-${slug(t.who)}">👤 ${esc(t.who)}</span>` : '',
+    t.due ? `<span class="uk-chip uk-due ${ds}">📅 ${ds === 'over' ? 'po termínu · ' : ''}${esc(fmtDue(t.due))}</span>` : '',
+    ph ? `<a class="uk-chip" href="stavba.html#faze=${encodeURIComponent(ph.id)}">🏗️ ${esc(ph.name)}</a>` : '',
+    t.done ? `<span class="uk-chip uk-donechip">✓ ${t.doneBy ? esc(t.doneBy) + ' · ' : ''}${t.doneAt ? esc(new Date(t.doneAt).toLocaleDateString('cs-CZ')) : 'hotovo'}</span>` : '',
+  ].filter(Boolean).join('');
+  return `<div class="uk-row${t.done ? ' done' : ''}${t.urgent && !t.done ? ' urgent' : ''}${ds === 'over' ? ' over' : ''}" data-id="${esc(t.id)}">
+    <input type="checkbox" class="uk-cb" data-toggle="${esc(t.id)}"${t.done ? ' checked' : ''} aria-label="Hotovo">
+    <div class="uk-main">
+      <span class="uk-text">${t.urgent && !t.done ? '⏰ ' : ''}${esc(t.text)}</span>
+      ${t.note ? `<span class="uk-note">${esc(t.note)}</span>` : ''}
+      ${meta ? `<span class="uk-meta">${meta}</span>` : ''}
+    </div>
+    <div class="uk-tools">
+      <button type="button" data-edit="${esc(t.id)}" title="Upravit" aria-label="Upravit">✎</button>
+      <button type="button" data-del="${esc(t.id)}" title="Smazat" aria-label="Smazat">🗑</button>
+    </div>
+  </div>`;
+}
+
+function render(){
+  renderSum(); renderFilters();
+  const vis = tasks.filter(matchPerson);
+  const html = groupsAll().map(g => {
+    const all = sortTasks(vis.filter(t => t.group === g));
+    if(!all.length) return '';
+    const open = all.filter(t => !t.done), done = all.filter(t => t.done);
+    let shown, hiddenDone = 0;
+    if(filt.state === 'open'){ shown = open; hiddenDone = done.length; if(openDone.has(g)){ shown = all; hiddenDone = 0; } }
+    else shown = all.filter(matchState);
+    if(!shown.length && !hiddenDone) return '';
+    const tot = tasks.filter(t => t.group === g), td = tot.filter(t => t.done).length;
+    return `<section class="uk-group" id="g-${esc(slug(g) || 'x')}" data-group="${esc(g)}">
+      <h2>${esc(g)} <span class="uk-gcount">${td}/${tot.length}</span></h2>
+      ${shown.map(rowHTML).join('') || '<p class="uk-allgood">✅ Vše hotovo.</p>'}
+      ${filt.state === 'open' && (hiddenDone || openDone.has(g)) && done.length ? `<button type="button" class="uk-showdone" data-showdone="${esc(g)}">${
+        openDone.has(g) ? 'Skrýt hotové' : `Zobrazit hotové (${done.length})`}</button>` : ''}
+    </section>`;
+  }).join('');
+  listEl.innerHTML = html || `<div class="board-empty"><span class="be-ic">🎉</span><p>${
+    filt.state === 'open' ? 'Žádné otevřené úkoly' + (filt.person ? ' pro tento výběr' : '') + '.' : 'Nic tu není.'}</p></div>`;
+  renderMigr();
+}
+
+/* --- lišta s možností vrátit poslední odškrtnutí --- */
+let toastTimer = null;
+function toast(text, undo){
+  const el = $('toast');
+  el.innerHTML = `<span>${esc(text)}</span><button type="button">Vrátit</button>`;
+  el.hidden = false;
+  el.querySelector('button').onclick = () => { undo(); el.hidden = true; };
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 6000);
+}
+
+/* --- převzetí odškrtnutí ze starého checklistu --- */
+function renderMigr(){
+  const el = $('migr');
+  if(!store || !store.shared){ el.hidden = true; return; }
+  const list = legacyChecked(tasks);
+  el.hidden = !list.length;
+  if(!list.length) return;
+  el.innerHTML = `V&nbsp;tomhle prohlížeči máš ve starém checklistu odškrtnuté <b>${list.length}</b>
+    ${list.length === 1 ? 'položku, která' : (list.length < 5 ? 'položky, které' : 'položek, které')} ve sdíleném seznamu ještě nejsou hotové
+    (${list.slice(0, 3).map(t => '„' + esc(t.text) + '“').join(', ')}${list.length > 3 ? ', …' : ''}).
+    <div class="uk-migr-btns"><button type="button" class="btn primary" id="migrYes">Označit jako hotové</button>
+    <button type="button" class="btn" id="migrNo">Nechat být</button></div>`;
+  $('migrYes').onclick = async () => {
+    for(const t of list){ try { await store.toggle(t, myName()); } catch(e){ console.error(e); } }
+    markMigrated(); el.hidden = true;
+  };
+  $('migrNo').onclick = () => { markMigrated(); el.hidden = true; };
+}
+
+/* --- události --- */
+$('fState').addEventListener('click', e => { const b = e.target.closest('[data-state]'); if(!b) return; filt.state = b.dataset.state; saveFilt(); render(); });
+$('fPerson').addEventListener('click', e => { const b = e.target.closest('[data-person]'); if(!b) return; filt.person = b.dataset.person; saveFilt(); render(); });
+
+function askGroup(sel, fallback){
+  if(sel.value !== '__new') return sel.value;
+  const g = (prompt('Název nové skupiny:') || '').trim();
+  if(!g){ sel.value = fallback; return fallback; }
+  if(![...sel.options].some(o => o.value === g)) sel.insertAdjacentHTML('afterbegin', `<option value="${esc(g)}">${esc(g)}</option>`);
+  sel.value = g;
+  return g;
+}
+$('fGroup').addEventListener('change', e => askGroup(e.target, 'Příprava a povolení'));
+$('fWho').addEventListener('change', e => { if(e.target.value) setMyName(e.target.value); });
+
+$('addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const text = $('fText').value.trim(); if(!text) return;
+  const group = $('fGroup').value === '__new' ? 'Ostatní' : $('fGroup').value;
+  store.add({ text, group, who:$('fWho').value, due:$('fDue').value || null, phase:$('fPhase').value || null })
+    .catch(err => { console.error(err); alert('Přidání se nepodařilo.'); });
+  $('fText').value = ''; $('fDue').value = '';
+  if(filt.state === 'done'){ filt.state = 'open'; saveFilt(); }
+  $('fText').focus();
 });
+
+listEl.addEventListener('change', e => {
+  const cb = e.target.closest('[data-toggle]');
+  if(cb){
+    const t = tasks.find(x => x.id === cb.dataset.toggle);
+    if(!t) return;
+    const wasDone = !!t.done;
+    store.toggle(t, myName()).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+    if(!wasDone) toast(`✓ Hotovo: „${t.text.length > 48 ? t.text.slice(0, 46) + '…' : t.text}“`, () => {
+      const cur = tasks.find(x => x.id === t.id);
+      if(cur && cur.done) store.toggle(cur, '').catch(err => console.error(err));
+    });
+    return;
+  }
+  if(e.target.matches('.uk-e-group')) askGroup(e.target, (tasks.find(t => t.id === editing) || {}).group || 'Ostatní');
+});
+listEl.addEventListener('click', e => {
+  const sd = e.target.closest('[data-showdone]');
+  if(sd){ const g = sd.dataset.showdone; openDone.has(g) ? openDone.delete(g) : openDone.add(g); render(); return; }
+  const ed = e.target.closest('[data-edit]');
+  if(ed){ editing = ed.dataset.edit; render(); const i = listEl.querySelector('.uk-e-text'); if(i) i.focus(); return; }
+  if(e.target.closest('[data-cancel]')){ editing = null; render(); return; }
+  const sv = e.target.closest('[data-save]');
+  if(sv){
+    const row = sv.closest('.uk-row');
+    const text = row.querySelector('.uk-e-text').value.trim();
+    if(!text){ alert('Úkol musí mít text.'); return; }
+    const g = row.querySelector('.uk-e-group').value;
+    const patch = { text, note: row.querySelector('.uk-e-note').value.trim(), who: row.querySelector('.uk-e-who').value,
+      due: row.querySelector('.uk-e-due').value || null, phase: row.querySelector('.uk-e-phase').value || null,
+      urgent: row.querySelector('.uk-e-urgent').checked };
+    if(g && g !== '__new') patch.group = g;
+    editing = null;
+    store.update(sv.dataset.save, patch).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+    render();
+    return;
+  }
+  const del = e.target.closest('[data-del]');
+  if(del){
+    const t = tasks.find(x => x.id === del.dataset.del);
+    if(t && confirm('Smazat úkol „' + t.text + '“?')) store.remove(t.id).catch(err => { console.error(err); alert('Smazání se nepodařilo.'); });
+  }
+});
+listEl.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && editing){ editing = null; render(); }
+  else if(e.key === 'Enter' && e.target.matches('.uk-e-text, .uk-e-due')){ const b = e.target.closest('.uk-row').querySelector('[data-save]'); if(b) b.click(); }
+});
+
+/* --- start --- */
+const me = myName();
+fillForm();
+if(me) $('fWho').value = me;
+let timeline = null;
+try { timeline = await loadTimeline(); phases = timeline.phases || []; } catch(e){ console.warn(e); }
+fillForm();
+store = await createTaskStore({
+  phases: timeline && timeline.source !== 'default' ? phases : null,
+  onItems: list => { tasks = list; if(!editing || tasks.some(t => t.id === editing)) render(); fillForm(); },
+  onStatus: (kind, html) => { statusEl.className = 'statusbar' + (kind ? ' ' + kind : ''); statusEl.innerHTML = html; },
+});
+
+// odkaz ze stránky přípojek: ?skupina=<název>
+const sk = new URLSearchParams(location.search).get('skupina');
+if(sk){
+  requestAnimationFrame(() => {
+    const el = listEl.querySelector(`.uk-group[data-group="${CSS.escape(sk)}"]`);
+    if(el){ el.scrollIntoView({ block:'start' }); el.classList.add('hg-flash'); }
+  });
+}
 </script>
 </body>
 </html>

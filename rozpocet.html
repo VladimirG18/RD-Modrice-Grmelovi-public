@@ -52,7 +52,7 @@
         <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
         <div class="navmenu">
           <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
-          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
           <a href="poznamky.html" data-ic="📝">Poznámky</a>
         </div>
       </div>
@@ -67,8 +67,8 @@
   <span class="eyebrow">Náklady stavby</span>
   <h1>Rozpočet</h1>
   <p class="lead">Sdílený rozpočet v reálném čase – položky rozdělené do kategorií, u&nbsp;každé cena
-  <b>oficiální</b> (dle rozpočtu/smlouvy) a <b>neoficiální</b> (aktuální odhad či nabídka). Součty se
-  počítají automaticky po kategoriích i&nbsp;celkem. Základ tvoří položky z&nbsp;rozpočtu k&nbsp;hypotéce,
+  <b>oficiální</b> (dle rozpočtu/smlouvy), <b>neoficiální</b> (aktuální odhad či nabídka) a&nbsp;kolik je už
+  <b>zaplaceno</b>. Součty se počítají automaticky po kategoriích i&nbsp;celkem. Základ tvoří položky z&nbsp;rozpočtu k&nbsp;hypotéce,
   doplněné o&nbsp;kategorie a&nbsp;položky, na které se v&nbsp;něm ještě nemyslelo – u&nbsp;těch je cena
   zatím prázdná.</p>
 
@@ -79,7 +79,8 @@
   <details class="helpbox" style="margin-top:18px"><summary>💡 Jak se rozpočet upravuje</summary><p>Cenu jde vždy dopsat ručně. U&nbsp;položky s&nbsp;odkazem na e-shop/produkt lze zkusit tlačítkem
   <b>„↻ cena"</b> natáhnout aktuální cenu automaticky do pole neoficiální – je to experimentální (statický
   web bez vlastního serveru čte stránku přes veřejnou proxy) a&nbsp;funguje jen u&nbsp;části obchodů;
-  když se nepovede, doplň cenu ručně. Položku přidáš na konci tabulky dané kategorie, kategorii přesuneš
+  když se nepovede, doplň cenu ručně. Do sloupce <b>Zaplaceno</b> piš, kolik Kč za položku už odešlo
+  (u&nbsp;záloh součet); datum platby se při prvním zadání doplní dnešní, jde ho přepsat. Položku přidáš na konci tabulky dané kategorie, kategorii přesuneš
   výběrem v&nbsp;posledním sloupci, novou kategorii přidáš úplně dole.</p></details>
 
   <div id="root"></div>
@@ -109,14 +110,16 @@ let items = [], categories = [], backend = null;
 
 function setStatus(kind, html){ statusEl.className = 'statusbar' + (kind ? ' ' + kind : ''); statusEl.innerHTML = html; }
 
+const paidOf = it => (it.paid != null && isFinite(it.paid)) ? Number(it.paid) : 0;
 function grandTotals(){
-  let off = 0, est = 0;
-  items.forEach(it => { off += itemOfficialTotal(it) || 0; est += itemEstimateTotal(it) || 0; });
-  return { off, est };
+  let off = 0, est = 0, paid = 0;
+  items.forEach(it => { off += itemOfficialTotal(it) || 0; est += itemEstimateTotal(it) || 0; paid += paidOf(it); });
+  return { off, est, paid };
 }
 
 function renderStats(){
-  const { off, est } = grandTotals();
+  const { off, est, paid } = grandTotals();
+  const pct = est > 0 ? Math.min(100, paid / est * 100) : 0;
   const diff = est - off;
   const diffCls = diff > 0 ? 'rz-over' : (diff < 0 ? 'rz-under' : '');
   const diffTxt = (diff > 0 ? '+' : '') + fmtMoney(diff);
@@ -124,6 +127,9 @@ function renderStats(){
     <div class="stat"><b>${fmtMoney(off)}</b><span>Oficiální rozpočet celkem</span></div>
     <div class="stat"><b>${fmtMoney(est)}</b><span>Aktuální odhad celkem</span></div>
     <div class="stat"><b class="${diffCls}">${diffTxt}</b><span>Rozdíl odhad − oficiální</span></div>
+    <div class="stat"><b class="rz-paid">${fmtMoney(paid)}</b><span>Zaplaceno${est > 0 && paid > 0 ? ` · ${(pct < 10 ? pct.toFixed(1) : pct.toFixed(0)).replace('.', ',')} % odhadu` : ''}</span>
+      <div class="rz-paidbar" aria-hidden="true"><i style="width:${pct.toFixed(1)}%"></i></div></div>
+    <div class="stat"><b>${fmtMoney(Math.max(0, est - paid))}</b><span>Zbývá zaplatit (dle odhadu)</span></div>
     <div class="stat"><b>${items.length}</b><span>položek v ${categories.length} kategoriích</span></div>`;
 }
 
@@ -143,21 +149,26 @@ function rowHTML(it){
     }
   }
   const link = it.link || '';
-  return `<tr data-item="${esc(it.id)}">
-    <td>
+  const paidFull = it.paid != null && est != null && Number(it.paid) >= est && est > 0;
+  return `<tr data-item="${esc(it.id)}"${paidFull ? ' class="rz-row-paid"' : ''}>
+    <td class="rz-c-name" data-label="Položka">
       <input type="text" class="rz-name" data-id="${esc(it.id)}" data-field="name" value="${esc(it.name)}" title="${esc(it.name)}" placeholder="Název položky">
       <input type="text" class="rz-note-input" data-id="${esc(it.id)}" data-field="note" value="${esc(it.note||'')}" placeholder="poznámka…">
     </td>
-    <td class="num">
+    <td class="num" data-label="Množství">
       <div class="rz-qtycell">
         <input type="number" step="any" class="qty" data-id="${esc(it.id)}" data-field="qty" value="${it.qty==null?'':it.qty}">
         <input type="text" class="unit" data-id="${esc(it.id)}" data-field="unit" value="${esc(it.unit||'')}" placeholder="j.">
       </div>
     </td>
-    <td class="num"><input type="number" step="1" min="0" data-id="${esc(it.id)}" data-field="priceOff" value="${it.priceOff==null?'':it.priceOff}" placeholder="–"></td>
-    <td class="num"><input type="number" step="1" min="0" data-id="${esc(it.id)}" data-field="priceUnoff" value="${it.priceUnoff==null?'':it.priceUnoff}" placeholder="–"></td>
-    <td class="num rz-total">${totalHtml}</td>
-    <td>
+    <td class="num" data-label="Kč/j. oficiální"><input type="number" step="1" min="0" data-id="${esc(it.id)}" data-field="priceOff" value="${it.priceOff==null?'':it.priceOff}" placeholder="–"></td>
+    <td class="num" data-label="Kč/j. odhad"><input type="number" step="1" min="0" data-id="${esc(it.id)}" data-field="priceUnoff" value="${it.priceUnoff==null?'':it.priceUnoff}" placeholder="–"></td>
+    <td class="num rz-total" data-label="Celkem">${totalHtml}</td>
+    <td class="num rz-paidcell" data-label="Zaplaceno">
+      <input type="number" step="1" min="0" data-id="${esc(it.id)}" data-field="paid" value="${it.paid==null?'':it.paid}" placeholder="–" title="Kolik je už zaplaceno (Kč celkem)">
+      <input type="date" class="rz-paiddate" data-id="${esc(it.id)}" data-field="paidDate" value="${esc(it.paidDate||'')}" title="Datum platby">
+    </td>
+    <td class="rz-c-link" data-label="Odkaz">
       <div class="rz-linkcell">
         <input type="url" data-id="${esc(it.id)}" data-field="link" value="${esc(link)}" placeholder="odkaz na produkt…">
         <div class="rz-linkbtns">
@@ -166,7 +177,7 @@ function rowHTML(it){
         </div>
       </div>
     </td>
-    <td>
+    <td class="rz-c-cat" data-label="Kategorie">
       <select class="rz-catsel" data-id="${esc(it.id)}" data-field="category" title="Přesunout do jiné kategorie">${catOptionsHTML(it.category)}</select>
       <button type="button" class="rz-icon-btn danger" data-delitem="${esc(it.id)}" title="Smazat položku" aria-label="Smazat položku" style="width:100%;text-align:center;margin-top:4px">🗑</button>
     </td>
@@ -175,8 +186,8 @@ function rowHTML(it){
 
 function catSectionHTML(cat){
   const catItems = items.filter(i => i.category === cat.id);
-  let sumOff = 0, sumEst = 0;
-  catItems.forEach(it => { sumOff += itemOfficialTotal(it) || 0; sumEst += itemEstimateTotal(it) || 0; });
+  let sumOff = 0, sumEst = 0, sumPaid = 0;
+  catItems.forEach(it => { sumOff += itemOfficialTotal(it) || 0; sumEst += itemEstimateTotal(it) || 0; sumPaid += paidOf(it); });
   const diffCls = sumEst > sumOff ? 'rz-over' : (sumEst < sumOff ? 'rz-under' : '');
   return `<section class="rz-cat" id="cat-${esc(cat.id)}" data-cat="${esc(cat.id)}">
     <div class="rz-cat-head">
@@ -184,6 +195,7 @@ function catSectionHTML(cat){
       <div class="rz-cat-sums">
         <span>Oficiálně <b>${fmtMoney(sumOff)}</b></span>
         <span>Odhad <b class="${diffCls}">${fmtMoney(sumEst)}</b></span>
+        ${sumPaid ? `<span>Zaplaceno <b class="rz-paid">${fmtMoney(sumPaid)}</b></span>` : ''}
       </div>
       <div class="rz-cat-actions">
         <button type="button" class="rz-icon-btn" data-rencat="${esc(cat.id)}" title="Přejmenovat kategorii" aria-label="Přejmenovat kategorii">✎</button>
@@ -194,11 +206,11 @@ function catSectionHTML(cat){
       <table class="rz-tbl">
         <colgroup>
           <col><col style="width:96px"><col style="width:104px"><col style="width:104px">
-          <col style="width:112px"><col style="width:150px"><col style="width:150px">
+          <col style="width:112px"><col style="width:136px"><col style="width:150px"><col style="width:150px">
         </colgroup>
-        <tr><th>Položka</th><th class="num">Množství</th><th class="num">Kč/j. oficiální</th><th class="num">Kč/j. odhad</th><th class="num">Celkem</th><th>Odkaz</th><th>Kategorie</th></tr>
+        <tr><th>Položka</th><th class="num">Množství</th><th class="num">Kč/j. oficiální</th><th class="num">Kč/j. odhad</th><th class="num">Celkem</th><th class="num">Zaplaceno</th><th>Odkaz</th><th>Kategorie</th></tr>
         ${catItems.map(rowHTML).join('')}
-        <tr class="rz-addrow"><td colspan="7"><input type="text" data-addcat="${esc(cat.id)}" placeholder="+ Přidat položku do „${esc(cat.name)}“… (Enter)"></td></tr>
+        <tr class="rz-addrow"><td colspan="8"><input type="text" data-addcat="${esc(cat.id)}" placeholder="+ Přidat položku do „${esc(cat.name)}“… (Enter)"></td></tr>
       </table>
     </div>
   </section>`;
@@ -253,9 +265,16 @@ rootEl.addEventListener('change', e => {
   const id = el.dataset.id, field = el.dataset.field;
   let val = el.value;
   if(field === 'qty'){ val = val === '' ? 1 : Number(val); if(!isFinite(val)) val = 1; }
-  else if(field === 'priceOff' || field === 'priceUnoff'){ val = val === '' ? null : Number(val); if(val != null && !isFinite(val)) val = null; }
+  else if(field === 'priceOff' || field === 'priceUnoff' || field === 'paid'){ val = val === '' ? null : Number(val); if(val != null && !isFinite(val)) val = null; }
+  else if(field === 'paidDate'){ val = val || null; }
   else { val = val.trim(); }
-  backend.updateItem(id, { [field]: val }).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
+  const patch = { [field]: val };
+  // první zadaná platba bez data → doplní se dnešní datum (jde přepsat)
+  if(field === 'paid' && val){
+    const it = items.find(i => i.id === id);
+    if(it && !it.paidDate) patch.paidDate = new Date().toLocaleDateString('sv-SE');
+  }
+  backend.updateItem(id, patch).catch(err => { console.error(err); alert('Uložení se nepodařilo.'); });
 });
 
 rootEl.addEventListener('keydown', e => {

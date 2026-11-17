@@ -39,7 +39,7 @@ const EXTRA = [
 ];
 const extraFor = p => EXTRA.filter(e => e.match.test(p.name || ''));
 
-let T = { phases:[], kroky:[] }, photos = [], budget = null;
+let T = { phases:[], kroky:[] }, photos = [], budget = null, tasks = [];
 const thumbs = new Map();                 // id fotky → náhled
 
 const stepsOf = p => T.kroky.filter(k => k.phase === p.id);
@@ -121,6 +121,22 @@ function budgetHTML(p){
     esc(cat ? cat.name : p.budgetCat)}${sum != null && sum > 0 ? ` · <b>${esc(fmtMoney(sum))}</b>` : ''}</a>`;
 }
 
+/* úkoly rodiny navázané na fázi (assets/ukoly.js, checklist.html) */
+function tasksHTML(p){
+  const mine = tasks.filter(t => t.phase === p.id);
+  if(!mine.length) return '';
+  const open = mine.filter(t => !t.done)
+    .sort((a, b) => (a.urgent ? 0 : 1) - (b.urgent ? 0 : 1) || String(a.due || '9999').localeCompare(String(b.due || '9999')));
+  const today = new Date().toLocaleDateString('sv-SE');
+  return `<h3>Úkoly <span class="ph-d-n">${mine.length - open.length}/${mine.length}</span></h3>
+    ${open.length ? `<ul class="ph-d-steps">${open.slice(0, 8).map(t => `<li class="st-planovano">
+        <span aria-hidden="true">${t.urgent ? '⏰' : '☐'}</span><span>${esc(t.text)}</span>${
+        t.who || t.due ? `<small${t.due && t.due < today ? ' class="rz-over"' : ''}>${[t.who ? esc(t.who) : '', t.due ? esc(fmtDay(t.due)) : ''].filter(Boolean).join(' · ')}</small>` : ''}</li>`).join('')}</ul>`
+      : '<p class="ph-d-empty">Všechny úkoly k této fázi jsou hotové. ✅</p>'}
+    <a class="ph-link" href="checklist.html${mine[0] && mine[0].group ? '?skupina=' + encodeURIComponent(mine[0].group) : ''}">✅ ${
+      open.length > 8 ? `Všech ${open.length} otevřených úkolů` : 'Úkoly'} →</a>`;
+}
+
 async function openPhase(id, focusBack){
   const p = T.phases.find(x => x.id === id);
   if(!p) return;
@@ -139,6 +155,7 @@ async function openPhase(id, focusBack){
       ${st.length ? `<h3>Kroky</h3><ul class="ph-d-steps">${st.map(k => `<li class="st-${esc(k.status || 'planovano')}">
           <span aria-hidden="true">${STEP_ICON[k.status] || '📋'}</span><span>${esc(k.text)}</span>${
           k.when ? `<small>${esc(k.when)}</small>` : ''}</li>`).join('')}</ul>` : ''}
+      ${tasksHTML(p)}
       ${hist.length ? `<h3>Záznamy</h3><ul class="subtl">${hist.map(([w, t]) => `<li><b>${esc(w)}</b> – ${esc(t)}</li>`).join('')}</ul>` : ''}
       <h3>Fotky${ph.length ? ` <span class="ph-d-n">${ph.length}</span>` : ''}</h3>
       ${ph.length ? `<div class="ph-d-photos">${ph.slice(0, 12).map(f => thumbHTML(f)).join('')}</div>
@@ -185,13 +202,16 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal();
 /* ---------- načtení ---------- */
 async function init(){
   const on = online();
-  const [timeline, fotky, rozpocet] = await Promise.all([
+  const [timeline, fotky, rozpocet, ukoly] = await Promise.all([
     loadTimeline().catch(e => { console.warn(e); return null; }),
     (on ? listDocs('fotky', ['date', 'caption', 'phase', 'phaseName', 'phaseManual', 'ts', 'src']) : Promise.reject(new Error('offline')))
       .catch(() => localList('rdmodrice-fotky-v1')),
     (on ? listDocs('rozpocet', ['category', 'qty', 'priceOff', 'priceUnoff']) : Promise.reject(new Error('offline')))
       .catch(() => localList('rdmodrice-rozpocet-items-v1')),
+    (on ? listDocs('ukoly', ['text', 'done', 'who', 'due', 'phase', 'urgent', 'group']) : Promise.reject(new Error('offline')))
+      .catch(() => localList('rdmodrice-ukoly-v1')),
   ]);
+  tasks = Array.isArray(ukoly) ? ukoly : [];
   if(!timeline){
     $('timeline').innerHTML = '<div class="empty">Stav stavby se nepodařilo načíst – zkus stránku obnovit.</div>';
     $('status').textContent = '⚠️ Data se nepodařilo načíst.';

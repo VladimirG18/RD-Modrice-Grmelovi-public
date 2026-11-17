@@ -318,7 +318,7 @@ ul.tidy li{ margin:5px 0; }
   margin-top:auto; padding-top:12px; }
 .now-photos-foot small{ color:var(--muted); font-size:.8rem; }
 .now-photos-foot .btn, .now-card > .btn{ padding:8px 13px; font-size:.84rem; align-self:flex-start; }
-.now-mini{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; }
+.now-mini{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:14px; }
 .now-tile{ display:flex; align-items:center; gap:12px; padding:13px 15px; background:var(--surface); color:var(--text);
   border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm); min-width:0;
   transition:border-color .14s ease, box-shadow .14s ease; }
@@ -337,10 +337,11 @@ ul.tidy li{ margin:5px 0; }
   .now-thumbs{ flex:1; grid-auto-rows:1fr; min-height:150px; }
   .now-thumbs a{ aspect-ratio:auto; min-height:70px; }
 }
+@media (max-width:1000px){ .now-mini{ grid-template-columns:1fr 1fr; } }
 @media (max-width:860px){
   .now-grid{ grid-template-columns:1fr; }
-  .now-mini{ grid-template-columns:1fr; gap:10px; }
 }
+@media (max-width:560px){ .now-mini{ grid-template-columns:1fr; gap:10px; } }
 @media (max-width:560px){
   /* dlaždice rozcestníku na mobilu jako kompaktní řádky (ikona vlevo, text vpravo) */
   .cards{ gap:10px; }
@@ -401,6 +402,90 @@ ul.tidy li{ margin:5px 0; }
 .toolbtn{ border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text);
   padding:7px 13px; font-size:.82rem; cursor:pointer; }
 .toolbtn:hover{ border-color:var(--border-strong); }
+
+/* ---------- Úkoly (checklist.html, assets/ukoly.js) ---------- */
+.uk-sum .stats{ margin-top:6px; }
+.uk-sum .progresswrap{ margin:12px 0 18px; }
+.uk-over{ color:var(--danger); }
+.uk-add{ margin-bottom:18px; }
+.uk-add-row{ align-items:flex-end; margin-bottom:0; }
+.uk-add-row .ba-field input, .uk-add-row .ba-field select{ min-height:40px; }
+.uk-add .ba-field input[type="text"]{ width:100%; background:var(--bg); color:var(--text); border:1px solid var(--border);
+  border-radius:10px; padding:10px 12px; font:inherit; font-size:.95rem; }
+.uk-add .ba-field input[type="date"]{ background:var(--bg); color:var(--text); border:1px solid var(--border);
+  border-radius:10px; padding:8px 10px; font:inherit; font-size:.88rem; }
+.uk-add .ba-field input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.uk-add-btn{ margin-left:auto; }
+.uk-filters{ display:flex; flex-wrap:wrap; gap:4px 18px; }
+.uk-filters .board-filter{ margin-bottom:12px; }
+.uk-migr-btns{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.uk-migr-btns .btn{ padding:8px 14px; font-size:.86rem; }
+.uk-group{ margin:0 0 6px; }
+.uk-group > h2{ margin:26px 0 10px; }
+.uk-gcount{ font-size:.74rem; font-weight:700; color:var(--muted); background:var(--surface-2); border-radius:999px; padding:1px 9px; }
+.uk-row{ display:flex; align-items:flex-start; gap:11px; padding:11px 12px 11px 13px; margin:7px 0; background:var(--surface);
+  border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-sm); }
+.uk-row.urgent{ border-color:var(--warn); }
+.uk-row.over{ border-color:color-mix(in srgb, var(--danger) 55%, transparent); }
+.uk-row.done{ background:var(--surface-2); box-shadow:none; }
+.uk-row.done .uk-text{ color:var(--muted); text-decoration:line-through; }
+.uk-cb{ width:20px; height:20px; margin-top:1px; accent-color:var(--accent); flex:0 0 auto; cursor:pointer; }
+.uk-main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.uk-text{ font-size:.95rem; line-height:1.4; overflow-wrap:anywhere; }
+.uk-note{ color:var(--muted); font-size:.84rem; line-height:1.4; white-space:pre-wrap; }
+.uk-meta{ display:flex; flex-wrap:wrap; gap:5px; }
+.uk-chip{ display:inline-flex; align-items:center; gap:4px; font-size:.74rem; font-weight:600; padding:2px 9px; border-radius:999px;
+  background:var(--surface-2); color:var(--muted); border:1px solid transparent; white-space:nowrap; max-width:100%;
+  overflow:hidden; text-overflow:ellipsis; }
+a.uk-chip:hover{ border-color:var(--accent); color:var(--accent-ink); text-decoration:none; }
+.uk-due.soon{ color:var(--warn); background:var(--warn-soft); }
+.uk-due.over{ color:var(--danger); background:color-mix(in srgb, var(--danger) 13%, transparent); }
+.uk-donechip{ color:var(--ok); background:var(--ok-soft); }
+.uk-tools{ display:flex; gap:2px; opacity:0; transition:opacity .12s; }
+.uk-row:hover .uk-tools, .uk-row:focus-within .uk-tools{ opacity:1; }
+@media (hover:none){ .uk-tools{ opacity:1; } }
+.uk-tools button{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:.92rem; padding:4px 7px; border-radius:7px; }
+.uk-tools button:hover{ background:var(--surface-2); color:var(--text); }
+.uk-tools button[data-del]:hover{ color:var(--danger); }
+.uk-row.editing{ flex-direction:column; align-items:stretch; gap:9px; border-color:var(--accent); }
+.uk-row.editing input[type="text"], .uk-row.editing textarea, .uk-row.editing select, .uk-row.editing input[type="date"]{
+  font:inherit; font-size:.9rem; color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:8px 10px; }
+.uk-row.editing textarea{ resize:vertical; }
+.uk-e-row{ display:flex; flex-wrap:wrap; gap:10px; }
+.uk-e-row label{ display:flex; flex-direction:column; gap:4px; font-size:.75rem; font-weight:600; color:var(--muted); min-width:0; }
+.uk-e-row select{ max-width:220px; }
+.uk-e-row .uk-e-urg{ flex-direction:row; align-items:center; gap:6px; align-self:flex-end; padding-bottom:8px; }
+.uk-e-btns{ display:flex; gap:8px; }
+.uk-e-btns .btn{ padding:8px 14px; font-size:.86rem; }
+.uk-showdone{ background:none; border:1px dashed var(--border-strong); color:var(--muted); border-radius:10px; padding:7px 12px;
+  font:inherit; font-size:.82rem; cursor:pointer; margin:4px 0 0; }
+.uk-showdone:hover{ color:var(--text); border-color:var(--accent); }
+.uk-allgood{ color:var(--muted); font-size:.88rem; margin:4px 2px; }
+.uk-toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:60; display:flex; align-items:center; gap:14px;
+  max-width:calc(100vw - 32px); padding:11px 12px 11px 16px; border-radius:12px; background:var(--text); color:var(--bg);
+  box-shadow:var(--shadow-lg); font-size:.88rem; }
+.uk-toast[hidden]{ display:none; }
+.uk-toast span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.uk-toast button{ flex:0 0 auto; border:0; border-radius:8px; padding:6px 12px; font:inherit; font-weight:700; cursor:pointer;
+  background:var(--accent); color:#fff; }
+/* malý seznam na stránkách přípojek */
+.uk-mini label.clitem{ cursor:pointer; }
+.uk-inline-meta{ display:block; margin-top:3px; color:var(--muted); font-size:.76rem; }
+.uk-mini-foot{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:10px; }
+.uk-mini-add{ flex:1 1 240px; background:var(--bg); color:var(--text); border:1px dashed var(--border-strong); border-radius:10px;
+  padding:9px 12px; font:inherit; font-size:.88rem; }
+.uk-mini-add:focus{ outline:2px solid var(--accent); outline-offset:0; border-style:solid; }
+.uk-mini-foot a{ font-size:.84rem; font-weight:600; white-space:nowrap; }
+@media (max-width:560px){
+  .uk-add-row .ba-field{ flex:1 1 calc(50% - 6px); }
+  .uk-add-row .ba-field select, .uk-add-row .ba-field input{ width:100%; }
+  .uk-add-btn{ width:100%; justify-content:center; }
+  .uk-filters{ display:block; }
+  .uk-filters .board-filter{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+  .uk-filters .fchip{ flex:0 0 auto; }
+  .uk-e-row label{ flex:1 1 calc(50% - 5px); }
+  .uk-e-row select{ max-width:none; width:100%; }
+}
 
 /* ---------- Harmonogram ---------- */
 .timeline{ position:relative; margin:16px 0 0 8px; padding-left:30px; }
@@ -540,7 +625,14 @@ ul.tidy li{ margin:5px 0; }
 .rz-icon-btn.danger:hover{ color:var(--danger); }
 a.rz-icon-btn:hover{ text-decoration:none; }
 
-.tablewrap .rz-tbl{ min-width:960px; table-layout:fixed; }
+.tablewrap .rz-tbl{ min-width:1080px; table-layout:fixed; }
+.rz-paid{ color:var(--ok); }
+.rz-paidbar{ height:5px; margin-top:8px; border-radius:4px; background:var(--surface-2); overflow:hidden; }
+.rz-paidbar i{ display:block; height:100%; background:var(--ok); border-radius:4px; }
+.rz-tbl td.rz-paidcell input{ display:block; }
+.rz-paidcell .rz-paiddate{ margin-top:2px; font-size:.74rem !important; color:var(--muted) !important; text-align:right;
+  min-width:0; max-width:100%; padding-left:2px !important; padding-right:2px !important; }
+.rz-tbl tr.rz-row-paid .rz-paidcell input[data-field="paid"]{ color:var(--ok); font-weight:650; }
 .rz-tbl th{ white-space:normal; line-height:1.3; }
 .rz-tbl td{ vertical-align:top; }
 .rz-tbl input{ overflow:hidden; text-overflow:ellipsis; }
@@ -578,6 +670,38 @@ a.rz-icon-btn:hover{ text-decoration:none; }
 
 @media (max-width:560px){
   .rz-cat-sums{ gap:10px; }
+}
+/* rozpočet na mobilu: každá položka jako karta místo široké tabulky */
+@media (max-width:720px){
+  .rz-cat .tablewrap{ overflow:visible; background:none; border:0; box-shadow:none; border-radius:0; }
+  .tablewrap .rz-tbl{ min-width:0; display:block; table-layout:auto; }
+  .rz-tbl colgroup{ display:none; }
+  .rz-tbl tbody{ display:block; }
+  .rz-tbl tr{ display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; padding:12px 12px 10px; margin:0 0 10px;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-sm); }
+  .rz-tbl tr:first-child{ display:none; }                      /* hlavička tabulky */
+  .rz-tbl tr.rz-row-paid{ border-color:color-mix(in srgb, var(--ok) 45%, transparent); }
+  .rz-tbl td{ display:block; padding:0; border:0; text-align:left; min-width:0; }
+  .rz-tbl td[data-label]::before{ content:attr(data-label); display:block; margin:0 0 3px; font-size:.66rem; font-weight:700;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .rz-tbl td.rz-c-name, .rz-tbl td.rz-c-link, .rz-tbl td.rz-c-cat{ grid-column:1 / -1; }
+  .rz-tbl td.rz-c-name::before{ display:none; }
+  .rz-tbl td.rz-c-name .rz-name{ font-weight:650; font-size:.98rem; }
+  .rz-tbl input, .rz-tbl select{ border-color:var(--border); background:var(--bg); padding:7px 8px; font-size:.92rem; }
+  .rz-tbl input[type="number"]{ text-align:left; }
+  .rz-tbl td.rz-c-name .rz-note-input{ border-color:transparent; background:transparent; padding-top:2px; }
+  .rz-total{ padding-top:0; white-space:normal; }
+  .rz-total b{ font-size:1rem; }
+  .rz-paidcell .rz-paiddate{ text-align:left; margin-top:4px; padding:7px 8px !important; }
+  .rz-linkcell{ min-width:0; flex-direction:row; align-items:center; }
+  .rz-linkcell input{ flex:1; }
+  .rz-tbl td.rz-c-cat{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .rz-tbl td.rz-c-cat::before{ width:100%; }
+  .rz-tbl td.rz-c-cat select{ flex:1; width:auto; }
+  .rz-tbl td.rz-c-cat .rz-icon-btn{ width:auto !important; margin:0 !important; }
+  .rz-tbl tr.rz-addrow{ display:block; padding:0; background:none; border:0; box-shadow:none; }
+  .rz-tbl tr.rz-addrow td{ display:block; }
+  .rz-addrow input{ border:1px dashed var(--border-strong) !important; padding:10px 12px !important; }
 }
 
 /* ---------- Harmonogram (interaktivní) ---------- */
@@ -650,14 +774,41 @@ a.rz-icon-btn:hover{ text-decoration:none; }
   border-radius:10px; padding:9px 12px; font:inherit; }
 .hg-newphase input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
 
+/* sbalitelné fáze */
+.hg-listtools{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; margin:0 0 10px; }
+.hg-listtools[hidden]{ display:none; }
+.hg-chev{ display:inline-block; width:8px; height:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform:rotate(45deg); margin-top:-4px; transition:transform .15s; }
+.hg-coltoggle{ flex:0 0 auto; width:28px; height:28px; display:grid; place-items:center; margin-top:4px; border:0; border-radius:8px;
+  background:none; color:var(--muted); cursor:pointer; }
+.hg-coltoggle:hover{ background:var(--surface-2); color:var(--text); }
+.hg-phase.hg-collapsed{ padding:0; }
+.hg-colhead{ width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; border:0; background:none; cursor:pointer;
+  font:inherit; color:var(--text); text-align:left; border-radius:var(--radius-lg); }
+.hg-colhead:hover{ background:var(--surface-2); }
+.hg-colhead .hg-chev{ transform:rotate(-45deg); margin-top:0; color:var(--muted); }
+.hg-col-name{ flex:1; min-width:0; font-weight:650; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hg-col-when{ color:var(--accent-ink); font-size:.8rem; font-weight:650; white-space:nowrap; }
+.hg-col-n{ color:var(--muted); font-size:.78rem; font-variant-numeric:tabular-nums; background:var(--surface-2);
+  border-radius:999px; padding:1px 9px; }
+@media (hover:none){ .hg-draghandle{ display:none; } }   /* tažení na dotykových displejích nefunguje – jsou šipky */
 @media (max-width:560px){
-  .hg-kroky, .hg-addkrok{ margin-left:6px; }
+  .hg-phase{ padding:10px 12px 12px; }
+  .hg-colhead{ padding:12px 12px; gap:8px; }
+  .hg-col-when{ display:none; }
+  .hg-kroky, .hg-addkrok{ margin-left:0; }
   .hg-when{ width:110px; }
-  .hg-krok{ flex-wrap:wrap; }
-  .hg-krok-text{ flex:1 1 100%; order:1; }
-  .hg-krok-when{ order:3; }
-  .hg-krok-phase{ flex:1 1 auto; order:4; max-width:none; }
-  .hg-krok[data-krok-id] > [data-delkrok]{ order:5; margin-left:auto; }
+  /* krok: stav · text · smazat, pod tím termín a fáze (menším písmem) */
+  .hg-krok{ display:grid; grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) auto; grid-template-areas:"st tx tx dl" ". wh ph ar";
+    gap:2px 6px; padding:6px 4px; border-bottom:1px solid var(--border); border-radius:0; }
+  .hg-krok:last-child{ border-bottom:0; }
+  .hg-krok .hg-draghandle{ display:none; }
+  .hg-krok-status{ grid-area:st; }
+  .hg-krok-text{ grid-area:tx; min-width:0; }
+  .hg-krok .hg-arrows{ grid-area:ar; flex-direction:row; }
+  .hg-krok[data-krok-id] > [data-delkrok]{ grid-area:dl; }
+  .hg-krok-when{ grid-area:wh; width:auto; font-size:.74rem; padding-top:0; padding-bottom:0; }
+  .hg-krok-phase{ grid-area:ph; max-width:none; width:100%; font-size:.72rem; padding-top:2px; padding-bottom:2px; }
 }
 
 /* přepínač zobrazení (seznam / Gantt) */

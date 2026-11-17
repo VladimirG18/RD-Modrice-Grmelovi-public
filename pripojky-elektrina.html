@@ -52,7 +52,7 @@
         <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
         <div class="navmenu">
           <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
-          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
           <a href="poznamky.html" data-ic="📝">Poznámky</a>
         </div>
       </div>
@@ -107,12 +107,14 @@
   </ul>
 
   <h2>Co ještě zařídit</h2>
+  <div class="uk-mini" id="ukoly" data-group="Přípojky – elektřina">
   <div class="clitem" data-id="pripojky-elektro-1"><input type="checkbox"><span>Vyfotit typový štítek/výrobní číslo skříně u souseda (je to SS300?) a ověřit, kolik má uvnitř sad pojistek a jak jsou označené</span></div>
   <div class="clitem" data-id="pripojky-elektro-2"><input type="checkbox"><span>Nahlásit EG.D fotky a polohu skříně s odkazem na smlouvu č. 9002317986 – zeptat se, jestli je to tatáž skříň ze smlouvy a kdy do ní přibude naše sada pojistek, nebo jestli patří jen k sousednímu odběru a naše je potřeba zřídit zcela nově</span></div>
   <div class="clitem" data-id="pripojky-elektro-3"><input type="checkbox"><span>Po potvrzení hotové skříně: objednat elektrikáře na vybudování kabelu od HDS + elektroměrový rozvaděč</span></div>
   <div class="clitem" data-id="pripojky-elektro-4"><input type="checkbox"><span>Objednat revizního technika – revizní zpráva elektroinstalace</span></div>
   <div class="clitem" data-id="pripojky-elektro-5"><input type="checkbox"><span>Vybrat dodavatele elektřiny a podepsat smlouvu o sdružených službách dodávky</span></div>
   <div class="clitem" data-id="pripojky-elektro-6"><input type="checkbox"><span>Podat žádost o osazení elektroměru (EG.D/dodavatel) – po revizi</span></div>
+  </div>
 
   <p class="note">Právní kontext a zdroje viz stránka <a href="pripojky.html">Přípojky</a>.</p>
 </div>
@@ -121,6 +123,11 @@
   RD Modřice · Grmelovi — stav vychází ze smlouvy o připojení a e-mailové komunikace s EG.D (2024–2026).
 </footer>
 
-<script src="assets/pripojky-checklist.js"></script>
+<script type="module">
+// úkoly ze sdíleného seznamu (statické položky výše jsou jen záloha)
+import { mountGroupTasks } from './assets/ukoly.js';
+const el = document.getElementById('ukoly');
+mountGroupTasks(el, el.dataset.group);
+</script>
 </body>
 </html>

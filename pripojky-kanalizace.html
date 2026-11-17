@@ -52,7 +52,7 @@
         <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
         <div class="navmenu">
           <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
-          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
           <a href="poznamky.html" data-ic="📝">Poznámky</a>
         </div>
       </div>
@@ -76,9 +76,11 @@
   zbytek přirozený vsak na pozemku. Přípojku k BVK proto řešit není potřeba.</p>
 
   <h2>Co ještě zařídit</h2>
+  <div class="uk-mini" id="ukoly" data-group="Přípojky – kanalizace">
   <div class="clitem" data-id="pripojky-kanal-1"><input type="checkbox"><span>Ověřit, že je jímka jako vodní dílo řádně povolena (dle stavebního povolení domu by měla být zahrnutá – doporučeno si to pro jistotu potvrdit u vodoprávního úřadu)</span></div>
   <div class="clitem" data-id="pripojky-kanal-2"><input type="checkbox"><span>Zajistit smlouvu s oprávněnou firmou na pravidelný vývoz jímky</span></div>
   <div class="clitem" data-id="pripojky-kanal-3"><input type="checkbox"><span>Uchovávat doklady o vývozu (pro případnou kontrolu)</span></div>
+  </div>
 
   <p class="note">Právní kontext a zdroje viz stránka <a href="pripojky.html">Přípojky</a>.</p>
 </div>
@@ -87,6 +89,11 @@
   RD Modřice · Grmelovi — stav vychází z projektové dokumentace a technické zprávy k přípojkám.
 </footer>
 
-<script src="assets/pripojky-checklist.js"></script>
+<script type="module">
+// úkoly ze sdíleného seznamu (statické položky výše jsou jen záloha)
+import { mountGroupTasks } from './assets/ukoly.js';
+const el = document.getElementById('ukoly');
+mountGroupTasks(el, el.dataset.group);
+</script>
 </body>
 </html>

@@ -52,7 +52,7 @@
         <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
         <div class="navmenu">
           <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
-          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
           <a href="poznamky.html" data-ic="📝">Poznámky</a>
         </div>
       </div>
@@ -90,6 +90,7 @@
   </ul>
 
   <h2>Co ještě zařídit</h2>
+  <div class="uk-mini" id="ukoly" data-group="Přípojky – voda">
   <div class="clitem" data-id="pripojky-voda-1"><input type="checkbox"><span>Objednat u přípojkového oddělení BVK realizaci (smlouva o dílo, dotazník, plná moc, čestné prohlášení k DPH, schválená PD, výpis z katastru)</span></div>
   <div class="clitem" data-id="pripojky-voda-2"><input type="checkbox"><span>Uhradit zálohu (BVK běžně požaduje 80 % ceny předem)</span></div>
   <div class="clitem" data-id="pripojky-voda-3"><input type="checkbox"><span>Objednat vytyčení sítí BVK (min. 3 dny předem), případně povolení zvláštního užívání komunikace</span></div>
@@ -98,6 +99,7 @@
   <div class="clitem" data-id="pripojky-voda-6"><input type="checkbox"><span>Závěrečná technická prohlídka (geodetické zaměření, přípojkový list V1, protokol)</span></div>
   <div class="clitem" data-id="pripojky-voda-7"><input type="checkbox"><span>Po instalaci vodoměru podepsat smlouvu o dodávce vody s BVK</span></div>
   <div class="clitem urgent" data-id="pripojky-voda-8"><input type="checkbox"><span>⏰ Termínově urgentní – řešit před zimou (BVK v zimě nepřipojuje)</span></div>
+  </div>
 
   <p class="note">Právní kontext a zdroje viz stránka <a href="pripojky.html">Přípojky</a>.</p>
 </div>
@@ -106,6 +108,11 @@
   RD Modřice · Grmelovi — stav vychází z projektové dokumentace a e-mailové komunikace s BVK (2024–2026).
 </footer>
 
-<script src="assets/pripojky-checklist.js"></script>
+<script type="module">
+// úkoly ze sdíleného seznamu (statické položky výše jsou jen záloha)
+import { mountGroupTasks } from './assets/ukoly.js';
+const el = document.getElementById('ukoly');
+mountGroupTasks(el, el.dataset.group);
+</script>
 </body>
 </html>
