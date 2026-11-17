@@ -39,7 +39,7 @@ const EXTRA = [
 ];
 const extraFor = p => EXTRA.filter(e => e.match.test(p.name || ''));
 
-let T = { phases:[], kroky:[] }, photos = [], budget = null, tasks = [], diary = [];
+let T = { phases:[], kroky:[] }, photos = [], budget = null, tasks = [], diary = [], defects = [];
 const thumbs = new Map();                 // id fotky → náhled
 
 const stepsOf = p => T.kroky.filter(k => k.phase === p.id);
@@ -121,6 +121,19 @@ function budgetHTML(p){
     esc(cat ? cat.name : p.budgetCat)}${sum != null && sum > 0 ? ` · <b>${esc(fmtMoney(sum))}</b>` : ''}</a>`;
 }
 
+/* vady a nedodělky ve fázi (vady.html) */
+function defectsHTML(p){
+  const mine = defects.filter(v => v.phase === p.id);
+  if(!mine.length) return '';
+  const open = mine.filter(v => v.status !== 'uzavreno');
+  const SEVI = { drobna:'🟡', stredni:'🟠', zavazna:'🔴' };
+  return `<h3>Vady a nedodělky <span class="ph-d-n">${mine.length - open.length}/${mine.length}</span></h3>
+    ${open.length ? `<ul class="ph-d-steps">${open.slice(0, 6).map(v => `<li class="st-planovano"><span aria-hidden="true">${SEVI[v.severity] || '🟠'}</span>
+      <span>${esc(v.title)}${v.place ? ` <small>· ${esc(v.place)}</small>` : ''}</span>${v.status === 'opraveno' ? '<small>ke kontrole</small>' : ''}</li>`).join('')}</ul>`
+      : '<p class="ph-d-empty">Všechny vady v této fázi jsou uzavřené. ✅</p>'}
+    <a class="ph-link" href="vady.html">🔧 Vady a nedodělky →</a>`;
+}
+
 /* zápisy ze stavebního deníku (uložená fáze, jinak podle data) */
 function diaryHTML(p){
   const mine = diary.filter(e => (e.phase || (phaseForDate(T.phases, e.date) || {}).id) === p.id)
@@ -168,6 +181,7 @@ async function openPhase(id, focusBack){
           k.when ? `<small>${esc(k.when)}</small>` : ''}</li>`).join('')}</ul>` : ''}
       ${tasksHTML(p)}
       ${diaryHTML(p)}
+      ${defectsHTML(p)}
       ${hist.length ? `<h3>Záznamy</h3><ul class="subtl">${hist.map(([w, t]) => `<li><b>${esc(w)}</b> – ${esc(t)}</li>`).join('')}</ul>` : ''}
       <h3>Fotky${ph.length ? ` <span class="ph-d-n">${ph.length}</span>` : ''}</h3>
       ${ph.length ? `<div class="ph-d-photos">${ph.slice(0, 12).map(f => thumbHTML(f)).join('')}</div>
@@ -214,7 +228,7 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal();
 /* ---------- načtení ---------- */
 async function init(){
   const on = online();
-  const [timeline, fotky, rozpocet, ukoly, denik] = await Promise.all([
+  const [timeline, fotky, rozpocet, ukoly, denik, vady] = await Promise.all([
     loadTimeline().catch(e => { console.warn(e); return null; }),
     (on ? listDocs('fotky', ['date', 'caption', 'phase', 'phaseName', 'phaseManual', 'ts', 'src']) : Promise.reject(new Error('offline')))
       .catch(() => localList('rdmodrice-fotky-v1')),
@@ -224,7 +238,10 @@ async function init(){
       .catch(() => localList('rdmodrice-ukoly-v1')),
     (on ? listDocs('denik', ['date', 'text', 'deal', 'phase']) : Promise.reject(new Error('offline')))
       .catch(() => localList('rdmodrice-denik-v1')),
+    (on ? listDocs('vady', ['title', 'place', 'status', 'severity', 'phase']) : Promise.reject(new Error('offline')))
+      .catch(() => localList('rdmodrice-vady-v1')),
   ]);
+  defects = Array.isArray(vady) ? vady : [];
   diary = Array.isArray(denik) ? denik : [];
   tasks = Array.isArray(ukoly) ? ukoly : [];
   if(!timeline){

@@ -60,6 +60,19 @@ function localBackend(key){
     async add(t){ const it = { id:'l' + uid(), ...t }; items.push(it); save(); cb(items.slice()); return it; },
     async update(id, patch){ const it = items.find(x => x.id === id); if(it){ Object.assign(it, patch); save(); cb(items.slice()); } },
     async remove(id){ items = items.filter(x => x.id !== id); save(); cb(items.slice()); },
+    // pomocné záznamy (např. plné fotky) – mimo hlavní seznam, ať se nenačítají pořád
+    async putAux(coll, data){
+      const k = key + '-' + coll, id = 'l' + uid();
+      let m = {}; try { m = JSON.parse(localStorage.getItem(k)) || {}; } catch(e){}
+      m[id] = data;
+      try { localStorage.setItem(k, JSON.stringify(m)); } catch(e){ alert('Úložiště prohlížeče je plné.'); throw e; }
+      return id;
+    },
+    async getAux(coll, id){ try { return (JSON.parse(localStorage.getItem(key + '-' + coll)) || {})[id] || null; } catch(e){ return null; } },
+    async delAux(coll, id){
+      const k = key + '-' + coll;
+      try { const m = JSON.parse(localStorage.getItem(k)) || {}; delete m[id]; localStorage.setItem(k, JSON.stringify(m)); } catch(e){}
+    },
   };
 }
 
@@ -89,6 +102,9 @@ async function firebaseBackend(coll){
     add: t => addDoc(col, t),
     update: (id, patch) => updateDoc(doc(db, coll, id), patch),
     remove: id => deleteDoc(doc(db, coll, id)),
+    async putAux(c, data){ return (await addDoc(collection(db, c), data)).id; },
+    async getAux(c, id){ const s = await getDoc(doc(db, c, id)); return s.exists() ? s.data() : null; },
+    delAux: (c, id) => deleteDoc(doc(db, c, id)),
   };
 }
 
@@ -104,6 +120,9 @@ export async function createStore(opts){
     add: t => current.add({ ts: Date.now(), ...t }),
     update: (id, patch) => current.update(id, patch),
     remove: id => current.remove(id),
+    putAux: (c, data) => current.putAux(c, data),
+    getAux: (c, id) => current.getAux(c, id),
+    delAux: (c, id) => current.delAux(c, id),
   };
   const goLocal = async reason => {
     current = localBackend(opts.localKey);

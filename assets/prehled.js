@@ -148,17 +148,16 @@ function renderDiary(list){
     <small>${esc(fmtDay(e.date))} (${esc(agoCz(e.date))})${e.author ? ' · ' + esc(e.author) : ''} · poslední zápis</small></span>`);
 }
 
-function renderNotes(list){
-  const n = list[0];
-  if(!n){
-    tile('nowNotes', `<span class="now-tile-ic">📝</span>
-      <span class="now-tile-main"><b>Poznámky</b><small>zatím žádné – zapiš první domluvu nebo nápad</small></span>`);
-    return;
-  }
-  const text = String(n.text || '').replace(/\s+/g, ' ').trim();
-  tile('nowNotes', `<span class="now-tile-ic">📝</span>
-    <span class="now-tile-main"><b class="now-clip">${esc(text.length > 70 ? text.slice(0, 68) + '…' : text)}</b>
-    <small>${esc(n.author || '')}${n.ts ? ' · ' + esc(agoCz(new Date(n.ts))) : ''} · poslední poznámka</small></span>`);
+function renderDefects(list){
+  const open = list.filter(v => v.status === 'zjisteno' || v.status === 'nahlaseno' || !v.status);
+  const check = list.filter(v => v.status === 'opraveno').length;
+  const sev = open.filter(v => v.severity === 'zavazna').length;
+  const sub = [sev ? `<span class="rz-over">${sev} závažn${sev === 1 ? 'á' : 'é'}</span>` : '', check ? `${check} ke kontrole` : '']
+    .filter(Boolean).join(' · ');
+  tile('nowDefects', `<span class="now-tile-ic">🔧</span>
+    <span class="now-tile-main"><b>${!list.length ? 'Vady a nedodělky' : open.length
+      ? `${open.length} ${pluralCz(open.length, 'neopravená vada', 'neopravené vady', 'neopravených vad')}` : 'Vše opraveno'}</b>
+    <small>${sub || (open.length ? 'čeká na opravu' : list.length ? 'nic otevřeného' : 'zatím žádné – zapiš, co je špatně')}</small></span>`);
 }
 
 /* ---------- načtení (každá část zvlášť, ať jedna chyba neshodí zbytek) ---------- */
@@ -206,9 +205,10 @@ async function init(){
   ).then(renderDiary);
 
   tryPart(
-    () => on ? queryDocs('poznamky', { fields:['text','author','ts'], orderBy:'ts', limit:1 }) : Promise.reject(new Error('offline')),
-    () => localList('rdmodrice-poznamky-v1').sort(byTsDesc).slice(0, 1)
-  ).then(renderNotes);
+    () => on ? listDocs('vady', ['status', 'severity']) : Promise.reject(new Error('offline')),
+    () => localList('rdmodrice-vady-v1')
+  ).then(renderDefects);
+
 }
 
 init();

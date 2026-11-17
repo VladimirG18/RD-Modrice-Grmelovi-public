@@ -284,6 +284,11 @@ const SOURCES = [
       t: [d.title, d.note, d.due, ...(Array.isArray(d.variants) ? d.variants.map(v => [v && v.name, v && v.note].filter(Boolean).join(' ')) : [])]
         .filter(Boolean).join(' · ') }) },
 
+  { coll:'vady', page:'vady.html', icon:'🔧', label:'Vady a nedodělky',
+    fields:['title','desc','place','contractor','status','foundAt'], local:'rdmodrice-vady-v1',   // `photos` ne – náhledy fotek
+    row: d => ({ h: [clean(d.title), d.place].filter(Boolean).join(' · '),
+      t: [d.title, d.desc, d.place, d.contractor, d.foundAt].filter(Boolean).join(' · ') }) },
+
   { coll:'harmonogram_kroky', page:'harmonogram.html', icon:'📅', label:'Harmonogram – kroky',
     fields:['text','when','status'], local:'rdmodrice-harmonogram-kroky-v1',
     row: (d, L) => ({ h: clean(d.text).slice(0, 70),
