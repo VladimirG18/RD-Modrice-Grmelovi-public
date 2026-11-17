@@ -51,6 +51,13 @@ const slug = s => (s || '').toLowerCase()
 const esc = s => (s == null ? '' : String(s)).replace(/[&<>"']/g, m =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 const isImageUrl = u => /^data:image\//i.test(u || '') || /\.(jpe?g|png|gif|webp|avif|bmp|svg)(\?|#|$)/i.test(u || '');
+/* Název souboru z foťáku / WhatsAppu („WhatsApp Image 2026-08-29 at 21.15.31", „IMG_20260829_…",
+   „PXL_…", „Snímek obrazovky…") není popisek – takový název se nezobrazuje ani neukládá. */
+const AUTO_NAME = /^(whatsapp[ _-]?(image|obr[aá]zek)|img[-_ ]?\d|dsc[-_ ]?\d|dscn?\d|pxl[-_]|p\d{6,}|screenshot|sn[ií]mek obrazovky|image[-_ ]?\d*$|obr[aá]zek$|photo[-_ ]?\d|signal-\d|received_\d|fb_img|\d{8}[-_ ]?\d{4,}|[0-9a-f]{8}-[0-9a-f]{4}-)/i;
+export function niceTitle(t){
+  const s = (t == null ? '' : String(t)).trim();
+  return AUTO_NAME.test(s) ? '' : s;
+}
 function domainOf(u){ try { return new URL(u).hostname.replace(/^www\./, ''); } catch(e){ return (u || '').replace(/^https?:\/\//, '').split('/')[0]; } }
 function fmtDate(ts){
   if(!ts) return '';
@@ -330,7 +337,7 @@ export async function initBoard(opts){
     for(const f of files){
       try {
         const img = await backend.putImage(f);
-        const title = (f.name || '').replace(/\.[a-z0-9]+$/i, '') || 'Obrázek';
+        const title = niceTitle((f.name || '').replace(/\.[a-z0-9]+$/i, ''));
         await backend.add({ cat, author, ts: Date.now(), title, note:'', ...img });
         ok++;
       } catch(e){ console.error(e); }
@@ -399,6 +406,7 @@ export async function initBoard(opts){
   }
   function cardHTML(item){
     const s = slug(item.author);
+    const title = niceTitle(item.title);
     const who = `<span class="who who-${s}">${esc(item.author || '')}</span>`;
     const meta = `<span class="bcard-meta">${who} · ${esc(fmtDate(item.ts))}</span>`;
     const del = `<button class="bcard-del" data-id="${esc(item.id)}" title="Smazat" aria-label="Smazat">🗑</button>`;
@@ -423,11 +431,11 @@ export async function initBoard(opts){
     return `<figure class="bcard bcard-img" data-id="${esc(item.id)}">
       ${del}
       <button class="bcard-thumb" data-open="${esc(item.id)}" aria-label="Zvětšit">
-        <img src="${esc(item.src)}" alt="${esc(item.title || '')}" loading="lazy">
+        <img src="${esc(item.src)}" alt="${esc(title)}" loading="lazy">
         ${badge}
       </button>
       <figcaption>
-        <span class="bcard-title">${esc(item.title || '')}</span>
+        ${title ? `<span class="bcard-title">${esc(title)}</span>` : ''}
         ${item.note ? `<span class="bcard-note">${esc(item.note)}</span>` : ''}
         ${meta}
       </figcaption>
@@ -498,9 +506,10 @@ export async function initBoard(opts){
   }
   function showLb(){
     const it = lbList[lbIdx]; if(!it) return;
-    lbImg.src = it.src; lbImg.alt = it.title || '';
+    const title = niceTitle(it.title);
+    lbImg.src = it.src; lbImg.alt = title;
     const c = CAT_BY_ID[it.cat];
-    lbCap.innerHTML = `<b>${esc(it.title || '')}</b> <span class="lb-sub">${c ? c.icon + ' ' + esc(c.name) : ''} · ${esc(it.author || '')} · ${esc(fmtDate(it.ts))}</span>`;
+    lbCap.innerHTML = `${title ? `<b>${esc(title)}</b> ` : ''}<span class="lb-sub">${c ? c.icon + ' ' + esc(c.name) : ''} · ${esc(it.author || '')} · ${esc(fmtDate(it.ts))}</span>`;
   }
   function closeLb(){ light.hidden = true; lbImg.src = ''; document.body.style.overflow = ''; }
   function step(d){ if(!lbList.length) return; lbIdx = (lbIdx + d + lbList.length) % lbList.length; showLb(); }

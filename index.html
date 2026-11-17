@@ -16,30 +16,54 @@
 <link rel="stylesheet" href="assets/style.css" />
 <script src="assets/site.js"></script>
 <script type="module" src="assets/search.js"></script>
+<script type="module" src="assets/prehled.js"></script>
 </head>
 <body>
 
 <header class="site-header">
-  <nav class="nav">
+  <nav class="nav" aria-label="Hlavní navigace">
     <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
-    <div class="navlinks">
-      <a href="model.html">3D model</a>
-      <a href="informace.html">Informace</a>
-      <a href="material.html">Materiály</a>
-      <a href="dokumentace.html">Dokumentace</a>
-      <a href="vykresy.html">Editor výkresů</a>
-      <a href="vizualizace.html">Vizualizace</a>
-      <a href="inspirace.html">Inspirace</a>
-      <a href="harmonogram.html">Harmonogram</a>
-      <a href="stavba.html">Stavba domu</a>
-      <a href="fotky-stavby.html">Fotky ze stavby</a>
-      <a href="checklist.html">Checklist</a>
-      <a href="poznamky.html">Poznámky</a>
-      <a href="pozadavky.html">Požadavky</a>
-      <a href="rozpocet.html">Rozpočet</a>
+    <div class="navlinks" id="navlinks">
+      <a class="navhome" href="index.html" data-ic="🏡">Přehled</a>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Dům</button>
+        <div class="navmenu">
+          <a href="model.html" data-ic="🏠">3D model</a>
+          <a href="informace.html" data-ic="ℹ️">Informace o domě</a>
+          <a href="material.html" data-ic="🧱">Materiály</a>
+          <a href="dokumentace.html" data-ic="📐">Dokumentace</a>
+          <a href="vykresy.html" data-ic="🖍️">Editor výkresů</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Stavba</button>
+        <div class="navmenu">
+          <a href="stavba.html" data-ic="🏗️">Postup stavby</a>
+          <a href="harmonogram.html" data-ic="📅">Harmonogram</a>
+          <a href="fotky-stavby.html" data-ic="📷">Fotky ze stavby</a>
+          <a href="pripojky.html" data-ic="🔌">Přípojky</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Nápady</button>
+        <div class="navmenu">
+          <a href="vizualizace.html" data-ic="🖼️">Vizualizace</a>
+          <a href="inspirace.html" data-ic="💡">Inspirace</a>
+          <a href="pozadavky.html" data-ic="✏️">Požadavky na model</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
+        <div class="navmenu">
+          <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
+          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="poznamky.html" data-ic="📝">Poznámky</a>
+        </div>
+      </div>
     </div>
     <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
     <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span aria-hidden="true">☰</span></button>
   </nav>
 </header>
 
@@ -48,11 +72,10 @@
     <span class="eyebrow">Novostavba · Modřice, p.č. 1292/40 a 1295/2</span>
     <h1>Stavíme dům<br />v&nbsp;Modřicích</h1>
     <p>Rodinný dům 5+kk se sedlovou střechou, zapuštěnou terasou v&nbsp;podkroví
-      a garáží průjezdnou do zahrady. Všechno o&nbsp;projektu na jednom místě –
-      od interaktivního 3D modelu po harmonogram stavby.</p>
+      a garáží průjezdnou do zahrady. Všechno o&nbsp;projektu na jednom místě.</p>
     <div class="actions">
       <a class="btn primary" href="model.html">🏠 Prohlédnout 3D model</a>
-      <a class="btn" href="informace.html">Informace o domě</a>
+      <a class="btn" href="fotky-stavby.html">📷 Přidat fotky ze stavby</a>
     </div>
   </div>
   <div class="heroimg">
@@ -61,98 +84,124 @@
 </section>
 
 <div class="hubwrap">
+
+  <!-- Přehled „co se děje" – plní assets/prehled.js ze sdílených dat (harmonogram, fotky, rozpočet…) -->
+  <section class="now" id="now" aria-labelledby="nowTitle">
+    <h2 class="hub-title" id="nowTitle">Co se děje na stavbě</h2>
+    <div class="now-grid">
+      <article class="now-card" id="nowPhase">
+        <div class="now-card-head"><h3>🛠️ Právě probíhá</h3><a href="stavba.html">Postup stavby →</a></div>
+        <div class="now-skel"><i></i><i></i><i></i></div>
+      </article>
+      <article class="now-card" id="nowPhotos">
+        <div class="now-card-head"><h3>📷 Poslední fotky</h3><a href="fotky-stavby.html">Všechny fotky →</a></div>
+        <div class="now-skel"><i></i><i></i></div>
+      </article>
+    </div>
+    <div class="now-mini">
+      <a class="now-tile" id="nowBudget" href="rozpocet.html"><span class="now-tile-ic">💰</span>
+        <span class="now-tile-main"><b>Rozpočet</b><small>načítám…</small></span></a>
+      <a class="now-tile" id="nowReq" href="pozadavky.html"><span class="now-tile-ic">✏️</span>
+        <span class="now-tile-main"><b>Požadavky na model</b><small>načítám…</small></span></a>
+      <a class="now-tile" id="nowNotes" href="poznamky.html"><span class="now-tile-ic">📝</span>
+        <span class="now-tile-main"><b>Poznámky</b><small>načítám…</small></span></a>
+    </div>
+  </section>
+
+  <h2 class="hub-title">Stavba</h2>
+  <div class="cards">
+    <a class="card" href="stavba.html">
+      <span class="ic">🏗️</span><span class="go">→</span>
+      <h2>Postup stavby</h2>
+      <p>Živý přehled fází – co je hotové, co probíhá a&nbsp;co nás čeká, s&nbsp;kroky a&nbsp;fotkami ke každé fázi.</p>
+    </a>
+    <a class="card" href="harmonogram.html">
+      <span class="ic">📅</span><span class="go">→</span>
+      <h2>Harmonogram</h2>
+      <p>Úprava plánu – fáze, dílčí kroky, termíny a&nbsp;Gantt. Odtud se bere stav pro celý web.</p>
+    </a>
+    <a class="card" href="fotky-stavby.html">
+      <span class="ic">📷</span><span class="go">→</span>
+      <h2>Fotky ze stavby</h2>
+      <p>Fotodokumentace po dnech a&nbsp;fázích – fotku přidá kdokoli přímo z&nbsp;mobilu.</p>
+    </a>
+    <a class="card" href="pripojky.html">
+      <span class="ic">🔌</span><span class="go">→</span>
+      <h2>Přípojky</h2>
+      <p>Elektřina, plyn, voda a&nbsp;kanalizace – stav, časová osa a&nbsp;co ještě zařídit.</p>
+    </a>
+  </div>
+
+  <h2 class="hub-title">Plánování</h2>
+  <div class="cards">
+    <a class="card" href="rozpocet.html">
+      <span class="ic">💰</span><span class="go">→</span>
+      <h2>Rozpočet</h2>
+      <p>Sdílený rozpočet po kategoriích – cena oficiální i&nbsp;odhad, součty v&nbsp;reálném čase.</p>
+    </a>
+    <a class="card" href="checklist.html">
+      <span class="ic">✅</span><span class="go">→</span>
+      <h2>Checklist</h2>
+      <p>Úkoly a&nbsp;rozhodnutí napříč stavbou. Odškrtnutí se ukládá ve tvém prohlížeči.</p>
+    </a>
+    <a class="card" href="poznamky.html">
+      <span class="ic">📝</span><span class="go">→</span>
+      <h2>Poznámky</h2>
+      <p>Společné poznámky v&nbsp;reálném čase – každý zapíše pod svým jménem.</p>
+    </a>
+  </div>
+
+  <h2 class="hub-title">Dům</h2>
   <div class="stats">
     <div class="stat"><b>5+kk</b><span>dispozice · 2 podlaží</span></div>
     <div class="stat"><b>162 m²</b><span>plocha místností</span></div>
     <div class="stat"><b>123,5 m²</b><span>zastavěná plocha</span></div>
     <div class="stat"><b>872 m³</b><span>obestavěný prostor</span></div>
   </div>
-
-  <div style="height:18px"></div>
-
   <div class="cards">
     <a class="card" href="model.html">
       <span class="ic">🏠</span><span class="go">→</span>
       <h2>3D model</h2>
-      <p>Interaktivní model s&nbsp;vnitřní dispozicí – procházka domem, vypínání vrstev, pohled do místností a&nbsp;konfigurátor barev fasády.</p>
+      <p>Procházka domem, vypínání vrstev, pohled do místností a&nbsp;konfigurátor barev.</p>
     </a>
-
     <a class="card" href="informace.html">
       <span class="ic">ℹ️</span><span class="go">→</span>
       <h2>Informace o domě</h2>
       <p>Přesné údaje z&nbsp;projektové dokumentace – plochy místností, konstrukce, technika, pozemek.</p>
     </a>
-
     <a class="card" href="material.html">
       <span class="ic">🧱</span><span class="go">→</span>
       <h2>Stavební materiál</h2>
-      <p>Materiály a&nbsp;skladby dle projektu – zdivo, střecha, izolace, vytápění – plus co je ještě k&nbsp;výběru.</p>
+      <p>Materiály a&nbsp;skladby dle projektu – zdivo, střecha, izolace, vytápění – plus co je k&nbsp;výběru.</p>
     </a>
-
     <a class="card" href="dokumentace.html">
       <span class="ic">📐</span><span class="go">→</span>
       <h2>Projektová dokumentace</h2>
-      <p>Výkresy z&nbsp;projektu k&nbsp;prohlížení – základy, půdorysy, řez, pohledy, sjezd a&nbsp;koordinační situace (PDF).</p>
+      <p>Výkresy k&nbsp;prohlížení – základy, půdorysy, řez, pohledy, sjezd a&nbsp;koordinační situace.</p>
     </a>
-
     <a class="card" href="vykresy.html">
       <span class="ic">🖍️</span><span class="go">→</span>
       <h2>Editor výkresů</h2>
-      <p>Otevři půdorys (nebo nahraj vlastní), zakryj kóty a&nbsp;prvky, které nechceš, a&nbsp;zakresli vedení elektřiny, zásuvky a&nbsp;světla. Uloží se ti v&nbsp;prohlížeči, jde stáhnout jako obrázek.</p>
+      <p>Zakresli do půdorysu vedení elektřiny, zásuvky a&nbsp;světla a&nbsp;sdílej výsledek do Dokumentace.</p>
     </a>
+  </div>
 
+  <h2 class="hub-title">Nápady</h2>
+  <div class="cards">
     <a class="card" href="vizualizace.html">
       <span class="ic">🖼️</span><span class="go">→</span>
       <h2>Vizualizace</h2>
-      <p>Sdílená nástěnka vlastních obrázků a&nbsp;vizualizací – nahrávání z&nbsp;počítače i&nbsp;přes odkaz, rozčleněné podle exteriéru a&nbsp;jednotlivých místností.</p>
+      <p>Sdílená nástěnka vlastních obrázků a&nbsp;vizualizací podle exteriéru a&nbsp;místností.</p>
     </a>
-
     <a class="card" href="inspirace.html">
       <span class="ic">💡</span><span class="go">→</span>
       <h2>Inspirace</h2>
-      <p>Odkazy na obrázky a&nbsp;stránky, ze kterých se inspirujeme – také rozčleněné podle exteriéru a&nbsp;jednotlivých místností.</p>
+      <p>Odkazy na obrázky a&nbsp;stránky, ze kterých se inspirujeme – také podle místností.</p>
     </a>
-
-    <a class="card" href="harmonogram.html">
-      <span class="ic">📅</span><span class="go">→</span>
-      <h2>Harmonogram stavby</h2>
-      <p>Fáze výstavby s&nbsp;termíny a&nbsp;stavem – co je hotové, co probíhá a&nbsp;co nás čeká.</p>
-    </a>
-
-    <a class="card" href="stavba.html">
-      <span class="ic">🏗️</span><span class="go">→</span>
-      <h2>Stavba domu</h2>
-      <p>Aktuální postup výstavby po jednotlivých fázích – rozklikni si detail (přípojky, základy…) s&nbsp;časovou osou a&nbsp;checklistem úkolů.</p>
-    </a>
-
-    <a class="card" href="fotky-stavby.html">
-      <span class="ic">📷</span><span class="go">→</span>
-      <h2>Fotky ze stavby</h2>
-      <p>Fotodokumentace postupu výstavby seřazená chronologicky po dnech – fotku přidá kdokoli přímo tady, z&nbsp;mobilu i&nbsp;z&nbsp;počítače.</p>
-    </a>
-
-    <a class="card" href="checklist.html">
-      <span class="ic">✅</span><span class="go">→</span>
-      <h2>Checklist</h2>
-      <p>Úkoly a&nbsp;rozhodnutí napříč stavbou. Odškrtnutí se ukládá ve tvém prohlížeči.</p>
-    </a>
-
-    <a class="card" href="poznamky.html">
-      <span class="ic">📝</span><span class="go">→</span>
-      <h2>Poznámky</h2>
-      <p>Společné poznámky v&nbsp;reálném čase – každý zapíše pod svým jménem (Lucka, Vladimír, Jirka, Jarka).</p>
-    </a>
-
     <a class="card" href="pozadavky.html">
       <span class="ic">✏️</span><span class="go">→</span>
-      <h2>Požadavky na úpravy</h2>
-      <p>Návrhy úprav 3D modelu – zadej, co upravit (i&nbsp;přímo z&nbsp;modelu s&nbsp;přiloženým pohledem). Postupně je zapracuji a&nbsp;u&nbsp;každého vidíš stav.</p>
-    </a>
-
-    <a class="card" href="rozpocet.html">
-      <span class="ic">💰</span><span class="go">→</span>
-      <h2>Rozpočet</h2>
-      <p>Sdílený interaktivní rozpočet stavby po kategoriích – cena oficiální i&nbsp;neoficiální, součty v&nbsp;reálném čase, položky přidáš, upravíš i&nbsp;smažeš.</p>
+      <h2>Požadavky na model</h2>
+      <p>Návrhy úprav 3D modelu – zadej, co upravit, a&nbsp;u&nbsp;každého vidíš stav.</p>
     </a>
   </div>
 </div>

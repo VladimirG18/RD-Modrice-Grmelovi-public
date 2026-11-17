@@ -17,26 +17,49 @@
 <body>
 
 <header class="site-header">
-  <nav class="nav">
+  <nav class="nav" aria-label="Hlavní navigace">
     <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
-    <div class="navlinks">
-      <a href="model.html">3D model</a>
-      <a href="informace.html">Informace</a>
-      <a href="material.html">Materiály</a>
-      <a href="dokumentace.html">Dokumentace</a>
-      <a href="vykresy.html">Editor výkresů</a>
-      <a href="vizualizace.html">Vizualizace</a>
-      <a href="inspirace.html">Inspirace</a>
-      <a href="harmonogram.html">Harmonogram</a>
-      <a href="stavba.html">Stavba domu</a>
-      <a href="fotky-stavby.html">Fotky ze stavby</a>
-      <a href="checklist.html">Checklist</a>
-      <a href="poznamky.html">Poznámky</a>
-      <a href="pozadavky.html">Požadavky</a>
-      <a href="rozpocet.html">Rozpočet</a>
+    <div class="navlinks" id="navlinks">
+      <a class="navhome" href="index.html" data-ic="🏡">Přehled</a>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Dům</button>
+        <div class="navmenu">
+          <a href="model.html" data-ic="🏠">3D model</a>
+          <a href="informace.html" data-ic="ℹ️">Informace o domě</a>
+          <a href="material.html" data-ic="🧱">Materiály</a>
+          <a href="dokumentace.html" data-ic="📐">Dokumentace</a>
+          <a href="vykresy.html" data-ic="🖍️">Editor výkresů</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Stavba</button>
+        <div class="navmenu">
+          <a href="stavba.html" data-ic="🏗️">Postup stavby</a>
+          <a href="harmonogram.html" data-ic="📅">Harmonogram</a>
+          <a href="fotky-stavby.html" data-ic="📷">Fotky ze stavby</a>
+          <a href="pripojky.html" data-ic="🔌">Přípojky</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Nápady</button>
+        <div class="navmenu">
+          <a href="vizualizace.html" data-ic="🖼️">Vizualizace</a>
+          <a href="inspirace.html" data-ic="💡">Inspirace</a>
+          <a href="pozadavky.html" data-ic="✏️">Požadavky na model</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
+        <div class="navmenu">
+          <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
+          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="poznamky.html" data-ic="📝">Poznámky</a>
+        </div>
+      </div>
     </div>
     <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
     <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span aria-hidden="true">☰</span></button>
   </nav>
 </header>
 
@@ -87,8 +110,11 @@ const slug = s => s.toLowerCase().replace('á','a').replace('í','i').replace('�
 const KEY = 'rdmodrice-poznamky-v1';
 
 // zapamatuj si naposledy zvoleného autora
-const lastAuthor = localStorage.getItem(KEY + '-author');
-if(lastAuthor) authorEl.value = lastAuthor;
+const AKEY = 'rdmodrice-board-author';   // společný pro celý web (nástěnky, fotky, požadavky)
+let lastAuthor = null;
+try { lastAuthor = localStorage.getItem(AKEY) || localStorage.getItem(KEY + '-author'); } catch(e){}
+if(lastAuthor && [...authorEl.options].some(o => o.value === lastAuthor)) authorEl.value = lastAuthor;
+authorEl.addEventListener('change', () => { try { localStorage.setItem(AKEY, authorEl.value); } catch(e){} });
 
 function fmt(ts){
   if(!ts) return '';
@@ -193,7 +219,7 @@ backend.subscribe(render);
 addBtn.addEventListener('click', async ()=>{
   const text = textEl.value.trim();
   if(!text){ textEl.focus(); return; }
-  localStorage.setItem(KEY + '-author', authorEl.value);
+  try { localStorage.setItem(AKEY, authorEl.value); } catch(e){}
   addBtn.disabled = true;
   try { await backend.add(authorEl.value, text); textEl.value = ''; }
   catch(e){ console.error(e); alert('Poznámku se nepodařilo uložit.'); }

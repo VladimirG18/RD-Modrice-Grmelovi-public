@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>RD Modřice – Stavba domu</title>
+<title>RD Modřice – Postup stavby</title>
 <meta name="description" content="Aktuální postup výstavby rodinného domu v Modřicích po jednotlivých fázích – přípojky, základy a další, s časovou osou a checklistem." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
 <script>(function(){try{var t=localStorage.getItem('rdmodrice-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
@@ -17,262 +17,85 @@
 <body>
 
 <header class="site-header">
-  <nav class="nav">
+  <nav class="nav" aria-label="Hlavní navigace">
     <a class="brand" href="index.html"><span class="logo">⌂</span><span>RD Modřice<small>projekt rodiny Grmelových</small></span></a>
-    <div class="navlinks">
-      <a href="model.html">3D model</a>
-      <a href="informace.html">Informace</a>
-      <a href="material.html">Materiály</a>
-      <a href="dokumentace.html">Dokumentace</a>
-      <a href="vykresy.html">Editor výkresů</a>
-      <a href="vizualizace.html">Vizualizace</a>
-      <a href="inspirace.html">Inspirace</a>
-      <a href="harmonogram.html">Harmonogram</a>
-      <a href="stavba.html">Stavba domu</a>
-      <a href="fotky-stavby.html">Fotky ze stavby</a>
-      <a href="checklist.html">Checklist</a>
-      <a href="poznamky.html">Poznámky</a>
-      <a href="pozadavky.html">Požadavky</a>
-      <a href="rozpocet.html">Rozpočet</a>
+    <div class="navlinks" id="navlinks">
+      <a class="navhome" href="index.html" data-ic="🏡">Přehled</a>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Dům</button>
+        <div class="navmenu">
+          <a href="model.html" data-ic="🏠">3D model</a>
+          <a href="informace.html" data-ic="ℹ️">Informace o domě</a>
+          <a href="material.html" data-ic="🧱">Materiály</a>
+          <a href="dokumentace.html" data-ic="📐">Dokumentace</a>
+          <a href="vykresy.html" data-ic="🖍️">Editor výkresů</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Stavba</button>
+        <div class="navmenu">
+          <a href="stavba.html" data-ic="🏗️">Postup stavby</a>
+          <a href="harmonogram.html" data-ic="📅">Harmonogram</a>
+          <a href="fotky-stavby.html" data-ic="📷">Fotky ze stavby</a>
+          <a href="pripojky.html" data-ic="🔌">Přípojky</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Nápady</button>
+        <div class="navmenu">
+          <a href="vizualizace.html" data-ic="🖼️">Vizualizace</a>
+          <a href="inspirace.html" data-ic="💡">Inspirace</a>
+          <a href="pozadavky.html" data-ic="✏️">Požadavky na model</a>
+        </div>
+      </div>
+      <div class="navgroup">
+        <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
+        <div class="navmenu">
+          <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
+          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="poznamky.html" data-ic="📝">Poznámky</a>
+        </div>
+      </div>
     </div>
     <button class="search-btn" type="button" data-search-open title="Hledat na webu (Ctrl+K)" aria-label="Hledat na webu"><span aria-hidden="true">🔍</span><span class="search-lbl">Hledat</span></button>
     <button class="theme-btn" title="Přepnout světlý / tmavý režim" aria-label="Přepnout vzhled">🌙</button>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span aria-hidden="true">☰</span></button>
   </nav>
 </header>
 
 <div class="content wide">
   <span class="eyebrow">Postup výstavby</span>
-  <h1>Stavba domu</h1>
-  <p class="lead">Aktuální stav výstavby po jednotlivých fázích. Klikni na fázi v&nbsp;časové ose
-  pro detail – u&nbsp;přípojek najdeš rozpad na elektřinu, plyn, vodu a&nbsp;kanalizaci
-  s&nbsp;vlastní časovou osou a&nbsp;checklistem úkolů.</p>
+  <h1>Postup stavby</h1>
+  <p class="lead">Živý přehled fází – co je hotové, co probíhá a&nbsp;co nás čeká. Stav i kroky se berou
+  z&nbsp;<a href="harmonogram.html">harmonogramu</a>, fotky z&nbsp;<a href="fotky-stavby.html">fotodokumentace</a>.
+  Klikni na fázi pro detail s&nbsp;kroky, fotkami a&nbsp;rozpočtem.</p>
 
-  <div class="statusbar">📍 <b>Aktuální fáze: kopání základů</b> – základové rýhy jsou vykopané,
-  připravena armovací kari síť, brzy proběhne vylévání základů betonem.
-  <span style="color:var(--muted)"> · stav k 6.&nbsp;9.&nbsp;2026</span></div>
+  <div class="statusbar" id="status">Načítám stav stavby…</div>
 
-  <div class="timeline" id="timeline">
-    <div class="phase done clickable" data-phase="dokumentace" tabindex="0" role="button">
-      <h3>1. Projektová dokumentace <span class="statetag done">hotovo</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">07/2023</div>
-      <p>Architektonicko-stavební řešení pro územní souhlas a ohlášení stavby, průzkumy a profese.</p>
-    </div>
-
-    <div class="phase done clickable" data-phase="pruzkumy" tabindex="0" role="button">
-      <h3>2. Průzkumy a profese <span class="statetag done">hotovo</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">10/2024</div>
-      <p>Radonový průzkum, hydrogeologické posouzení vsakování, požárně bezpečnostní řešení,
-      koordinační situace s přípojkami.</p>
-    </div>
-
-    <div class="phase done clickable" data-phase="povoleni" tabindex="0" role="button">
-      <h3>3. Povolení a příprava <span class="statetag done">hotovo</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">6/2026 – 8/2026</div>
-      <p>Vyjádření správců sítí, územní souhlas / ohlášení stavby, výběr dodavatele, rozpočet,
-      demolice stávající garáže na pozemku.</p>
-    </div>
-
-    <a class="phase active clickable" href="pripojky.html">
-      <h3>4. Přípojky a zemní práce <span class="statetag active">probíhá</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">9/2026 →</div>
-      <p>Elektřina, plyn, voda a kanalizace/jímka – papírově je nejdál voda (kladné vyjádření
-      BVK už existuje) a elektřina (smlouva podepsaná, uhrazeno), zbývá ale ověřit a objednat
-      fyzickou realizaci. Zemní práce (výkopy, skrývka) souběžně probíhají se základy.</p>
-    </a>
-
-    <div class="phase active clickable" data-phase="zaklady" tabindex="0" role="button">
-      <h3>5. Základy <span class="statetag active">probíhá</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">9/2026</div>
-      <p>Základové rýhy vykopané, připravena armovací kari síť – čeká se na vylití základů betonem.</p>
-    </div>
-
-    <div class="phase clickable" data-phase="hruba" tabindex="0" role="button">
-      <h3>6. Hrubá stavba <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">—</div>
-      <p>Zdivo 1. NP (bloky 450/250 mm), železobetonový strop s věncem, zdivo podkroví,
-      schodiště, komín.</p>
-    </div>
-
-    <div class="phase clickable" data-phase="zastreseni" tabindex="0" role="button">
-      <h3>7. Zastřešení <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">—</div>
-      <p>Hambálkový krov, krytina Bramac Turmalin, klempířské prvky, střešní okna,
-      hliníková okna a vstupní dveře – uzavření hrubé stavby.</p>
-    </div>
-
-    <div class="phase clickable" data-phase="rozvody" tabindex="0" role="button">
-      <h3>8. Rozvody a instalace <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">—</div>
-      <p>Elektroinstalace, voda a kanalizace, plynový kondenzační kotel, podlahové vytápění,
-      rekuperace, krbová vložka.</p>
-    </div>
-
-    <div class="phase clickable" data-phase="dokoncovani" tabindex="0" role="button">
-      <h3>9. Vnitřní dokončovací práce <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">—</div>
-      <p>Omítky, podlahy, obklady, SDK podhledy, vnitřní dveře, malby, kuchyně a koupelny.</p>
-    </div>
-
-    <div class="phase clickable" data-phase="fasada" tabindex="0" role="button">
-      <h3>10. Fasáda a okolí <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">—</div>
-      <p>Silikátová omítka, tmavý sokl a obklady, terasa, sjezd, zpevněné plochy, zahrada.</p>
-    </div>
-
-    <div class="phase clickable" data-phase="kolaudace" tabindex="0" role="button">
-      <h3>11. Kolaudace a stěhování <span class="statetag">plánováno</span><span class="open-hint">Detail →</span></h3>
-      <div class="when">—</div>
-      <p>Závěrečná kontrola, kolaudace, nastěhování. 🎉</p>
-    </div>
+  <div class="progresswrap">
+    <div class="progressbar"><i id="pfill"></i></div>
+    <small id="pcount">…</small>
   </div>
 
-  <p class="note">Podrobný obecný plán s termíny všech fází je na stránce
-  <a href="harmonogram.html">Harmonogram stavby</a>. Tady sledujeme skutečný postup a u přípojek
-  konkrétní kroky k vyřízení.</p>
+  <div class="timeline" id="timeline">
+    <div class="now-skel"><i></i><i></i><i></i></div>
+  </div>
+
+  <p class="note">Stav fází a kroků měníš v&nbsp;<a href="harmonogram.html">Harmonogramu</a> (tady se projeví
+  hned po obnovení stránky). Fotky se k&nbsp;fázím řadí podle data, nebo podle fáze vybrané při nahrání.</p>
 </div>
 
 <footer class="site-footer">
-  RD Modřice · Grmelovi — stav vychází z projektové dokumentace, uzavřených smluv o připojení
-  a fyzické kontroly na místě (9/2026).
+  RD Modřice · Grmelovi — stav se skládá ze sdíleného harmonogramu a fotodokumentace stavby.
 </footer>
 
-<div class="modal" id="modal">
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-card">
-    <button class="modal-close" id="modalClose" title="Zavřít">×</button>
+    <button class="modal-close" id="modalClose" title="Zavřít" aria-label="Zavřít">×</button>
     <div id="modalBody"></div>
   </div>
 </div>
 
-<div id="phaseDetails" hidden>
-
-  <div class="phase-detail" data-phase="dokumentace">
-    <h2>Projektová dokumentace <span class="statetag done">hotovo</span></h2>
-    <p>Architektonicko-stavební řešení pro územní souhlas a ohlášení stavby
-    (Ing. arch. Bradáč a kol.) – půdorysy, řez, pohledy, situace, technická zpráva.</p>
-    <ul class="subtl">
-      <li><b>07/2023</b> – zpracována kompletní dokumentace pro ohlášení stavby</li>
-    </ul>
-  </div>
-
-  <div class="phase-detail" data-phase="pruzkumy">
-    <h2>Průzkumy a profese <span class="statetag done">hotovo</span></h2>
-    <p>Doplňkové průzkumy a posouzení potřebné k povolení a bezpečnému návrhu stavby.</p>
-    <ul class="subtl">
-      <li><b>10/2024</b> – radonový průzkum (střední index) a hydrogeologické posouzení vsakování</li>
-      <li><b>10/2024</b> – požárně bezpečnostní řešení</li>
-      <li><b>10/2024</b> – koordinační situace s přípojkami vody a plynu</li>
-    </ul>
-  </div>
-
-  <div class="phase-detail" data-phase="povoleni">
-    <h2>Povolení a příprava <span class="statetag done">hotovo</span></h2>
-    <p>Administrativní a smluvní příprava před zahájením zemních prací.</p>
-    <ul class="subtl">
-      <li><b>2024</b> – vyjádření správců sítí, kladné vyjádření BVK (8/2024)</li>
-      <li><b>2024</b> – uzavřeny smlouvy o připojení k distribučním soustavám (elektřina, plyn)</li>
-      <li><b>9. 6. 2026</b> – vydáno stavební povolení na dům (řízení R/2026/4233)</li>
-      <li><b>11. 7. 2026</b> – stavební povolení nabylo právní moci (potvrzeno úřadem 10. 8. 2026)</li>
-      <li><b>11. 8. 2026</b> – obdržen štítek „stavba povolena“</li>
-      <li>výběr dodavatele stavby, rozpočet, demolice stávající garáže na pozemku</li>
-    </ul>
-    <p class="note" style="margin-top:0">Podrobnosti k jednotlivým přípojkám (elektřina, plyn,
-    voda, kanalizace) jsou na stránce <a href="pripojky.html">Přípojky</a>.</p>
-  </div>
-
-  <div class="phase-detail" data-phase="zaklady">
-    <h2>Základy <span class="statetag active">probíhá</span></h2>
-    <p>Základové pasy a deska (založení −1,25 m), ležaté rozvody, podkladní beton s kari sítí,
-    hydroizolace 2× SBS s protiradonovou funkcí.</p>
-    <ul class="subtl">
-      <li><b>31. 8. – 4. 9. 2026</b> – postupné odkrývání a kopání základových rýh</li>
-      <li><b>6. 9. 2026</b> – rýhy vykopané, hromada suti z bouraček, svazky armovací kari sítě připravené, výstražná páska kolem výkopu</li>
-      <li><b>další krok</b> – vylití základové desky betonem</li>
-      <li>poté ležaté rozvody a hydroizolace 2× SBS</li>
-    </ul>
-  </div>
-
-  <div class="phase-detail" data-phase="hruba">
-    <h2>Hrubá stavba <span class="statetag">plánováno</span></h2>
-    <p>Zdivo 1. NP (bloky 450/250 mm), železobetonový strop s věncem, zdivo podkroví,
-    schodiště, komín.</p>
-    <ul class="subtl">
-      <li>svislé konstrukce 1. NP</li>
-      <li>strop nad 1. NP + věnec</li>
-      <li>svislé konstrukce 2. NP (podkroví)</li>
-      <li>schodiště, komín</li>
-    </ul>
-  </div>
-
-  <div class="phase-detail" data-phase="zastreseni">
-    <h2>Zastřešení <span class="statetag">plánováno</span></h2>
-    <p>Hambálkový krov (krokve 100/180), krytina Bramac Turmalin, klempířské prvky,
-    střešní okna, hliníková okna a vstupní dveře – uzavření hrubé stavby.</p>
-    <ul class="subtl">
-      <li>krov a krytina</li>
-      <li>klempířské prvky, střešní okna</li>
-      <li>okna a vstupní dveře – uzavření hrubé stavby</li>
-    </ul>
-  </div>
-
-  <div class="phase-detail" data-phase="rozvody">
-    <h2>Rozvody a instalace <span class="statetag">plánováno</span></h2>
-    <p>Elektroinstalace, voda a kanalizace, plynový kondenzační kotel 18 kW,
-    podlahové vytápění, rekuperace, krbová vložka.</p>
-    <ul class="subtl">
-      <li>elektroinstalace</li>
-      <li>rozvody vody a odpadů</li>
-      <li>vytápění, rekuperace, krb</li>
-    </ul>
-  </div>
-
-  <div class="phase-detail" data-phase="dokoncovani">
-    <h2>Vnitřní dokončovací práce <span class="statetag">plánováno</span></h2>
-    <p>Omítky, podlahy (dlažba + dřevo/vinyl), obklady, SDK podhledy, vnitřní dveře,
-    malby, kuchyně a koupelny.</p>
-  </div>
-
-  <div class="phase-detail" data-phase="fasada">
-    <h2>Fasáda a okolí <span class="statetag">plánováno</span></h2>
-    <p>Silikátová omítka, tmavý sokl a obklady, terasa s dlažbou na terčích a skleněným
-    zábradlím, sjezd, zpevněné plochy, zahrada.</p>
-  </div>
-
-  <div class="phase-detail" data-phase="kolaudace">
-    <h2>Kolaudace a stěhování <span class="statetag">plánováno</span></h2>
-    <p>Závěrečná kontrola, kolaudace, nastěhování. 🎉</p>
-  </div>
-
-</div>
-
-<script>
-(function(){
-  const modal = document.getElementById('modal');
-  const modalBody = document.getElementById('modalBody');
-  const holder = document.getElementById('phaseDetails');
-
-  function openPhase(id){
-    const detail = holder.querySelector('.phase-detail[data-phase="'+id+'"]');
-    if(!detail) return;
-    while(modalBody.firstChild) holder.appendChild(modalBody.firstChild);
-    modalBody.appendChild(detail);
-    modal.classList.add('open');
-  }
-  function closeModal(){
-    while(modalBody.firstChild) holder.appendChild(modalBody.firstChild);
-    modal.classList.remove('open');
-  }
-
-  document.querySelectorAll('.phase.clickable[data-phase]').forEach(el=>{
-    el.addEventListener('click', ()=> openPhase(el.getAttribute('data-phase')));
-    el.addEventListener('keydown', e=>{
-      if(e.code === 'Enter' || e.code === 'Space'){ e.preventDefault(); openPhase(el.getAttribute('data-phase')); }
-    });
-  });
-
-  document.getElementById('modalClose').addEventListener('click', closeModal);
-  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
-  document.addEventListener('keydown', (e)=>{ if(e.code === 'Escape') closeModal(); });
-})();
-</script>
+<script type="module" src="assets/stavba.js"></script>
 </body>
 </html>

@@ -43,7 +43,19 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 
 ## 2) Struktura webu
 
-- `index.html` – rozcestník (dlaždice + hero).
+- `index.html` – **Přehled** (hero + „Co se děje na stavbě" + dlaždice ve skupinách Stavba/Plánování/Dům/Nápady).
+  Blok „Co se děje" plní `assets/prehled.js`: probíhající fáze a otevřené kroky (z harmonogramu), dalších
+  6 fotek, souhrn rozpočtu, stav požadavků a poslední poznámka. Jen čte, přes `assets/data.js`.
+- `assets/data.js` – **lehké čtení sdílených dat přes Firestore REST** (bez Firebase SDK): `listDocs`
+  (s `mask.fieldPaths`), `queryDocs` (`:runQuery`, např. nejnovější fotky), `getDocsById` (`:batchGet`,
+  náhledy jen zobrazených fotek), `loadTimeline` (harmonogram → fallback localStorage → `DEFAULT_PHASES`).
+  Je tu i sdílená logika fází fotek: `phaseForDate` a `effectivePhase` (uložená fáze, jinak podle data;
+  ručně zvolené „bez fáze" = `phaseManual:true`). `fotky.js` je odsud re-exportuje.
+- `stavba.html` – **Postup stavby**, generuje ho `assets/stavba.js` živě z harmonogramu (fáze, kroky, postup),
+  k fázím přiřadí fotky (`effectivePhase`) a součet navázané kategorie rozpočtu. Klik na fázi = detail
+  v modálu (odkaz `stavba.html#faze=<id>`). Ručně psaná historie a odkazy, které v harmonogramu nejsou
+  (data povolení, průběh základů, odkazy na přípojky…), jsou v poli `EXTRA` v `stavba.js` (párují se
+  regexem podle názvu fáze). Stav stavby se tedy **mění jen v Harmonogramu**.
 - `model.html` – **interaktivní 3D model** (three.js r0.160 přes importmap z unpkg):
   otáčení/procházka/vrstvy (vč. sousedních domů), **konfigurátor barev** (fasáda,
   střecha, okna, dveře, vrata, klempířské, sokl, obklad, ocel, vjezd, interiér, podlahy,
@@ -68,10 +80,11 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   **Štítek fáze stavby**: fotka má pole `phase` (id fáze) + `phaseName` (název pro jistotu, kdyby
   se fáze přejmenovala/smazala). Fáze se **jen čtou** z kolekce `harmonogram_faze` (`watchPhases`,
   realtime; fallback na lokální zálohu harmonogramu) – upravují se pořád jen na stránce Harmonogram.
-  Ve výchozím nastavení se fáze doplní automaticky podle data fotky (`phaseForDate`: vyhrává fáze,
-  která začala nejpozději před datem a ještě neskončila – fáze se překrývají), jde ji ale vybrat
-  ručně i změnit v úpravách. Nad výpisem jsou filtry podle fáze (odkaz `fotky-stavby.html?faze=<id>`
-  otevře rovnou konkrétní fázi) a u starších fotek bez fáze tlačítko na hromadné doplnění podle data.
+  Fotka bez uložené fáze se do fáze zařadí sama podle data (`effectivePhase` → `phaseForDate`: vyhrává
+  fáze, která začala nejpozději před datem a ještě neskončila – fáze se překrývají); nic se kvůli tomu
+  nezapisuje, takže se to přizpůsobí změnám harmonogramu. Fázi jde vybrat ručně i změnit v úpravách
+  (ručně „bez fáze" → `phaseManual:true`). Nad výpisem jsou filtry podle fáze (odkaz
+  `fotky-stavby.html?faze=<id>` otevře rovnou konkrétní fázi).
   Zmenšování obrázků je sdílené s nástěnkami (`compressFile`/`compressForInline` z `board.js`).
 - `vykresy.html` – **editor výkresů** (samostatná stránka, vše v inline skriptu, bez Firebase):
   otevře PDF z `dokumentace/` (pdf.js z cdnjs → PNG ~4000 px) nebo vlastní PDF/obrázek/zálohu `.json`.
@@ -86,11 +99,13 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   (● = neuložené změny); „Uložit jako…“ udělá novou kopii. V Dokumentaci jde sdílená kopie smazat tlačítkem 🗑 (smaže `vykresy`, `vykresy_plne`, `vykresy_bg`). ✏️ Přejmenovat = PATCH `vykresy/<id>` `updateMask.fieldPaths=name` (v Dokumentaci i v seznamu sdílených v editoru).
   Původní PDF z `dokumentace/` se nikdy nemažou ani nepřepisují – v databázi nejsou.
 - `vizualizace.html`, `inspirace.html` – sdílené nástěnky obrázků/odkazů
-  (`assets/board.js`).
+  (`assets/board.js`). Automatické názvy souborů (WhatsApp Image…, IMG_…, PXL_…) se jako popisek
+  nezobrazují ani neukládají (`niceTitle`).
 - `poznamky.html` – sdílené poznámky.
 - `pozadavky.html` – **nástěnka požadavků na úpravy modelu** (`assets/pozadavky.js`).
 - `assets/style.css` – design systém (světlý/tmavý režim), `assets/site.js` – přepínač
-  vzhledu + aktivní odkaz v nav.
+  vzhledu + navigace. Dlouhé nápovědy dávej do sbalitelného `<details class="helpbox"><summary>…</summary><p>…</p></details>`.
+  Jméno autora si celý web pamatuje pod jedním klíčem `rdmodrice-board-author`.
 - `assets/search.js` – **fulltextové vyhledávání** (lupa v liště, `Ctrl/⌘+K`, `/`). Index
   se staví v prohlížeči: stáhne HTML stránek ze seznamu `PAGES` (+ odkazy z `.navlinks`),
   rozdělí je podle nadpisů, přidá text schovaný v inline `<script>` (tak má obsah třeba
@@ -103,9 +118,13 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   (přes callback `onPick` volá raycast v `model.html`) do náhledu požadavku.
 - `RDModrice.glb` – 3D model (glTF binární), viz §4.
 
-Nav odkazy a dlaždice jsou na všech stránkách stejné – při přidání stránky je doplň
-všude (nav blok `.navlinks`, dlaždice `.card` v `index.html`) a přidej i tlačítko lupy
-(`.search-btn` před `.theme-btn`) plus `<script type="module" src="assets/search.js">`.
+**Navigace** má 4 skupiny (Dům · Stavba · Nápady · Plánování) s rozbalovací nabídkou; na mobilu (≤720 px)
+je celá v panelu za tlačítkem ☰. HTML hlavičky je na všech stránkách stejné a **generuje ho
+`tools/update_nav.py`** (seznam stránek `GROUPS`) – při přidání stránky ji dopiš tam, spusť
+`python3 tools/update_nav.py` (přepíše `<header class="site-header">` ve všech `*.html`) a přidej
+dlaždici `.card` do `index.html`. Chování (aktivní položka, rozbalování, Esc, panel na mobilu) je
+v `assets/site.js`; podstránky `x-y.html` se zvýrazní pod `x.html`. Na stránku patří i
+`<script type="module" src="assets/search.js">`.
 Stránka v navigaci se do vyhledávání přidá sama; podstránky mimo nav (např. `pripojky-*.html`)
 dopiš do `PAGES` v `assets/search.js`.
 
