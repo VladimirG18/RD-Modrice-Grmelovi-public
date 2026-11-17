@@ -52,7 +52,7 @@
         <button class="navgroup-btn" type="button" aria-expanded="false">Plánování</button>
         <div class="navmenu">
           <a href="rozpocet.html" data-ic="💰">Rozpočet</a>
-          <a href="checklist.html" data-ic="✅">Checklist</a>
+          <a href="checklist.html" data-ic="✅">Úkoly</a>
           <a href="poznamky.html" data-ic="📝">Poznámky</a>
         </div>
       </div>
@@ -89,6 +89,7 @@
   </ul>
 
   <h2>Co ještě zařídit</h2>
+  <div class="uk-mini" id="ukoly" data-group="Přípojky – plyn">
   <div class="clitem" data-id="pripojky-plyn-1"><input type="checkbox"><span>Ověřit fyzický stav na pozemku (je HUP / přípojka již položená, nebo ne)</span></div>
   <div class="clitem" data-id="pripojky-plyn-2"><input type="checkbox"><span>Objednat firmu s oprávněním pro plynová zařízení na vybudování přípojky dle hotového projektu</span></div>
   <div class="clitem" data-id="pripojky-plyn-3"><input type="checkbox"><span>Zajistit povinnou tlakovou zkoušku přípojky před zásypem</span></div>
@@ -96,6 +97,7 @@
   <div class="clitem" data-id="pripojky-plyn-5"><input type="checkbox"><span>Podat u GasNet žádost o uvedení do provozu / zahájení distribuce</span></div>
   <div class="clitem" data-id="pripojky-plyn-6"><input type="checkbox"><span>Vybrat dodavatele plynu a podepsat samostatnou smlouvu o dodávce plynu</span></div>
   <div class="clitem" data-id="pripojky-plyn-7"><input type="checkbox"><span>Po zahájení distribuce – osazení plynoměru (provádí GasNet)</span></div>
+  </div>
 
   <p class="note">Právní kontext a zdroje viz stránka <a href="pripojky.html">Přípojky</a>.</p>
 </div>
@@ -104,6 +106,11 @@
   RD Modřice · Grmelovi — stav vychází ze smlouvy o připojení a e-mailové komunikace s GasNet (2024–2026).
 </footer>
 
-<script src="assets/pripojky-checklist.js"></script>
+<script type="module">
+// úkoly ze sdíleného seznamu (statické položky výše jsou jen záloha)
+import { mountGroupTasks } from './assets/ukoly.js';
+const el = document.getElementById('ukoly');
+mountGroupTasks(el, el.dataset.group);
+</script>
 </body>
 </html>

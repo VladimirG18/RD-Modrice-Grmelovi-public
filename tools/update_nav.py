@@ -39,7 +39,7 @@ GROUPS = [
     ]),
     ("Plánování", [
         ("rozpocet.html", "💰", "Rozpočet"),
-        ("checklist.html", "✅", "Checklist"),
+        ("checklist.html", "✅", "Úkoly"),
         ("poznamky.html", "📝", "Poznámky"),
     ]),
 ]

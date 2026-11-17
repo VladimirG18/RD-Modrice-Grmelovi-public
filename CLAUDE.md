@@ -65,8 +65,24 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
   **rychlé volby typu** úpravy, **diktování hlasem** cs-CZ a **kontext scény** = barvy+vrstvy);
   **🔧 Posunout prvek** (TransformControls) = táhni nábytek (živě) / okna+dveře (průhledný „duch" = návrh),
   posun jde uložit jako požadavek (`move`) i nasdílet odkazem (`#move=`, jen nábytek).
-- `informace.html`, `material.html`, `dokumentace.html`, `harmonogram.html`,
-  `checklist.html` – obsahové stránky.
+- `informace.html`, `material.html`, `dokumentace.html` – obsahové stránky.
+- `harmonogram.html` – sdílený harmonogram (`assets/harmonogram.js`). Fáze jdou sbalit (stav si pamatuje
+  prohlížeč v `rdmodrice-harmonogram-sbalene`; hotové fáze jsou ve výchozím stavu sbalené), nad seznamem
+  „Rozbalit vše / Sbalit hotové / Sbalit vše". Na mobilu je krok kompaktní (grid), tažení ⠿ se na dotykových
+  displejích skrývá (HTML5 drag&drop tam nefunguje) – zůstávají šipky ▲▼.
+- `checklist.html` – **Úkoly** (adresa zůstala kvůli starým odkazům): jeden sdílený seznam úkolů rodiny
+  (`assets/ukoly.js`, kolekce `ukoly` + `ukoly_meta/seed`). Úkol: `text, group, who, due (YYYY-MM-DD),
+  phase (id fáze harmonogramu), done, doneBy, doneAt, note, urgent, key, order, ts`. Při prvním otevření se
+  založí výchozí úkoly (`DEFAULT_TASKS` = dřívější Checklist + checklisty přípojek; skupina „Hrubá stavba"
+  vypadla – to jsou kroky harmonogramu). `key` = id položky ze starého checklistu: když má prohlížeč
+  ve starém localStorage (`rdmodrice-checklist-v1`, `rdmodrice-stavba-checklist-v1`) odškrtnuté položky,
+  stránka nabídne jejich převzetí (jen online). Filtry stav/osoba, po termínu červeně, po odškrtnutí lišta
+  „Vrátit". `?skupina=<název>` skočí na skupinu. Stránky `pripojky-*.html` ukazují svou skupinu živě přes
+  `mountGroupTasks` (statické položky v HTML jsou jen záloha a pro vyhledávání; pevné pořadí, ať odškrtnutý
+  úkol neuskočí). Úkoly s `phase` se ukazují i v detailu fáze na Postupu stavby, souhrn na úvodní stránce.
+- `rozpocet.html` – sdílený rozpočet (`assets/rozpocet.js`). Položka má navíc `paid` (Kč zaplaceno celkem)
+  a `paidDate` (při prvním zadání platby se doplní dnešek). Souhrny: zaplaceno, zbývá zaplatit (dle odhadu).
+  Na mobilu (≤720 px) se tabulka přestaví na karty čistě v CSS (`td[data-label]`).
 - `fotky-stavby.html` – **sdílená fotodokumentace stavby** (`assets/fotky.js`): fotky přidává
   rodina přímo na stránce (mobil i počítač), řadí se po dnech. Datum focení se zjišťuje samo
   (`detectDate`) v pořadí: **EXIF** (průchod JPEG segmenty, u ostatních formátů sken značky
@@ -135,7 +151,7 @@ dopiš do `PAGES` v `assets/search.js`.
 - Config: `assets/firebase-config.js` (projekt `rd-modrice-e9477`). apiKey je
   **veřejný** (běžné pro web SDK; bezpečnost řeší pravidla Firestore, ne skrývání).
 - Kolekce Firestore: `poznamky`, `vizualizace`, `inspirace`, **`pozadavky`**, `rozpocet`,
-  `harmonogram_faze`, `harmonogram_kroky`, **`fotky`** (+ `fotky_plne` s plnými fotkami
+  `harmonogram_faze`, `harmonogram_kroky`, **`ukoly`** (+ `ukoly_meta/seed`), **`fotky`** (+ `fotky_plne` s plnými fotkami
   a `fotky_meta/seed` jako značka, že se úvodní fotky ze složky v repu už založily).
   Pozor při čtení přes REST: pole `thumb`/`img`/`images` jsou obrázky – vybírej pole
   přes `mask.fieldPaths`, ať se netahají megabajty.
@@ -202,8 +218,10 @@ commitni a nasaď (§1).
 Model i stránky se ověřují headless Chromiem (je předinstalované na
 `/opt/pw-browsers/...`, `playwright-core`). Osvědčený postup: malý http server, který
 servíruje repo, přepíše `unpkg` URL na lokální kopii three.js a servíruje `RDModrice.glb`.
-Pro testy nástěnek servíruj **prázdný** `firebase-config.js` (apiKey ""), ať se
-nezapisuje do reálné databáze (spadne to na `localStorage`).
+Pro testy nástěnek, úkolů a rozpočtu servíruj **prázdný** `firebase-config.js` (apiKey ""), ať se
+nezapisuje do reálné databáze (spadne to na `localStorage`). Pozor hlavně u úkolů: první otevření
+s živou konfigurací by do databáze založilo výchozí úkoly. Pro jistotu v testu propouštěj k Firestore
+jen čtení (GET `/documents`, `:runQuery`, `:batchGet`, `Listen/channel`) a zápisy blokuj.
 
 3D snímek: `renderer.render(scene,camera)` a hned `canvas.toDataURL(...)` (buffer se
 jinak nezachytí). Kamera je v modulu `model.html` jako `camera`/`orbit`.
