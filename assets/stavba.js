@@ -6,7 +6,7 @@
    v Harmonogramu a ve Fotkách ze stavby.
    ============================================================ */
 import { esc, online, loadTimeline, listDocs, getDocsById, localList, pluralCz, fmtDay, agoCz,
-         effectivePhase } from './data.js';
+         effectivePhase, phaseForDate } from './data.js';
 import { fmtMoney, itemEstimateTotal, DEFAULT_CATEGORIES } from './rozpocet.js';
 
 const $ = id => document.getElementById(id);
@@ -39,7 +39,7 @@ const EXTRA = [
 ];
 const extraFor = p => EXTRA.filter(e => e.match.test(p.name || ''));
 
-let T = { phases:[], kroky:[] }, photos = [], budget = null, tasks = [];
+let T = { phases:[], kroky:[] }, photos = [], budget = null, tasks = [], diary = [];
 const thumbs = new Map();                 // id fotky → náhled
 
 const stepsOf = p => T.kroky.filter(k => k.phase === p.id);
@@ -121,6 +121,17 @@ function budgetHTML(p){
     esc(cat ? cat.name : p.budgetCat)}${sum != null && sum > 0 ? ` · <b>${esc(fmtMoney(sum))}</b>` : ''}</a>`;
 }
 
+/* zápisy ze stavebního deníku (uložená fáze, jinak podle data) */
+function diaryHTML(p){
+  const mine = diary.filter(e => (e.phase || (phaseForDate(T.phases, e.date) || {}).id) === p.id)
+    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  if(!mine.length) return '';
+  return `<h3>Ze stavebního deníku <span class="ph-d-n">${mine.length}</span></h3>
+    <ul class="subtl">${mine.slice(0, 6).map(e => `<li><b>${esc(fmtDay(e.date))}</b> – ${esc(String(e.text || '').slice(0, 160))}${
+      e.deal ? ` <span class="ph-d-deal">🤝 ${esc(e.deal)}</span>` : ''}</li>`).join('')}</ul>
+    <a class="ph-link" href="denik.html">📒 ${mine.length > 6 ? `Všech ${mine.length} zápisů` : 'Stavební deník'} →</a>`;
+}
+
 /* úkoly rodiny navázané na fázi (assets/ukoly.js, checklist.html) */
 function tasksHTML(p){
   const mine = tasks.filter(t => t.phase === p.id);
@@ -156,6 +167,7 @@ async function openPhase(id, focusBack){
           <span aria-hidden="true">${STEP_ICON[k.status] || '📋'}</span><span>${esc(k.text)}</span>${
           k.when ? `<small>${esc(k.when)}</small>` : ''}</li>`).join('')}</ul>` : ''}
       ${tasksHTML(p)}
+      ${diaryHTML(p)}
       ${hist.length ? `<h3>Záznamy</h3><ul class="subtl">${hist.map(([w, t]) => `<li><b>${esc(w)}</b> – ${esc(t)}</li>`).join('')}</ul>` : ''}
       <h3>Fotky${ph.length ? ` <span class="ph-d-n">${ph.length}</span>` : ''}</h3>
       ${ph.length ? `<div class="ph-d-photos">${ph.slice(0, 12).map(f => thumbHTML(f)).join('')}</div>
@@ -202,7 +214,7 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal();
 /* ---------- načtení ---------- */
 async function init(){
   const on = online();
-  const [timeline, fotky, rozpocet, ukoly] = await Promise.all([
+  const [timeline, fotky, rozpocet, ukoly, denik] = await Promise.all([
     loadTimeline().catch(e => { console.warn(e); return null; }),
     (on ? listDocs('fotky', ['date', 'caption', 'phase', 'phaseName', 'phaseManual', 'ts', 'src']) : Promise.reject(new Error('offline')))
       .catch(() => localList('rdmodrice-fotky-v1')),
@@ -210,7 +222,10 @@ async function init(){
       .catch(() => localList('rdmodrice-rozpocet-items-v1')),
     (on ? listDocs('ukoly', ['text', 'done', 'who', 'due', 'phase', 'urgent', 'group']) : Promise.reject(new Error('offline')))
       .catch(() => localList('rdmodrice-ukoly-v1')),
+    (on ? listDocs('denik', ['date', 'text', 'deal', 'phase']) : Promise.reject(new Error('offline')))
+      .catch(() => localList('rdmodrice-denik-v1')),
   ]);
+  diary = Array.isArray(denik) ? denik : [];
   tasks = Array.isArray(ukoly) ? ukoly : [];
   if(!timeline){
     $('timeline').innerHTML = '<div class="empty">Stav stavby se nepodařilo načíst – zkus stránku obnovit.</div>';

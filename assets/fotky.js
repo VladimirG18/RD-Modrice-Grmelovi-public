@@ -656,7 +656,8 @@ export async function initFotky(opts){
     }
     bodyEl.innerHTML = groups(vybrane).map(g => `
       <section class="fot-day">
-        <h2>${esc(fmtDay(g.date))} <span class="fot-n">${g.items.length}</span></h2>
+        <h2>${esc(fmtDay(g.date))} <span class="fot-n">${g.items.length}</span>
+          <a class="fot-dk" href="denik.html?den=${esc(g.date)}" title="Stavební deník – zápis k tomuto dni">📒 deník</a></h2>
         <div class="gallery">${g.items.map(cardHTML).join('')}</div>
       </section>`).join('');
   }

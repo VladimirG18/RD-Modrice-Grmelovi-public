@@ -44,8 +44,8 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 ## 2) Struktura webu
 
 - `index.html` – **Přehled** (hero + „Co se děje na stavbě" + dlaždice ve skupinách Stavba/Plánování/Dům/Nápady).
-  Blok „Co se děje" plní `assets/prehled.js`: probíhající fáze a otevřené kroky (z harmonogramu), dalších
-  6 fotek, souhrn rozpočtu, stav požadavků a poslední poznámka. Jen čte, přes `assets/data.js`.
+  Blok „Co se děje" plní `assets/prehled.js`: probíhající fáze a otevřené kroky (z harmonogramu), posledních
+  6 fotek a 6 dlaždic (rozpočet, úkoly, výběry, deník, požadavky, poslední poznámka). Jen čte, přes `assets/data.js`.
 - `assets/data.js` – **lehké čtení sdílených dat přes Firestore REST** (bez Firebase SDK): `listDocs`
   (s `mask.fieldPaths`), `queryDocs` (`:runQuery`, např. nejnovější fotky), `getDocsById` (`:batchGet`,
   náhledy jen zobrazených fotek), `loadTimeline` (harmonogram → fallback localStorage → `DEFAULT_PHASES`).
@@ -83,6 +83,23 @@ Před pushem lokálně ověř (nejlépe v prohlížeči přes Playwright, viz §
 - `rozpocet.html` – sdílený rozpočet (`assets/rozpocet.js`). Položka má navíc `paid` (Kč zaplaceno celkem)
   a `paidDate` (při prvním zadání platby se doplní dnešek). Souhrny: zaplaceno, zbývá zaplatit (dle odhadu).
   Na mobilu (≤720 px) se tabulka přestaví na karty čistě v CSS (`td[data-label]`).
+- `assets/store.js` – **obecné sdílené úložiště jedné kolekce** (Firestore realtime + fallback localStorage,
+  volitelný `seed` se značkou `<coll>_meta/seed`), plus společné pomocníky (`AUTHORS`, `myName`/`setMyName`,
+  `fmtDate`, `dueState`, `fold` = hledání bez diakritiky, `uid`). Používají ho Deník, Kontakty a Výběry –
+  pro další jednoduchý nástroj stačí `createStore({ coll, localKey, label, seed, onItems, onStatus })`.
+- `denik.html` – **Stavební deník** (kolekce `denik`): zápis = `date, author, text, onsite (kdo byl na stavbě),
+  weather, deal (dohody), phase, ts`. Výpis po měsících/dnech, fotky z daného dne se připojí samy (REST
+  náhledy jen zobrazených dnů), dny s fotkami bez zápisu nabízí „＋ Doplnit zápis". `?den=YYYY-MM-DD`
+  předvyplní datum (odkaz „📒 deník" u každého dne ve Fotkách). Hledání, filtr „jen dny s dohodami".
+  Zápisy se ukazují i v detailu fáze na Postupu stavby a poslední na úvodní stránce.
+- `kontakty.html` – **Kontakty** (kolekce `kontakty`, seed = EG.D, GasNet, BVK, projektant – jen údaje
+  z webu, telefony doplňuje rodina): `name, company, role, cat, phone, email, web, note`. Zavolat (`tel:`),
+  WhatsApp (`wa.me`, 9místné číslo dostane 420), e-mail, „📇" = stažení vizitky `.vcf` (název souboru
+  bez diakritiky – jinak ho Chrome přejmenuje na „download"). Hledání bez diakritiky, filtr kategorií.
+- `vybery.html` – **Výběry a rozhodnutí** (kolekce `vybery`): `title, due, who, budgetCat, phase, note,
+  status (vybirame/rozhodnuto/objednano), variants:[{id,name,price,link,note}], chosen, decidedBy, decidedAt`.
+  „Vybrat" u varianty = rozhodnuto (znovu = zrušit), nejlevnější varianta se označí, typické výběry
+  (`SUGG`) jako rychlá volba. Souhrn na úvodní stránce.
 - `fotky-stavby.html` – **sdílená fotodokumentace stavby** (`assets/fotky.js`): fotky přidává
   rodina přímo na stránce (mobil i počítač), řadí se po dnech. Datum focení se zjišťuje samo
   (`detectDate`) v pořadí: **EXIF** (průchod JPEG segmenty, u ostatních formátů sken značky
@@ -151,7 +168,8 @@ dopiš do `PAGES` v `assets/search.js`.
 - Config: `assets/firebase-config.js` (projekt `rd-modrice-e9477`). apiKey je
   **veřejný** (běžné pro web SDK; bezpečnost řeší pravidla Firestore, ne skrývání).
 - Kolekce Firestore: `poznamky`, `vizualizace`, `inspirace`, **`pozadavky`**, `rozpocet`,
-  `harmonogram_faze`, `harmonogram_kroky`, **`ukoly`** (+ `ukoly_meta/seed`), **`fotky`** (+ `fotky_plne` s plnými fotkami
+  `harmonogram_faze`, `harmonogram_kroky`, **`ukoly`** (+ `ukoly_meta/seed`), `denik`, `kontakty`
+  (+ `kontakty_meta/seed`), `vybery`, **`fotky`** (+ `fotky_plne` s plnými fotkami
   a `fotky_meta/seed` jako značka, že se úvodní fotky ze složky v repu už založily).
   Pozor při čtení přes REST: pole `thumb`/`img`/`images` jsou obrázky – vybírej pole
   přes `mask.fieldPaths`, ať se netahají megabajty.

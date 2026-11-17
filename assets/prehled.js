@@ -122,6 +122,32 @@ function renderTasks(list){
     <small>${sub ? sub + ' · ' : ''}co zařídit a rozhodnout</small></span>`);
 }
 
+function renderChoices(list){
+  const open = list.filter(v => (v.status || 'vybirame') === 'vybirame');
+  const today = new Date().toLocaleDateString('sv-SE');
+  const over = open.filter(v => v.due && v.due < today).length;
+  const next = open.filter(v => v.due && v.due >= today).sort((a, b) => a.due.localeCompare(b.due))[0];
+  const sub = [over ? `<span class="rz-over">${over} po termínu</span>` : '',
+    next ? `nejbližší ${esc(fmtDay(next.due))}: ${esc(next.title)}` : ''].filter(Boolean).join(' · ');
+  tile('nowChoices', `<span class="now-tile-ic">🧭</span>
+    <span class="now-tile-main"><b>${!list.length ? 'Výběry' : open.length
+      ? `${open.length} ${pluralCz(open.length, 'věc', 'věci', 'věcí')} k rozhodnutí` : 'Vše rozhodnuto'}</b>
+    <small class="now-clip">${sub || (list.length ? 'okna, podlahy, kuchyň…' : 'co vybrat a do kdy – zatím prázdné')}</small></span>`);
+}
+
+function renderDiary(list){
+  const e = list[0];
+  if(!e){
+    tile('nowDiary', `<span class="now-tile-ic">📒</span>
+      <span class="now-tile-main"><b>Stavební deník</b><small>zatím bez zápisu – co se dnes na stavbě dělalo?</small></span>`);
+    return;
+  }
+  const text = String(e.text || '').replace(/\s+/g, ' ').trim();
+  tile('nowDiary', `<span class="now-tile-ic">📒</span>
+    <span class="now-tile-main"><b class="now-clip">${esc(text.length > 60 ? text.slice(0, 58) + '…' : text)}</b>
+    <small>${esc(fmtDay(e.date))} (${esc(agoCz(e.date))})${e.author ? ' · ' + esc(e.author) : ''} · poslední zápis</small></span>`);
+}
+
 function renderNotes(list){
   const n = list[0];
   if(!n){
@@ -168,6 +194,16 @@ async function init(){
     () => on ? listDocs('ukoly', ['done', 'due', 'who']) : Promise.reject(new Error('offline')),
     () => localList('rdmodrice-ukoly-v1')
   ).then(renderTasks);
+
+  tryPart(
+    () => on ? listDocs('vybery', ['status', 'due', 'title']) : Promise.reject(new Error('offline')),
+    () => localList('rdmodrice-vybery-v1')
+  ).then(renderChoices);
+
+  tryPart(
+    () => on ? queryDocs('denik', { fields:['date', 'text', 'author'], orderBy:'date', limit:1 }) : Promise.reject(new Error('offline')),
+    () => localList('rdmodrice-denik-v1').sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).slice(0, 1)
+  ).then(renderDiary);
 
   tryPart(
     () => on ? queryDocs('poznamky', { fields:['text','author','ts'], orderBy:'ts', limit:1 }) : Promise.reject(new Error('offline')),
